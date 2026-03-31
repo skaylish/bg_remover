@@ -6,6 +6,8 @@ import {
   Upload, X, Download, CheckCircle, AlertCircle,
   Loader2, ImageIcon, PackageOpen, Trash2
 } from 'lucide-react';
+import { useCreditStore } from '@/store/creditStore';
+import { PurchaseModal } from '@/components/shared/PurchaseModal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ItemStatus = 'pending' | 'processing' | 'done' | 'error';
@@ -70,6 +72,8 @@ export function BatchEditor() {
   const [items, setItems] = useState<BatchItem[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const abortRef = useRef(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const useCreditDB = useCreditStore((s) => s.useCreditDB);
 
   // Stats
   const total = items.length;
@@ -172,14 +176,36 @@ export function BatchEditor() {
     );
   };
 
-  // Download all as ZIP
+  // 크레딧 차감 후 단일 다운로드
+  const handleDownloadOne = useCallback(async (item: BatchItem) => {
+    if (!item.resultBlob) return;
+    const ok = await useCreditDB();
+    if (!ok) { setShowPurchaseModal(true); return; }
+    const name = item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
+    downloadBlob(item.resultBlob, name);
+  }, [useCreditDB]);
+
+  // Download all as ZIP — 이미지 수만큼 크레딧 차감
   const downloadAll = async () => {
     const doneItems = items.filter((i) => i.status === 'done' && i.resultBlob);
     if (!doneItems.length) return;
 
+    // 크레딧 차감 (순차적으로 — 하나라도 부족하면 중단)
+    const paid: BatchItem[] = [];
+    for (const item of doneItems) {
+      const ok = await useCreditDB();
+      if (!ok) {
+        setShowPurchaseModal(true);
+        // 이미 차감된 항목만 ZIP
+        if (!paid.length) return;
+        break;
+      }
+      paid.push(item);
+    }
+
     const { default: JSZip } = await import('jszip');
     const zip = new JSZip();
-    doneItems.forEach((item) => {
+    paid.forEach((item) => {
       const name = item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
       zip.file(name, item.resultBlob!);
     });
@@ -320,12 +346,7 @@ export function BatchEditor() {
                 key={item.id}
                 item={item}
                 onRemove={() => removeItem(item.id)}
-                onDownload={() => {
-                  if (item.resultBlob) {
-                    const name = item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
-                    downloadBlob(item.resultBlob, name);
-                  }
-                }}
+                onDownload={() => handleDownloadOne(item)}
               />
             ))}
           </div>
@@ -344,6 +365,10 @@ export function BatchEditor() {
           </div>
         )}
       </div>
+
+      {showPurchaseModal && (
+        <PurchaseModal onClose={() => setShowPurchaseModal(false)} />
+      )}
     </div>
   );
 }
