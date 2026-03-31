@@ -7,10 +7,10 @@ const PLAN_CREDITS: Record<string, number> = {
   pro: 500,
 };
 
-// PortOne V2 API 시크릿으로 Bearer 토큰 발급
+// PortOne V2 Bearer 토큰 발급
 async function getPortoneV2Token(): Promise<string> {
-  const secret = process.env.PORTONE_API_SECRET?.trim();
-  if (!secret) throw new Error('PortOne credentials not configured');
+  const secret = process.env.PORTONE_V2_API_SECRET?.trim();
+  if (!secret) throw new Error('PortOne V2 credentials not configured');
 
   const res = await fetch('https://api.portone.io/login/api-secret', {
     method: 'POST',
@@ -54,8 +54,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: msg }, { status: 502 });
   }
 
+  const storeId = process.env.PORTONE_V2_STORE_ID?.trim();
   const fetchPayment = () =>
-    fetch(`https://api.portone.io/payments/by-merchant-id/${merchantUid}`, {
+    fetch(`https://api.portone.io/payments/by-merchant-id/${merchantUid}?storeId=${storeId}`, {
       headers: { Authorization: `Bearer ${token}` },
     }).then((r) => r.json());
 
