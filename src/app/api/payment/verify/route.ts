@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
   const fetchPayment = async () => {
     const r = await fetch(
-      `https://api.portone.io/payments/by-merchant-id/${encodeURIComponent(merchantUid)}?storeId=${storeId}`,
+      `https://api.portone.io/payments/${encodeURIComponent(merchantUid)}?storeId=${storeId}`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
     const text = await r.text();
