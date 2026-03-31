@@ -13,7 +13,7 @@ declare global {
   interface Window {
     PortOne?: {
       requestPayment: (params: Record<string, unknown>) => Promise<{ paymentId?: string; code?: string; message?: string }>;
-      requestBillingKey: (params: Record<string, unknown>) => Promise<{ billingKey?: string; code?: string; message?: string }>;
+      requestIssueBillingKey: (params: Record<string, unknown>) => Promise<{ billingKey?: string; code?: string; message?: string }>;
     };
   }
 }
@@ -153,7 +153,7 @@ export function PricingSection({ dict }: PricingSectionProps) {
         if (!verifyRes.ok) { const e = await verifyRes.json(); throw new Error(e.error || '결제 검증 실패'); }
       } else {
         // 정기결제 — 빌링키 발급 후 즉시 청구
-        const res = await window.PortOne!.requestBillingKey({
+        const res = await window.PortOne!.requestIssueBillingKey({
           storeId: STORE_ID, channelKey: CHANNEL_KEY,
           billingKeyMethod: 'CARD',
           issueId: merchantUid, issueName: PLAN_NAMES[plan.key],
