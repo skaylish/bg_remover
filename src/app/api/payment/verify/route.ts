@@ -7,144 +7,81 @@ const PLAN_CREDITS: Record<string, number> = {
   pro: 500,
 };
 
-// PortOne V2 Bearer 토큰 발급
-async function getPortoneV2Token(): Promise<string> {
-  const secret = process.env.PORTONE_V2_API_SECRET?.trim();
-  if (!secret) throw new Error('PortOne V2 credentials not configured');
-
-  const res = await fetch('https://api.portone.io/login/api-secret', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiSecret: secret }),
-  });
-  const text = await res.text();
-  if (!text) throw new Error(`PortOne V2 token: empty response (HTTP ${res.status})`);
-  const data = JSON.parse(text);
-  if (!data.accessToken) {
-    throw new Error(`PortOne V2 token error (HTTP ${res.status}): ${data.message ?? text}`);
-  }
-  return data.accessToken;
-}
-
+// POST /api/payment/verify — 일반결제 검증 (PortOne V2)
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { impUid, merchantUid } = await request.json();
-  if (!impUid || !merchantUid) return NextResponse.json({ error: 'Missing params' }, { status: 400 });
+  const { paymentId } = await request.json();
+  if (!paymentId) return NextResponse.json({ error: 'Missing paymentId' }, { status: 400 });
 
   const service = createServiceClient();
 
-  // DB에서 주문 조회
   const { data: order } = await service
     .from('orders')
     .select('*')
-    .eq('portone_order_id', merchantUid)
+    .eq('portone_order_id', paymentId)
     .eq('user_id', user.id)
     .single();
 
   if (!order) return NextResponse.json({ error: 'Order not found' }, { status: 404 });
   if (order.status === 'paid') return NextResponse.json({ ok: true, plan: order.plan });
 
-  // 포트원 V2 API로 결제 조회 (merchant_uid 기준)
-  let token: string;
-  try {
-    token = await getPortoneV2Token();
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: msg }, { status: 502 });
+  const secret = process.env.PORTONE_V2_API_SECRET?.trim();
+  if (!secret) return NextResponse.json({ error: 'PortOne V2 credentials not configured' }, { status: 500 });
+
+  // PortOne V2 결제 조회
+  const payRes = await fetch(`https://api.portone.io/payments/${encodeURIComponent(paymentId)}`, {
+    headers: { Authorization: `PortOne ${secret}` },
+  });
+
+  if (!payRes.ok) {
+    const text = await payRes.text();
+    console.error('[verify] PortOne payment lookup failed', { paymentId, status: payRes.status, body: text });
+    return NextResponse.json({ error: `Payment lookup failed: ${payRes.status}` }, { status: 502 });
   }
 
-  const storeId = process.env.PORTONE_V2_STORE_ID?.trim();
+  const pay = await payRes.json();
 
-  const fetchPayment = async () => {
-    const r = await fetch(
-      `https://api.portone.io/payments/${encodeURIComponent(merchantUid)}?storeId=${storeId}`,
-      { headers: { Authorization: `Bearer ${token}` } },
+  // 금액 위변조 검증
+  if (pay.amount?.total !== order.amount_krw) {
+    await service.from('orders').update({ status: 'failed' }).eq('id', order.id);
+    return NextResponse.json(
+      { error: `Amount mismatch — expected ${order.amount_krw}, got ${pay.amount?.total}` },
+      { status: 400 },
     );
-    const text = await r.text();
-    if (!text) return { _httpStatus: r.status, type: 'EMPTY_RESPONSE' };
-    try {
-      return { _httpStatus: r.status, ...JSON.parse(text) };
-    } catch {
-      return { _httpStatus: r.status, type: 'PARSE_ERROR', raw: text.slice(0, 200) };
-    }
-  };
-
-  let payData = await fetchPayment();
-
-  // 타이밍 이슈 대비: 최대 3회 재시도 (1s 간격)
-  for (let i = 0; i < 3 && payData.type === 'PAYMENT_NOT_FOUND'; i++) {
-    await new Promise((r) => setTimeout(r, 1000));
-    payData = await fetchPayment();
   }
 
-  if (payData.type === 'PAYMENT_NOT_FOUND' || !payData.id) {
-    return NextResponse.json({
-      error: `Payment not found (merchant_uid: ${merchantUid}, type: ${payData.type}, message: ${payData.message ?? JSON.stringify(payData)})`,
-    }, { status: 404 });
-  }
-
-  // 금액 위변조 검증 (V2: amount.total)
-  const paidAmount = payData.amount?.total ?? payData.amount;
-  if (paidAmount !== order.amount_krw) {
+  if (pay.status !== 'PAID') {
     await service.from('orders').update({ status: 'failed' }).eq('id', order.id);
-    return NextResponse.json({ error: `Amount mismatch — expected ${order.amount_krw}, got ${paidAmount}` }, { status: 400 });
+    return NextResponse.json({ error: `Payment status: ${pay.status}` }, { status: 400 });
   }
 
-  // V2 status: PAID
-  if (payData.status !== 'PAID') {
-    await service.from('orders').update({ status: 'failed' }).eq('id', order.id);
-    return NextResponse.json({ error: `Payment status: ${payData.status}` }, { status: 400 });
-  }
-
-  // 주문 상태 업데이트 (V2 payment id 저장)
   await service.from('orders').update({
-    portone_payment_id: payData.id ?? impUid,
+    portone_payment_id: paymentId,
     status: 'paid',
     paid_at: new Date().toISOString(),
   }).eq('id', order.id);
 
   const plan = order.plan as string;
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  // 크레딧/구독 지급
   if (plan === 'enterprise') {
     await service.from('credits').update({ unlimited: true }).eq('user_id', user.id);
     await service.from('subscriptions').insert({
-      user_id: user.id,
-      plan,
-      status: 'active',
-      unlimited: true,
-      credits_per_month: 0,
+      user_id: user.id, plan, status: 'active', unlimited: true, credits_per_month: 0, expires_at: expiresAt,
     });
   } else {
     const credits = PLAN_CREDITS[plan] ?? 0;
-    const { data: current } = await service
-      .from('credits')
-      .select('balance')
-      .eq('user_id', user.id)
-      .single();
-
-    await service
-      .from('credits')
-      .update({ balance: (current?.balance ?? 0) + credits })
-      .eq('user_id', user.id);
-
+    const { data: current } = await service.from('credits').select('balance').eq('user_id', user.id).single();
+    await service.from('credits').update({ balance: (current?.balance ?? 0) + credits }).eq('user_id', user.id);
     await service.from('credit_transactions').insert({
-      user_id: user.id,
-      amount: credits,
-      type: 'purchase',
-      description: `${plan} 플랜 결제`,
+      user_id: user.id, amount: credits, type: 'purchase', description: `${plan} 플랜 결제`,
     });
-
     if (plan !== 'topup') {
       await service.from('subscriptions').insert({
-        user_id: user.id,
-        plan,
-        status: 'active',
-        unlimited: false,
-        credits_per_month: credits,
+        user_id: user.id, plan, status: 'active', unlimited: false, credits_per_month: credits, expires_at: expiresAt,
       });
     }
   }

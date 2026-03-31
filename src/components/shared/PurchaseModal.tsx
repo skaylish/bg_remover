@@ -7,15 +7,23 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-const STORE_ID = 'store-d9f67528-b83b-48e0-8693-208e4739fdee';
-const CHANNEL_KEY = 'channel-key-610b6012-3157-49a6-bf19-763c27093b53';
-const INI_LITE_KEY = 'b09LVzhuTGZVaEY1WmJoQnZzdXpRdz09';
+const STORE_ID            = process.env.NEXT_PUBLIC_PORTONE_V2_STORE_ID!;
+const CHANNEL_KEY_NORMAL  = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY_NORMAL!;
+const CHANNEL_KEY_BILLING = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY_BILLING!;
 
 declare global {
   interface Window {
     PortOne?: {
-      requestPayment: (params: Record<string, unknown>) => Promise<{ paymentId?: string; code?: string; message?: string }>;
-      requestIssueBillingKey: (params: Record<string, unknown>) => Promise<{ billingKey?: string; code?: string; message?: string }>;
+      requestPayment: (params: Record<string, unknown>) => Promise<{
+        paymentId?: string;
+        code?: string;
+        message?: string;
+      }>;
+      requestIssueBillingKey: (params: Record<string, unknown>) => Promise<{
+        billingKey?: string;
+        code?: string;
+        message?: string;
+      }>;
     };
   }
 }
@@ -38,23 +46,23 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
   const params = useParams();
   const lang = (params?.lang as string) || 'ko';
   const [paying, setPaying] = useState<string | null>(null);
-  const impLoaded = useRef(false);
+  const sdkLoaded = useRef(false);
 
   useEffect(() => {
-    if (impLoaded.current || document.getElementById('portone-v2-script')) {
-      impLoaded.current = true;
+    if (sdkLoaded.current || document.getElementById('portone-v2-script')) {
+      sdkLoaded.current = true;
       return;
     }
     const script = document.createElement('script');
     script.id = 'portone-v2-script';
     script.src = 'https://cdn.portone.io/v2/browser-sdk.js';
-    script.onload = () => { impLoaded.current = true; };
+    script.onload = () => { sdkLoaded.current = true; };
     document.head.appendChild(script);
   }, []);
 
   const t = dict?.pricing || {
     popular: '인기',
-    per_month: '/월',
+    per_month: '/30일',
     one_time_label: '1회 충전',
     credits_label: '크레딧/월',
     credits_once: '크레딧',
@@ -114,7 +122,6 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
       return;
     }
 
-    // 유저 이메일 조회
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     const email = user?.email ?? '';
@@ -131,52 +138,52 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
         const err = await prepRes.json();
         throw new Error(err.error || '주문 생성 실패');
       }
-      const { merchantUid, amount } = await prepRes.json();
-
-      let apiPath = '/api/payment/verify';
+      const { paymentId, amount } = await prepRes.json();
 
       if (plan.oneTime) {
         // 2a. 일반결제 (topup)
-        const res = await window.PortOne!.requestPayment({
+        const res = await window.PortOne.requestPayment({
           storeId: STORE_ID,
-          channelKey: CHANNEL_KEY,
-          paymentId: merchantUid,
+          channelKey: CHANNEL_KEY_NORMAL,
+          paymentId,
           orderName: PLAN_NAMES[plan.key],
           totalAmount: amount,
           currency: 'KRW',
           payMethod: 'CARD',
           customer: { email },
         });
-        if (res.code) throw new Error(res.message || '결제가 취소되었습니다.');
+        if (res.code !== undefined) throw new Error(res.message || '결제가 취소되었습니다.');
 
-        const verifyRes = await fetch(apiPath, {
+        // 3a. 서버 검증
+        const verifyRes = await fetch('/api/payment/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ impUid: res.paymentId, merchantUid }),
+          body: JSON.stringify({ paymentId }),
         });
         if (!verifyRes.ok) { const e = await verifyRes.json(); throw new Error(e.error || '결제 검증 실패'); }
-      } else {
-        // 2b. 정기결제 — 빌링키 발급 후 즉시 청구
-        const res = await window.PortOne!.requestIssueBillingKey({
-          storeId: STORE_ID,
-          channelKey: CHANNEL_KEY,
-          billingKeyMethod: 'CARD',
-          issueId: merchantUid,
-          issueName: PLAN_NAMES[plan.key],
-          customer: { email },
-          bypass: { inicis_v2: { iniLiteKey: INI_LITE_KEY } },
-        });
-        if (res.code) throw new Error(res.message || '결제가 취소되었습니다.');
 
+      } else {
+        // 2b. 정기결제 — 빌링키 발급
+        const res = await window.PortOne.requestIssueBillingKey({
+          storeId: STORE_ID,
+          channelKey: CHANNEL_KEY_BILLING,
+          billingKeyMethod: 'CARD',
+          issueId: paymentId,
+          issueName: PLAN_NAMES[plan.key],
+          customer: { customerId: user?.id ?? '', email },
+        });
+        if (res.code !== undefined) throw new Error(res.message || '결제가 취소되었습니다.');
+
+        // 3b. 서버에서 빌링키로 결제 실행
         const billingRes = await fetch('/api/payment/billing', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ billingKey: res.billingKey, merchantUid }),
+          body: JSON.stringify({ billingKey: res.billingKey, paymentId }),
         });
-        if (!billingRes.ok) { const e = await billingRes.json(); throw new Error(e.error || '결제 청구 실패'); }
+        if (!billingRes.ok) { const e = await billingRes.json(); throw new Error(e.error || '결제 실패'); }
       }
 
-      // 3. 로컬 상태 업데이트
+      // 4. 로컬 상태 업데이트
       if (plan.unlimited) {
         setUnlimited(true);
         alert(t.alert_enterprise);

@@ -17,18 +17,18 @@ export async function POST(request: Request) {
   const amount = PLAN_AMOUNTS[plan];
   if (!amount) return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
 
-  const merchantUid = `bgremover_v1_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const paymentId = `bgremover_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
   const service = createServiceClient();
   const { error } = await service.from('orders').insert({
     user_id: user.id,
     plan,
     amount_krw: amount,
-    portone_order_id: merchantUid,
+    portone_order_id: paymentId,
     status: 'pending',
   });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json({ merchantUid, amount });
+  return NextResponse.json({ paymentId, amount });
 }

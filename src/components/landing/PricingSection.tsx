@@ -5,15 +5,23 @@ import { useCreditStore } from '@/store/creditStore';
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-const STORE_ID = 'store-d9f67528-b83b-48e0-8693-208e4739fdee';
-const CHANNEL_KEY = 'channel-key-610b6012-3157-49a6-bf19-763c27093b53';
-const INI_LITE_KEY = 'b09LVzhuTGZVaEY1WmJoQnZzdXpRdz09';
+const STORE_ID            = process.env.NEXT_PUBLIC_PORTONE_V2_STORE_ID!;
+const CHANNEL_KEY_NORMAL  = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY_NORMAL!;
+const CHANNEL_KEY_BILLING = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY_BILLING!;
 
 declare global {
   interface Window {
     PortOne?: {
-      requestPayment: (params: Record<string, unknown>) => Promise<{ paymentId?: string; code?: string; message?: string }>;
-      requestIssueBillingKey: (params: Record<string, unknown>) => Promise<{ billingKey?: string; code?: string; message?: string }>;
+      requestPayment: (params: Record<string, unknown>) => Promise<{
+        paymentId?: string;
+        code?: string;
+        message?: string;
+      }>;
+      requestIssueBillingKey: (params: Record<string, unknown>) => Promise<{
+        billingKey?: string;
+        code?: string;
+        message?: string;
+      }>;
     };
   }
 }
@@ -35,17 +43,17 @@ export function PricingSection({ dict }: PricingSectionProps) {
   const credits      = useCreditStore((s) => s.credits);
   const unlimited    = useCreditStore((s) => s.unlimited);
   const [paying, setPaying] = useState<string | null>(null);
-  const impLoaded = useRef(false);
+  const sdkLoaded = useRef(false);
 
   useEffect(() => {
-    if (impLoaded.current || document.getElementById('portone-v2-script')) {
-      impLoaded.current = true;
+    if (sdkLoaded.current || document.getElementById('portone-v2-script')) {
+      sdkLoaded.current = true;
       return;
     }
     const script = document.createElement('script');
     script.id = 'portone-v2-script';
     script.src = 'https://cdn.portone.io/v2/browser-sdk.js';
-    script.onload = () => { impLoaded.current = true; };
+    script.onload = () => { sdkLoaded.current = true; };
     document.head.appendChild(script);
   }, []);
 
@@ -55,7 +63,7 @@ export function PricingSection({ dict }: PricingSectionProps) {
     subtitle: '구독 또는 1회 충전으로 이용하세요. 저해상도 미리보기는 항상 무료입니다.',
     free_badge: '저해상도 무료',
     popular: '인기',
-    per_month: '/월',
+    per_month: '/30일',
     one_time_label: '1회 충전',
     credits_label: '크레딧/월',
     credits_once: '크레딧',
@@ -126,6 +134,7 @@ export function PricingSection({ dict }: PricingSectionProps) {
 
     setPaying(plan.key);
     try {
+      // 1. 주문 생성
       const prepRes = await fetch('/api/payment/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,39 +144,52 @@ export function PricingSection({ dict }: PricingSectionProps) {
         const err = await prepRes.json();
         throw new Error(err.error || '주문 생성 실패');
       }
-      const { merchantUid, amount } = await prepRes.json();
+      const { paymentId, amount } = await prepRes.json();
 
       if (plan.oneTime) {
-        // 일반결제 (topup)
-        const res = await window.PortOne!.requestPayment({
-          storeId: STORE_ID, channelKey: CHANNEL_KEY,
-          paymentId: merchantUid, orderName: PLAN_NAMES[plan.key],
-          totalAmount: amount, currency: 'KRW', payMethod: 'CARD',
+        // 2a. 일반결제 (topup)
+        const res = await window.PortOne.requestPayment({
+          storeId: STORE_ID,
+          channelKey: CHANNEL_KEY_NORMAL,
+          paymentId,
+          orderName: PLAN_NAMES[plan.key],
+          totalAmount: amount,
+          currency: 'KRW',
+          payMethod: 'CARD',
           customer: { email },
         });
-        if (res.code) throw new Error(res.message || '결제가 취소되었습니다.');
+        if (res.code !== undefined) throw new Error(res.message || '결제가 취소되었습니다.');
+
+        // 3a. 서버 검증
         const verifyRes = await fetch('/api/payment/verify', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ impUid: res.paymentId, merchantUid }),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentId }),
         });
         if (!verifyRes.ok) { const e = await verifyRes.json(); throw new Error(e.error || '결제 검증 실패'); }
+
       } else {
-        // 정기결제 — 빌링키 발급 후 즉시 청구
-        const res = await window.PortOne!.requestIssueBillingKey({
-          storeId: STORE_ID, channelKey: CHANNEL_KEY,
+        // 2b. 정기결제 — 빌링키 발급
+        const res = await window.PortOne.requestIssueBillingKey({
+          storeId: STORE_ID,
+          channelKey: CHANNEL_KEY_BILLING,
           billingKeyMethod: 'CARD',
-          issueId: merchantUid, issueName: PLAN_NAMES[plan.key],
-          customer: { email },
-          bypass: { inicis_v2: { iniLiteKey: INI_LITE_KEY } },
+          issueId: paymentId,
+          issueName: PLAN_NAMES[plan.key],
+          customer: { customerId: user?.id ?? '', email },
         });
-        if (res.code) throw new Error(res.message || '결제가 취소되었습니다.');
+        if (res.code !== undefined) throw new Error(res.message || '결제가 취소되었습니다.');
+
+        // 3b. 서버에서 빌링키로 결제 실행
         const billingRes = await fetch('/api/payment/billing', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ billingKey: res.billingKey, merchantUid }),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ billingKey: res.billingKey, paymentId }),
         });
-        if (!billingRes.ok) { const e = await billingRes.json(); throw new Error(e.error || '결제 청구 실패'); }
+        if (!billingRes.ok) { const e = await billingRes.json(); throw new Error(e.error || '결제 실패'); }
       }
 
+      // 4. 로컬 상태 업데이트
       if (plan.unlimited) {
         setUnlimited(true);
         alert(t.alert_enterprise);
@@ -284,7 +306,6 @@ export function PricingSection({ dict }: PricingSectionProps) {
                 </div>
 
                 {plan.promo ? (
-                  /* 프로모션 가격 표시: 취소선 + 첫달 무료 */
                   <div className="mb-1">
                     <span
                       className="text-2xl font-black line-through"
