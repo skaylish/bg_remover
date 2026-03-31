@@ -2,6 +2,16 @@
 
 import { Check, Zap, Star, Building2, Infinity, Package } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
+import { useEffect, useRef, useState } from 'react';
+
+declare global {
+  interface Window {
+    IMP?: {
+      init: (uid: string) => void;
+      request_pay: (params: Record<string, unknown>, callback: (res: { success: boolean; imp_uid?: string; merchant_uid?: string; error_msg?: string }) => void) => void;
+    };
+  }
+}
 
 const PLANS = [
   { key: 'topup',      icon: Package,    credits: 100, unlimited: false, color: '#f59e0b', popular: false, oneTime: true,  promo: false },
@@ -15,10 +25,27 @@ interface PricingSectionProps {
 }
 
 export function PricingSection({ dict }: PricingSectionProps) {
-  const addCredits  = useCreditStore((s) => s.addCredits);
+  const addCredits   = useCreditStore((s) => s.addCredits);
   const setUnlimited = useCreditStore((s) => s.setUnlimited);
-  const credits   = useCreditStore((s) => s.credits);
-  const unlimited = useCreditStore((s) => s.unlimited);
+  const credits      = useCreditStore((s) => s.credits);
+  const unlimited    = useCreditStore((s) => s.unlimited);
+  const [paying, setPaying] = useState<string | null>(null);
+  const impLoaded = useRef(false);
+
+  useEffect(() => {
+    if (impLoaded.current || document.getElementById('iamport-script')) {
+      impLoaded.current = true;
+      return;
+    }
+    const script = document.createElement('script');
+    script.id = 'iamport-script';
+    script.src = 'https://cdn.iamport.kr/v1/iamport.js';
+    script.onload = () => {
+      window.IMP?.init(process.env.NEXT_PUBLIC_PORTONE_IMP_UID!);
+      impLoaded.current = true;
+    };
+    document.head.appendChild(script);
+  }, []);
 
   const t = dict?.pricing || {
     title_1: '심플하고 ',
@@ -78,17 +105,79 @@ export function PricingSection({ dict }: PricingSectionProps) {
     pro: t.per_image_pro,
   };
 
-  const handlePurchase = (plan: typeof PLANS[number]) => {
-    if (plan.unlimited) {
-      setUnlimited(true);
-      alert(t.alert_enterprise);
-    } else {
-      addCredits(plan.credits);
-      if (plan.key === 'topup') {
-        alert(t.alert_topup || `충전 완료! ${plan.credits} 크레딧이 추가되었습니다.`);
-      } else {
-        alert(plan.key === 'starter' ? t.alert_starter : t.alert_pro);
+  const PLAN_NAMES: Record<string, string> = {
+    topup: t.topup_name || '1회 충전 (100 크레딧)',
+    starter: t.starter_name || '스타터 구독',
+    pro: t.pro_name || '비즈니스 구독',
+    enterprise: t.enterprise_name || '엔터프라이즈 구독',
+  };
+
+  const handlePurchase = async (plan: typeof PLANS[number]) => {
+    if (!window.IMP) {
+      alert('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    setPaying(plan.key);
+    try {
+      const prepRes = await fetch('/api/payment/prepare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: plan.key }),
+      });
+      if (!prepRes.ok) {
+        const err = await prepRes.json();
+        throw new Error(err.error || '주문 생성 실패');
       }
+      const { merchantUid, amount } = await prepRes.json();
+
+      await new Promise<void>((resolve, reject) => {
+        window.IMP!.request_pay(
+          {
+            channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY,
+            merchant_uid: merchantUid,
+            name: PLAN_NAMES[plan.key],
+            amount,
+            currency: 'KRW',
+          },
+          async (res) => {
+            if (!res.success) {
+              reject(new Error(res.error_msg || '결제가 취소되었습니다.'));
+              return;
+            }
+            try {
+              const verifyRes = await fetch('/api/payment/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ impUid: res.imp_uid, merchantUid: res.merchant_uid }),
+              });
+              if (!verifyRes.ok) {
+                const err = await verifyRes.json();
+                reject(new Error(err.error || '결제 검증 실패'));
+                return;
+              }
+              resolve();
+            } catch (e) {
+              reject(e);
+            }
+          },
+        );
+      });
+
+      if (plan.unlimited) {
+        setUnlimited(true);
+        alert(t.alert_enterprise);
+      } else {
+        addCredits(plan.credits);
+        if (plan.key === 'topup') alert(t.alert_topup || `충전 완료! ${plan.credits} 크레딧이 추가되었습니다.`);
+        else if (plan.key === 'starter') alert(t.alert_starter);
+        else alert(t.alert_pro);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg && !msg.includes('취소')) alert(msg);
+    } finally {
+      setPaying(null);
     }
   };
 
@@ -242,7 +331,8 @@ export function PricingSection({ dict }: PricingSectionProps) {
 
                 <button
                   onClick={() => handlePurchase(plan)}
-                  className="w-full py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-[0.98]"
+                  disabled={paying !== null}
+                  className="w-full py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   style={
                     plan.promo
                       ? { background: 'linear-gradient(90deg, #ef4444, #f97316)', color: '#fff' }
@@ -251,11 +341,13 @@ export function PricingSection({ dict }: PricingSectionProps) {
                         : { background: `${plan.color}22`, color: plan.color, border: `1px solid ${plan.color}44` }
                   }
                 >
-                  {plan.promo
-                    ? (t.buy_promo || '첫달 무료로 시작')
-                    : plan.oneTime
-                      ? (t.buy_topup || '충전하기')
-                      : t.buy}
+                  {paying === plan.key
+                    ? '처리 중...'
+                    : plan.promo
+                      ? (t.buy_promo || '첫달 무료로 시작')
+                      : plan.oneTime
+                        ? (t.buy_topup || '충전하기')
+                        : t.buy}
                 </button>
               </div>
             );
