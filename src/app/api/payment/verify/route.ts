@@ -8,16 +8,20 @@ const PLAN_CREDITS: Record<string, number> = {
 };
 
 async function getPortoneToken(): Promise<string> {
+  const imp_key = process.env.PORTONE_API_KEY?.trim();
+  const imp_secret = process.env.PORTONE_API_SECRET?.trim();
+
+  if (!imp_key || !imp_secret) throw new Error('PortOne credentials not configured');
+
   const res = await fetch('https://api.iamport.kr/users/getToken', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      imp_key: process.env.PORTONE_API_KEY,
-      imp_secret: process.env.PORTONE_API_SECRET,
-    }),
+    body: JSON.stringify({ imp_key, imp_secret }),
   });
   const data = await res.json();
-  if (!data.response?.access_token) throw new Error('Failed to get PortOne token');
+  if (!data.response?.access_token) {
+    throw new Error(`PortOne token error: ${data.message ?? JSON.stringify(data)}`);
+  }
   return data.response.access_token;
 }
 
@@ -46,8 +50,9 @@ export async function POST(request: Request) {
   let token: string;
   try {
     token = await getPortoneToken();
-  } catch {
-    return NextResponse.json({ error: 'PortOne auth failed' }, { status: 502 });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 502 });
   }
 
   const payRes = await fetch(`https://api.iamport.kr/payments/${impUid}`, {
