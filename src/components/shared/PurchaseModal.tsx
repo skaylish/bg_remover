@@ -130,8 +130,8 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
       // 2. 포트원 결제창 호출
       // 2. PortOne V2 결제창 호출
       const res = await window.PortOne!.requestPayment({
-        storeId: process.env.NEXT_PUBLIC_PORTONE_V2_STORE_ID,
-        channelKey: process.env.NEXT_PUBLIC_PORTONE_V2_CHANNEL_KEY,
+        storeId: 'store-d9f67528-b83b-48e0-8693-208e4739fdee',
+        channelKey: 'channel-key-610b6012-3157-49a6-bf19-763c27093b53',
         paymentId: merchantUid,
         orderName: PLAN_NAMES[plan.key],
         totalAmount: amount,
