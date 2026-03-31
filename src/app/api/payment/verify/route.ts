@@ -55,14 +55,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: msg }, { status: 502 });
   }
 
-  const payRes = await fetch(`https://api.iamport.kr/payments/${impUid}`, {
-    headers: { Authorization: token },
-  });
-  const payData = await payRes.json();
+  const fetchPayment = () =>
+    fetch(`https://api.iamport.kr/payments/${impUid}`, {
+      headers: { Authorization: token },
+    }).then((r) => r.json());
+
+  let payData = await fetchPayment();
+
+  // 타이밍 이슈 대비: 최대 3회 재시도 (1s 간격)
+  for (let i = 0; i < 3 && !payData.response; i++) {
+    await new Promise((r) => setTimeout(r, 1000));
+    payData = await fetchPayment();
+  }
+
   const payment = payData.response;
 
   if (!payment) {
-    return NextResponse.json({ error: 'Payment not found on PortOne' }, { status: 404 });
+    return NextResponse.json({
+      error: `Payment not found on PortOne (imp_uid: ${impUid}, code: ${payData.code}, message: ${payData.message})`,
+    }, { status: 404 });
   }
 
   // 금액 위변조 검증
