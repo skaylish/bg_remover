@@ -3,16 +3,17 @@
 import { Check, Zap, Star, Building2, Infinity, Package } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
 import { useEffect, useRef, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+
+const STORE_ID = 'store-d9f67528-b83b-48e0-8693-208e4739fdee';
+const CHANNEL_KEY = 'channel-key-610b6012-3157-49a6-bf19-763c27093b53';
+const INI_LITE_KEY = 'b09LVzhuTGZVaEY1WmJoQnZzdXpRdz09';
 
 declare global {
   interface Window {
     PortOne?: {
-      requestPayment: (params: Record<string, unknown>) => Promise<{
-        paymentId?: string;
-        txId?: string;
-        code?: string;
-        message?: string;
-      }>;
+      requestPayment: (params: Record<string, unknown>) => Promise<{ paymentId?: string; code?: string; message?: string }>;
+      requestBillingKey: (params: Record<string, unknown>) => Promise<{ billingKey?: string; code?: string; message?: string }>;
     };
   }
 }
@@ -119,6 +120,10 @@ export function PricingSection({ dict }: PricingSectionProps) {
       return;
     }
 
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const email = user?.email ?? '';
+
     setPaying(plan.key);
     try {
       const prepRes = await fetch('/api/payment/prepare', {
@@ -132,28 +137,35 @@ export function PricingSection({ dict }: PricingSectionProps) {
       }
       const { merchantUid, amount } = await prepRes.json();
 
-      const res = await window.PortOne!.requestPayment({
-        storeId: 'store-d9f67528-b83b-48e0-8693-208e4739fdee',
-        channelKey: 'channel-key-610b6012-3157-49a6-bf19-763c27093b53',
-        paymentId: merchantUid,
-        orderName: PLAN_NAMES[plan.key],
-        totalAmount: amount,
-        currency: 'KRW',
-        payMethod: 'CARD',
-      });
-
-      if (res.code) {
-        throw new Error(res.message || '결제가 취소되었습니다.');
-      }
-
-      const verifyRes = await fetch('/api/payment/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ impUid: res.paymentId, merchantUid }),
-      });
-      if (!verifyRes.ok) {
-        const err = await verifyRes.json();
-        throw new Error(err.error || '결제 검증 실패');
+      if (plan.oneTime) {
+        // 일반결제 (topup)
+        const res = await window.PortOne!.requestPayment({
+          storeId: STORE_ID, channelKey: CHANNEL_KEY,
+          paymentId: merchantUid, orderName: PLAN_NAMES[plan.key],
+          totalAmount: amount, currency: 'KRW', payMethod: 'CARD',
+          customer: { email },
+        });
+        if (res.code) throw new Error(res.message || '결제가 취소되었습니다.');
+        const verifyRes = await fetch('/api/payment/verify', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ impUid: res.paymentId, merchantUid }),
+        });
+        if (!verifyRes.ok) { const e = await verifyRes.json(); throw new Error(e.error || '결제 검증 실패'); }
+      } else {
+        // 정기결제 — 빌링키 발급 후 즉시 청구
+        const res = await window.PortOne!.requestBillingKey({
+          storeId: STORE_ID, channelKey: CHANNEL_KEY,
+          billingKeyMethod: 'CARD',
+          issueId: merchantUid, issueName: PLAN_NAMES[plan.key],
+          customer: { email },
+          bypass: { inicis_v2: { iniLiteKey: INI_LITE_KEY } },
+        });
+        if (res.code) throw new Error(res.message || '결제가 취소되었습니다.');
+        const billingRes = await fetch('/api/payment/billing', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ billingKey: res.billingKey, merchantUid }),
+        });
+        if (!billingRes.ok) { const e = await billingRes.json(); throw new Error(e.error || '결제 청구 실패'); }
       }
 
       if (plan.unlimited) {
