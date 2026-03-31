@@ -1,0 +1,175 @@
+@import "tailwindcss";
+
+:root {
+  /* Aura Ether Design System - Ethereal Workspace */
+  --bg-base: #0e0e0e;
+  --bg-surface: #131313;
+  --bg-raised: #20201f;
+  --bg-border: #262626;
+  --bg-border-hover: #484847;
+
+  --accent-primary: #c799ff;
+  --accent-secondary: #aa8aff;
+  --accent-tertiary: #a0fff0;
+  --accent-glow: #bc87fe;
+  --accent-purple: #8A2BE2;
+  --accent-gradient: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  --accent-glow-shadow: 0 0 40px rgba(199, 153, 255, 0.15);
+
+  --text-primary: #ffffff;
+  --text-secondary: #e9deff;
+  --text-muted: #adaaaa;
+  --text-subtle: #767575;
+
+  --success: #a0fff0;
+  --error: #ff6e84;
+
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-border-hover);
+}
+
+/* Selection */
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: var(--text-primary);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow button utility */
+.btn-glow {
+  background: var(--accent-gradient);
+  box-shadow: var(--accent-glow-shadow);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 50px rgba(99, 102, 241, 0.6);
+  transform: translateY(-1px);
+}
+.btn-glow:active {
+  transform: translateY(0);
+}
+
+/* Glass card (Aura Ether Magic) */
+.glass-card {
+  background: rgba(38, 38, 38, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(72, 72, 71, 0.3); /* Ghost border */
+  border-left: 1px solid rgba(72, 72, 71, 0.2);
+  border-right: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(68, 0, 128, 0.05); /* Tinted ambient shadow */
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card:hover {
+  background: rgba(38, 38, 38, 0.6);
+  border-top: 1px solid rgba(199, 153, 255, 0.4); /* luminous glow hint */
+  transform: translateY(-4px);
+  box-shadow: 0 32px 80px rgba(68, 0, 128, 0.1);
+}
+
+/* Checkered background for transparent images */
+.checker-bg {
+  background-image:
+    linear-gradient(45deg, #1a1a28 25%, transparent 25%),
+    linear-gradient(-45deg, #1a1a28 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1a1a28 75%),
+    linear-gradient(-45deg, transparent 75%, #1a1a28 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-color: #141420;
+}
+
+/* Upload zone animation */
+@keyframes pulse-border {
+  0%, 100% { border-color: var(--bg-border); }
+  50% { border-color: var(--accent-primary); }
+}
+
+.upload-zone-idle {
+  animation: pulse-border 3s ease-in-out infinite;
+}
+
+/* Glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.7); }
+}
+
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Fade in */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fade-in 0.5s ease forwards;
+}
+
+/* Shimmer for loading state */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface) 25%,
+    var(--bg-raised) 50%,
+    var(--bg-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
