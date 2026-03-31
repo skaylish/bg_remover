@@ -130,7 +130,7 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
       await new Promise<void>((resolve, reject) => {
         window.IMP!.request_pay(
           {
-            channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY,
+            pg: 'html5_inicis',
             merchant_uid: merchantUid,
             name: PLAN_NAMES[plan.key],
             amount,
