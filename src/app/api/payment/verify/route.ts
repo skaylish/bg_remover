@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const { impUid, merchantUid } = await request.json();
   if (!impUid || !merchantUid) return NextResponse.json({ error: 'Missing params' }, { status: 400 });
 
-  const service = await createServiceClient();
+  const service = createServiceClient();
 
   // DB에서 주문 조회
   const { data: order } = await service

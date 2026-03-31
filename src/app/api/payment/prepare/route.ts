@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
   const merchantUid = `bgremover_v1_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-  const service = await createServiceClient();
+  const service = createServiceClient();
   const { error } = await service.from('orders').insert({
     user_id: user.id,
     plan,
