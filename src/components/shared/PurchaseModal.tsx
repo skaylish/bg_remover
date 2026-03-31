@@ -8,9 +8,13 @@ import { useEffect, useRef, useState } from 'react';
 
 declare global {
   interface Window {
-    IMP?: {
-      init: (uid: string) => void;
-      request_pay: (params: Record<string, unknown>, callback: (res: { success: boolean; imp_uid?: string; merchant_uid?: string; error_msg?: string }) => void) => void;
+    PortOne?: {
+      requestPayment: (params: Record<string, unknown>) => Promise<{
+        paymentId?: string;
+        txId?: string;
+        code?: string;
+        message?: string;
+      }>;
     };
   }
 }
@@ -36,17 +40,14 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
   const impLoaded = useRef(false);
 
   useEffect(() => {
-    if (impLoaded.current || document.getElementById('iamport-script')) {
+    if (impLoaded.current || document.getElementById('portone-v2-script')) {
       impLoaded.current = true;
       return;
     }
     const script = document.createElement('script');
-    script.id = 'iamport-script';
-    script.src = 'https://cdn.iamport.kr/v1/iamport.js';
-    script.onload = () => {
-      window.IMP?.init(process.env.NEXT_PUBLIC_PORTONE_IMP_UID!);
-      impLoaded.current = true;
-    };
+    script.id = 'portone-v2-script';
+    script.src = 'https://cdn.portone.io/v2/browser-sdk.js';
+    script.onload = () => { impLoaded.current = true; };
     document.head.appendChild(script);
   }, []);
 
@@ -107,7 +108,7 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
   };
 
   const handlePurchase = async (plan: typeof PLANS[number]) => {
-    if (!window.IMP) {
+    if (!window.PortOne) {
       alert('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');
       return;
     }
@@ -127,40 +128,31 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
       const { merchantUid, amount } = await prepRes.json();
 
       // 2. 포트원 결제창 호출
-      await new Promise<void>((resolve, reject) => {
-        window.IMP!.request_pay(
-          {
-            channelKey: process.env.NEXT_PUBLIC_PORTONE_V2_CHANNEL_KEY,
-            merchant_uid: merchantUid,
-            name: PLAN_NAMES[plan.key],
-            amount,
-            currency: 'KRW',
-          },
-          async (res) => {
-            if (!res.success) {
-              reject(new Error(res.error_msg || '결제가 취소되었습니다.'));
-              return;
-            }
-
-            // 3. 서버에서 결제 검증 및 크레딧 지급
-            try {
-              const verifyRes = await fetch('/api/payment/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ impUid: res.imp_uid, merchantUid: res.merchant_uid }),
-              });
-              if (!verifyRes.ok) {
-                const err = await verifyRes.json();
-                reject(new Error(err.error || '결제 검증 실패'));
-                return;
-              }
-              resolve();
-            } catch (e) {
-              reject(e);
-            }
-          },
-        );
+      // 2. PortOne V2 결제창 호출
+      const res = await window.PortOne!.requestPayment({
+        storeId: process.env.NEXT_PUBLIC_PORTONE_V2_STORE_ID,
+        channelKey: process.env.NEXT_PUBLIC_PORTONE_V2_CHANNEL_KEY,
+        paymentId: merchantUid,
+        orderName: PLAN_NAMES[plan.key],
+        totalAmount: amount,
+        currency: 'KRW',
+        payMethod: 'CARD',
       });
+
+      if (res.code) {
+        throw new Error(res.message || '결제가 취소되었습니다.');
+      }
+
+      // 3. 서버에서 결제 검증 및 크레딧 지급
+      const verifyRes = await fetch('/api/payment/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ impUid: res.paymentId, merchantUid }),
+      });
+      if (!verifyRes.ok) {
+        const err = await verifyRes.json();
+        throw new Error(err.error || '결제 검증 실패');
+      }
 
       // 4. 로컬 상태 업데이트
       if (plan.unlimited) {
