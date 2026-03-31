@@ -7,20 +7,14 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-const STORE_ID            = process.env.NEXT_PUBLIC_PORTONE_V2_STORE_ID!;
-const CHANNEL_KEY_NORMAL  = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY_NORMAL!;
-const CHANNEL_KEY_BILLING = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY_BILLING!;
+const STORE_ID   = process.env.NEXT_PUBLIC_PORTONE_V2_STORE_ID!;
+const CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY_NORMAL!;
 
 declare global {
   interface Window {
     PortOne?: {
       requestPayment: (params: Record<string, unknown>) => Promise<{
         paymentId?: string;
-        code?: string;
-        message?: string;
-      }>;
-      requestIssueBillingKey: (params: Record<string, unknown>) => Promise<{
-        billingKey?: string;
         code?: string;
         message?: string;
       }>;
@@ -140,48 +134,26 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
       }
       const { paymentId, amount } = await prepRes.json();
 
-      if (plan.oneTime) {
-        // 2a. 일반결제 (topup)
-        const res = await window.PortOne.requestPayment({
-          storeId: STORE_ID,
-          channelKey: CHANNEL_KEY_NORMAL,
-          paymentId,
-          orderName: PLAN_NAMES[plan.key],
-          totalAmount: amount,
-          currency: 'KRW',
-          payMethod: 'CARD',
-          customer: { email },
-        });
-        if (res.code !== undefined) throw new Error(res.message || '결제가 취소되었습니다.');
+      // 2. 결제창 호출 (일반결제 / 구독 모두 동일)
+      const res = await window.PortOne.requestPayment({
+        storeId: STORE_ID,
+        channelKey: CHANNEL_KEY,
+        paymentId,
+        orderName: PLAN_NAMES[plan.key],
+        totalAmount: amount,
+        currency: 'KRW',
+        payMethod: 'CARD',
+        customer: { email },
+      });
+      if (res.code !== undefined) throw new Error(res.message || '결제가 취소되었습니다.');
 
-        // 3a. 서버 검증
-        const verifyRes = await fetch('/api/payment/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentId }),
-        });
-        if (!verifyRes.ok) { const e = await verifyRes.json(); throw new Error(e.error || '결제 검증 실패'); }
-
-      } else {
-        // 2b. 정기결제 — 빌링키 발급
-        const res = await window.PortOne.requestIssueBillingKey({
-          storeId: STORE_ID,
-          channelKey: CHANNEL_KEY_BILLING,
-          billingKeyMethod: 'CARD',
-          issueId: paymentId,
-          issueName: PLAN_NAMES[plan.key],
-          customer: { customerId: user?.id ?? '', email },
-        });
-        if (res.code !== undefined) throw new Error(res.message || '결제가 취소되었습니다.');
-
-        // 3b. 서버에서 빌링키로 결제 실행
-        const billingRes = await fetch('/api/payment/billing', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ billingKey: res.billingKey, paymentId }),
-        });
-        if (!billingRes.ok) { const e = await billingRes.json(); throw new Error(e.error || '결제 실패'); }
-      }
+      // 3. 서버 검증
+      const verifyRes = await fetch('/api/payment/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentId }),
+      });
+      if (!verifyRes.ok) { const e = await verifyRes.json(); throw new Error(e.error || '결제 검증 실패'); }
 
       // 4. 로컬 상태 업데이트
       if (plan.unlimited) {
