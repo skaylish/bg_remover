@@ -17,9 +17,11 @@ async function getPortoneV2Token(): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ apiSecret: secret }),
   });
-  const data = await res.json();
+  const text = await res.text();
+  if (!text) throw new Error(`PortOne V2 token: empty response (HTTP ${res.status})`);
+  const data = JSON.parse(text);
   if (!data.accessToken) {
-    throw new Error(`PortOne V2 token error: ${data.message ?? JSON.stringify(data)}`);
+    throw new Error(`PortOne V2 token error (HTTP ${res.status}): ${data.message ?? text}`);
   }
   return data.accessToken;
 }
@@ -55,10 +57,20 @@ export async function POST(request: Request) {
   }
 
   const storeId = process.env.PORTONE_V2_STORE_ID?.trim();
-  const fetchPayment = () =>
-    fetch(`https://api.portone.io/payments/by-merchant-id/${merchantUid}?storeId=${storeId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then((r) => r.json());
+
+  const fetchPayment = async () => {
+    const r = await fetch(
+      `https://api.portone.io/payments/by-merchant-id/${encodeURIComponent(merchantUid)}?storeId=${storeId}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    const text = await r.text();
+    if (!text) return { _httpStatus: r.status, type: 'EMPTY_RESPONSE' };
+    try {
+      return { _httpStatus: r.status, ...JSON.parse(text) };
+    } catch {
+      return { _httpStatus: r.status, type: 'PARSE_ERROR', raw: text.slice(0, 200) };
+    }
+  };
 
   let payData = await fetchPayment();
 
