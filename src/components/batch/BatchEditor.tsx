@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
   Upload, X, Download, CheckCircle, AlertCircle,
-  Loader2, ImageIcon, PackageOpen, Trash2
+  Loader2, ImageIcon, PackageOpen, Trash2, Lock
 } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
 import { PurchaseModal } from '@/components/shared/PurchaseModal';
@@ -73,7 +73,16 @@ export function BatchEditor() {
   const [isRunning, setIsRunning] = useState(false);
   const abortRef = useRef(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [planChecked, setPlanChecked] = useState(false);
   const useCreditDB = useCreditStore((s) => s.useCreditDB);
+  const plan      = useCreditStore((s) => s.plan);
+  const syncFromDB = useCreditStore((s) => s.syncFromDB);
+
+  useEffect(() => {
+    syncFromDB().finally(() => setPlanChecked(true));
+  }, [syncFromDB]);
+
+  const hasBatchAccess = plan === 'pro' || plan === 'enterprise';
 
   // Stats
   const total = items.length;
@@ -212,6 +221,72 @@ export function BatchEditor() {
     const blob = await zip.generateAsync({ type: 'blob' });
     downloadBlob(blob, 'removed-backgrounds.zip');
   };
+
+  // 플랜 확인 중
+  if (!planChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
+        <Loader2 size={32} className="animate-spin" style={{ color: 'var(--accent-glow)' }} />
+      </div>
+    );
+  }
+
+  // 비즈니스/엔터프라이즈 미가입
+  if (!hasBatchAccess) {
+    return (
+      <>
+        <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--bg-base)' }}>
+          <div
+            className="w-full max-w-md rounded-3xl p-10 flex flex-col items-center text-center gap-5"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}
+          >
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center"
+              style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)' }}
+            >
+              <Lock size={28} style={{ color: '#a855f7' }} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                일괄 편집은 유료 플랜 전용입니다
+              </h2>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                비즈니스 또는 엔터프라이즈 플랜을 구독하면<br />여러 이미지를 한 번에 처리할 수 있습니다.
+              </p>
+            </div>
+            <div
+              className="w-full rounded-2xl p-4 text-left"
+              style={{ background: 'var(--bg-raised)', border: '1px solid var(--bg-border)' }}
+            >
+              {[
+                { name: '비즈니스', price: '₩19,900/30일', credits: '월 500 크레딧', color: '#a855f7' },
+                { name: '엔터프라이즈', price: '₩99,000/30일', credits: '무제한 생성', color: '#22d3a0' },
+              ].map((p) => (
+                <div key={p.name} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{p.name}</span>
+                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{p.credits}</span>
+                  </div>
+                  <span className="text-sm font-bold" style={{ color: p.color }}>{p.price}</span>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowPurchaseModal(true)}
+              className="w-full py-3 rounded-2xl text-sm font-bold text-white transition-all hover:opacity-90"
+              style={{ background: 'var(--accent-gradient)' }}
+            >
+              플랜 업그레이드
+            </button>
+          </div>
+        </div>
+        {showPurchaseModal && (
+          <PurchaseModal onClose={() => setShowPurchaseModal(false)} />
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>

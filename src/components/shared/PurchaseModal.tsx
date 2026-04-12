@@ -4,29 +4,23 @@ import { X, Zap, Star, Building2, Check, Infinity, Package } from 'lucide-react'
 import { useCreditStore } from '@/store/creditStore';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-const STORE_ID   = process.env.NEXT_PUBLIC_PORTONE_V2_STORE_ID!;
-const CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY_NORMAL!;
+const APP_ID = process.env.NEXT_PUBLIC_BOOTPAY_APPLICATION_ID!;
 
-declare global {
-  interface Window {
-    PortOne?: {
-      requestPayment: (params: Record<string, unknown>) => Promise<{
-        paymentId?: string;
-        code?: string;
-        message?: string;
-      }>;
-    };
-  }
-}
+const PLAN_AMOUNTS: Record<string, number> = {
+  topup: 9900,
+  starter: 4900,
+  pro: 19900,
+  enterprise: 99000,
+};
 
 const PLANS = [
-  { key: 'topup',      icon: Package,    credits: 100, unlimited: false, color: '#f59e0b', popular: false, oneTime: true,  promo: false },
-  { key: 'starter',    icon: Zap,        credits: 100, unlimited: false, color: '#6366f1', popular: false, oneTime: false, promo: true  },
-  { key: 'pro',        icon: Star,       credits: 500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false, promo: true  },
-  { key: 'enterprise', icon: Building2,  credits: 0,   unlimited: true,  color: '#22d3a0', popular: false, oneTime: false, promo: false },
+  { key: 'topup',      icon: Package,   credits: 100, unlimited: false, color: '#f59e0b', popular: false, oneTime: true,  promo: false },
+  { key: 'starter',    icon: Zap,       credits: 100, unlimited: false, color: '#6366f1', popular: false, oneTime: false, promo: true  },
+  { key: 'pro',        icon: Star,      credits: 500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false, promo: true  },
+  { key: 'enterprise', icon: Building2, credits: 0,   unlimited: true,  color: '#22d3a0', popular: false, oneTime: false, promo: false },
 ];
 
 interface PurchaseModalProps {
@@ -40,19 +34,6 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
   const params = useParams();
   const lang = (params?.lang as string) || 'ko';
   const [paying, setPaying] = useState<string | null>(null);
-  const sdkLoaded = useRef(false);
-
-  useEffect(() => {
-    if (sdkLoaded.current || document.getElementById('portone-v2-script')) {
-      sdkLoaded.current = true;
-      return;
-    }
-    const script = document.createElement('script');
-    script.id = 'portone-v2-script';
-    script.src = 'https://cdn.portone.io/v2/browser-sdk.js';
-    script.onload = () => { sdkLoaded.current = true; };
-    document.head.appendChild(script);
-  }, []);
 
   const t = dict?.pricing || {
     popular: '인기',
@@ -102,7 +83,6 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
     starter: t.per_image_starter,
     pro: t.per_image_pro,
   };
-
   const PLAN_NAMES: Record<string, string> = {
     topup: t.topup_name || '1회 충전 (100 크레딧)',
     starter: t.starter_name || '스타터 구독',
@@ -111,49 +91,45 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
   };
 
   const handlePurchase = async (plan: typeof PLANS[number]) => {
-    if (!window.PortOne) {
-      alert('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');
-      return;
-    }
-
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    const email = user?.email ?? '';
+    if (!user) { alert('로그인이 필요합니다.'); return; }
 
     setPaying(plan.key);
     try {
-      // 1. 주문 생성
-      const prepRes = await fetch('/api/payment/prepare', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: plan.key }),
-      });
-      if (!prepRes.ok) {
-        const err = await prepRes.json();
-        throw new Error(err.error || '주문 생성 실패');
-      }
-      const { paymentId, amount } = await prepRes.json();
+      // 1. 고유 주문번호 생성
+      const orderId = `bgr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-      // 2. 결제창 호출 (일반결제 / 구독 모두 동일)
-      const res = await window.PortOne.requestPayment({
-        storeId: STORE_ID,
-        channelKey: CHANNEL_KEY,
-        paymentId,
-        orderName: PLAN_NAMES[plan.key],
-        totalAmount: amount,
+      // 2. 부트페이 결제창 호출 (dynamic import — SSR 안전)
+      const { default: Bootpay } = await import('@bootpay/client-js');
+
+      const currentUrl = window.location.origin + window.location.pathname;
+      const response = await Bootpay.requestPayment({
+        application_id: APP_ID,
+        order_id: orderId,
+        order_name: PLAN_NAMES[plan.key],
+        price: PLAN_AMOUNTS[plan.key],
         currency: 'KRW',
-        payMethod: 'CARD',
-        customer: { email },
+        user: { email: user.email ?? '' },
+        redirect_url: currentUrl,
+        extra: {
+          redirect_url: currentUrl,
+        },
       });
-      if (res.code !== undefined) throw new Error(res.message || '결제가 취소되었습니다.');
 
-      // 3. 서버 검증
-      const verifyRes = await fetch('/api/payment/verify', {
+      const receiptId: string = (response as any)?.receipt_id ?? (response as any)?.data?.receipt_id;
+      if (!receiptId) throw new Error('영수증 ID를 받지 못했습니다.');
+
+      // 3. 서버 검증 및 크레딧 지급
+      const completeRes = await fetch('/api/payment/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentId }),
+        body: JSON.stringify({ receiptId, plan: plan.key, orderId }),
       });
-      if (!verifyRes.ok) { const e = await verifyRes.json(); throw new Error(e.error || '결제 검증 실패'); }
+      if (!completeRes.ok) {
+        const e = await completeRes.json();
+        throw new Error(e.error || '결제 처리 실패');
+      }
 
       // 4. 로컬 상태 업데이트
       if (plan.unlimited) {
@@ -161,14 +137,24 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
         alert(t.alert_enterprise);
       } else {
         addCredits(plan.credits);
-        if (plan.key === 'topup') alert(t.alert_topup || `충전 완료! ${plan.credits} 크레딧이 추가되었습니다.`);
+        if (plan.key === 'topup') alert(t.alert_topup);
         else if (plan.key === 'starter') alert(t.alert_starter);
         else alert(t.alert_pro);
       }
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg && !msg.includes('취소')) alert(msg);
+      // 부트페이는 취소/에러 시 plain object로 reject
+      console.error('[Bootpay] error object:', JSON.stringify(err));
+      const errObj = err as any;
+      const event: string = errObj?.event ?? errObj?.data?.event ?? '';
+      if (event === 'cancel' || event === 'close') return; // 사용자 취소 — 무시
+      const msg: string =
+        errObj?.message ??
+        errObj?.data?.message ??
+        errObj?.error_message ??
+        (err instanceof Error ? err.message : null) ??
+        '결제 처리 중 오류가 발생했습니다.';
+      if (msg) alert(msg);
     } finally {
       setPaying(null);
     }
@@ -202,7 +188,6 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
           </p>
         </div>
 
-        {/* 프로모션 배너 */}
         <div
           className="rounded-xl px-4 py-2.5 mb-4 text-center"
           style={{
@@ -211,7 +196,7 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
           }}
         >
           <p className="text-xs font-bold" style={{ color: '#fca5a5' }}>
-            {t.promo_banner || '🔥 한시적 프로모션 — 구독 시 첫 달 무료!'}
+            {t.promo_banner}
           </p>
         </div>
 
@@ -237,7 +222,7 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
                     className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-bold px-3 py-0.5 rounded-full text-white whitespace-nowrap"
                     style={{ background: 'linear-gradient(90deg, #ef4444, #f97316)' }}
                   >
-                    🎁 {t.first_month_free || '첫달 무료'}
+                    🎁 {t.first_month_free}
                   </div>
                 )}
                 {!plan.promo && plan.popular && (
@@ -263,14 +248,14 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
                     <span className="text-sm font-bold line-through" style={{ color: 'var(--text-subtle, #555)' }}>{price}</span>
                     <span className="text-[10px] ml-1" style={{ color: 'var(--text-muted)' }}>{t.per_month}</span>
                     <div className="text-base font-black mt-0.5" style={{ color: '#f87171' }}>
-                      {t.first_month_free || '첫달 무료'} 🎉
+                      {t.first_month_free} 🎉
                     </div>
                   </div>
                 ) : (
                   <>
                     <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{price}</p>
                     <p className="text-[10px] mb-3" style={{ color: 'var(--text-muted)' }}>
-                      {plan.oneTime ? (t.one_time_label || '1회 충전') : t.per_month}
+                      {plan.oneTime ? t.one_time_label : t.per_month}
                     </p>
                   </>
                 )}
@@ -281,7 +266,7 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
                   </p>
                 ) : (
                   <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
-                    {plan.credits.toLocaleString()} {plan.oneTime ? (t.credits_once || '크레딧') : t.credits_label}
+                    {plan.credits.toLocaleString()} {plan.oneTime ? t.credits_once : t.credits_label}
                   </p>
                 )}
 

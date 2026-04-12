@@ -2,23 +2,16 @@
 
 import { Check, Zap, Star, Building2, Infinity, Package } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+const APP_ID = process.env.NEXT_PUBLIC_BOOTPAY_APPLICATION_ID!;
 
-const STORE_ID   = process.env.NEXT_PUBLIC_PORTONE_V2_STORE_ID!;
-const CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY_NORMAL!;
-
-declare global {
-  interface Window {
-    PortOne?: {
-      requestPayment: (params: Record<string, unknown>) => Promise<{
-        paymentId?: string;
-        code?: string;
-        message?: string;
-      }>;
-    };
-  }
-}
+const PLAN_AMOUNTS: Record<string, number> = {
+  topup: 9900,
+  starter: 4900,
+  pro: 19900,
+  enterprise: 99000,
+};
 
 const PLANS = [
   { key: 'topup',      icon: Package,    credits: 100, unlimited: false, color: '#f59e0b', popular: false, oneTime: true,  promo: false },
@@ -37,19 +30,6 @@ export function PricingSection({ dict }: PricingSectionProps) {
   const credits      = useCreditStore((s) => s.credits);
   const unlimited    = useCreditStore((s) => s.unlimited);
   const [paying, setPaying] = useState<string | null>(null);
-  const sdkLoaded = useRef(false);
-
-  useEffect(() => {
-    if (sdkLoaded.current || document.getElementById('portone-v2-script')) {
-      sdkLoaded.current = true;
-      return;
-    }
-    const script = document.createElement('script');
-    script.id = 'portone-v2-script';
-    script.src = 'https://cdn.portone.io/v2/browser-sdk.js';
-    script.onload = () => { sdkLoaded.current = true; };
-    document.head.appendChild(script);
-  }, []);
 
   const t = dict?.pricing || {
     title_1: '심플하고 ',
@@ -117,49 +97,40 @@ export function PricingSection({ dict }: PricingSectionProps) {
   };
 
   const handlePurchase = async (plan: typeof PLANS[number]) => {
-    if (!window.PortOne) {
-      alert('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.');
-      return;
-    }
-
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    const email = user?.email ?? '';
+    if (!user) { alert('로그인이 필요합니다.'); return; }
 
     setPaying(plan.key);
     try {
-      // 1. 주문 생성
-      const prepRes = await fetch('/api/payment/prepare', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: plan.key }),
-      });
-      if (!prepRes.ok) {
-        const err = await prepRes.json();
-        throw new Error(err.error || '주문 생성 실패');
-      }
-      const { paymentId, amount } = await prepRes.json();
+      // 1. 고유 주문번호 생성
+      const orderId = `bgr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-      // 2. 결제창 호출 (일반결제 / 구독 모두 동일)
-      const res = await window.PortOne.requestPayment({
-        storeId: STORE_ID,
-        channelKey: CHANNEL_KEY,
-        paymentId,
-        orderName: PLAN_NAMES[plan.key],
-        totalAmount: amount,
+      // 2. 부트페이 결제창 호출
+      const { default: Bootpay } = await import('@bootpay/client-js');
+
+      const response = await Bootpay.requestPayment({
+        application_id: APP_ID,
+        order_id: orderId,
+        order_name: PLAN_NAMES[plan.key],
+        price: PLAN_AMOUNTS[plan.key],
         currency: 'KRW',
-        payMethod: 'CARD',
-        customer: { email },
+        user: { email: user.email ?? '' },
       });
-      if (res.code !== undefined) throw new Error(res.message || '결제가 취소되었습니다.');
 
-      // 3. 서버 검증
-      const verifyRes = await fetch('/api/payment/verify', {
+      const receiptId: string = (response as any)?.receipt_id ?? (response as any)?.data?.receipt_id;
+      if (!receiptId) throw new Error('영수증 ID를 받지 못했습니다.');
+
+      // 3. 서버 검증 및 크레딧 지급
+      const completeRes = await fetch('/api/payment/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentId }),
+        body: JSON.stringify({ receiptId, plan: plan.key, orderId }),
       });
-      if (!verifyRes.ok) { const e = await verifyRes.json(); throw new Error(e.error || '결제 검증 실패'); }
+      if (!completeRes.ok) {
+        const e = await completeRes.json();
+        throw new Error(e.error || '결제 처리 실패');
+      }
 
       // 4. 로컬 상태 업데이트
       if (plan.unlimited) {
@@ -167,13 +138,21 @@ export function PricingSection({ dict }: PricingSectionProps) {
         alert(t.alert_enterprise);
       } else {
         addCredits(plan.credits);
-        if (plan.key === 'topup') alert(t.alert_topup || `충전 완료! ${plan.credits} 크레딧이 추가되었습니다.`);
+        if (plan.key === 'topup') alert(t.alert_topup);
         else if (plan.key === 'starter') alert(t.alert_starter);
         else alert(t.alert_pro);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg && !msg.includes('취소')) alert(msg);
+      const errObj = err as any;
+      const event: string = errObj?.event ?? errObj?.data?.event ?? '';
+      if (event === 'cancel' || event === 'close') return;
+      const msg: string =
+        errObj?.message ??
+        errObj?.data?.message ??
+        errObj?.error_message ??
+        (err instanceof Error ? err.message : null) ??
+        '결제 처리 중 오류가 발생했습니다.';
+      if (msg) alert(msg);
     } finally {
       setPaying(null);
     }
