@@ -3,7 +3,7 @@
 // 랜딩 페이지 요금제 섹션 — Paddle Checkout 연동
 import { Check, Zap, Star, Building2, Infinity, Package } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { initializePaddle, type Paddle } from '@paddle/paddle-js';
 
@@ -29,6 +29,14 @@ export function PricingSection({ dict }: PricingSectionProps) {
   const credits   = useCreditStore((s) => s.credits);
   const unlimited = useCreditStore((s) => s.unlimited);
   const [paying, setPaying] = useState<string | null>(null);
+  const paddleRef = useRef<Paddle | null>(null);
+
+  useEffect(() => {
+    initializePaddle({
+      environment: (process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production',
+      token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
+    }).then((p) => { if (p) paddleRef.current = p; });
+  }, []);
 
   const t = dict?.pricing || {
     title_1: '심플하고 ',
@@ -90,10 +98,8 @@ export function PricingSection({ dict }: PricingSectionProps) {
 
     setPaying(plan.key);
     try {
-      const paddle: Paddle = await initializePaddle({
-        environment: (process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production',
-        token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
-      }) as Paddle;
+      const paddle = paddleRef.current;
+      if (!paddle) { alert('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.'); setPaying(null); return; }
 
       paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
