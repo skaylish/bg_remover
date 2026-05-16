@@ -1,34 +1,33 @@
 'use client';
 
+// 랜딩 페이지 요금제 섹션 — Paddle Checkout 연동
 import { Check, Zap, Star, Building2, Infinity, Package } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-const APP_ID = process.env.NEXT_PUBLIC_BOOTPAY_APPLICATION_ID!;
-
-const PLAN_AMOUNTS: Record<string, number> = {
-  topup: 9900,
-  starter: 4900,
-  pro: 19900,
-  enterprise: 99000,
-};
+import { initializePaddle, type Paddle } from '@paddle/paddle-js';
 
 const PLANS = [
-  { key: 'topup',      icon: Package,    credits: 100, unlimited: false, color: '#f59e0b', popular: false, oneTime: true,  promo: false },
-  { key: 'starter',    icon: Zap,        credits: 100, unlimited: false, color: '#6366f1', popular: false, oneTime: false, promo: true  },
-  { key: 'pro',        icon: Star,       credits: 500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false, promo: true  },
-  { key: 'enterprise', icon: Building2,  credits: 0,   unlimited: true,  color: '#22d3a0', popular: false, oneTime: false, promo: false },
+  { key: 'topup',      icon: Package,    credits: 100, unlimited: false, color: '#f59e0b', popular: false, oneTime: true  },
+  { key: 'starter',    icon: Zap,        credits: 100, unlimited: false, color: '#6366f1', popular: false, oneTime: false },
+  { key: 'business',   icon: Star,       credits: 500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false },
+  { key: 'enterprise', icon: Building2,  credits: 0,   unlimited: true,  color: '#22d3a0', popular: false, oneTime: false },
 ];
+
+const PRICE_IDS: Record<string, string> = {
+  topup:      process.env.NEXT_PUBLIC_PADDLE_PRICE_TOPUP      ?? '',
+  starter:    process.env.NEXT_PUBLIC_PADDLE_PRICE_STARTER    ?? '',
+  business:   process.env.NEXT_PUBLIC_PADDLE_PRICE_BUSINESS   ?? '',
+  enterprise: process.env.NEXT_PUBLIC_PADDLE_PRICE_ENTERPRISE ?? '',
+};
 
 interface PricingSectionProps {
   dict?: any;
 }
 
 export function PricingSection({ dict }: PricingSectionProps) {
-  const addCredits   = useCreditStore((s) => s.addCredits);
-  const setUnlimited = useCreditStore((s) => s.setUnlimited);
-  const credits      = useCreditStore((s) => s.credits);
-  const unlimited    = useCreditStore((s) => s.unlimited);
+  const credits   = useCreditStore((s) => s.credits);
+  const unlimited = useCreditStore((s) => s.unlimited);
   const [paying, setPaying] = useState<string | null>(null);
 
   const t = dict?.pricing || {
@@ -37,7 +36,7 @@ export function PricingSection({ dict }: PricingSectionProps) {
     subtitle: '구독 또는 1회 충전으로 이용하세요. 저해상도 미리보기는 항상 무료입니다.',
     free_badge: '저해상도 무료',
     popular: '인기',
-    per_month: '/30일',
+    per_month: '/월',
     one_time_label: '1회 충전',
     credits_label: '크레딧/월',
     credits_once: '크레딧',
@@ -46,54 +45,39 @@ export function PricingSection({ dict }: PricingSectionProps) {
     buy: '구독 시작하기',
     buy_topup: '충전하기',
     current_credits: '현재 보유 크레딧',
-    current_unlimited: '현재 플랜: 엔터프라이즈 (무제한)',
+    current_unlimited: '현재 플랜: Enterprise (무제한)',
     topup_name: '1회 충전',
     topup_target: '가끔 쓰는 사용자',
-    topup_features: ['100 크레딧 즉시 지급', '고해상도 (1×) 다운로드', '초고해상도 (2×) 다운로드', '저해상도 무제한 무료'],
-    price_topup: '₩9,900',
-    price_starter: '₩4,900',
-    price_pro: '₩19,900',
-    price_enterprise: '₩99,000',
-    per_image_topup: '₩99',
-    per_image_starter: '₩49',
-    per_image_pro: '₩39',
-    starter_name: '스타터',
+    topup_features: ['100 크레딧 즉시 지급', '고해상도 다운로드', '저해상도 무제한 무료'],
+    price_topup: '$6.99',
+    price_starter: '$3.99',
+    price_business: '$12.99',
+    price_enterprise: '$59.99',
+    per_image_topup: '$0.07',
+    per_image_starter: '$0.04',
+    per_image_business: '$0.026',
+    starter_name: 'Starter',
     starter_target: '블로거, 개인 사용자',
-    starter_features: ['월 100 크레딧 지급', '고해상도 (1×) 다운로드', '초고해상도 (2×) 다운로드', '저해상도 무제한 무료'],
-    pro_name: '비즈니스',
-    pro_target: '소형 쇼핑몰, 마케터',
-    pro_features: ['월 500 크레딧 지급', '고해상도 (1×) 다운로드', '초고해상도 (2×) 다운로드', '저해상도 무제한 무료', '일괄 처리 지원'],
-    enterprise_name: '엔터프라이즈',
+    starter_features: ['월 100 크레딧 지급', '고해상도 다운로드', '저해상도 무제한 무료'],
+    business_name: 'Business',
+    business_target: '소형 쇼핑몰, 마케터',
+    business_features: ['월 500 크레딧 지급', '고해상도 다운로드', '저해상도 무제한 무료', '일괄 처리 지원'],
+    enterprise_name: 'Enterprise',
     enterprise_target: '대형 셀러, 플랫폼, 대량 처리',
-    enterprise_features: ['무제한 고해상도 생성', '저해상도 무제한 무료', '일괄 처리 지원', '우선 고객 지원', '크레딧 제한 없음'],
-    alert_topup: '충전 완료! 100 크레딧이 추가되었습니다.',
-    alert_starter: '스타터 구독 완료! 100 크레딧이 추가되었습니다.',
-    alert_pro: '비즈니스 구독 완료! 500 크레딧이 추가되었습니다.',
-    alert_enterprise: '엔터프라이즈 구독 완료! 이제 무제한으로 생성하실 수 있습니다.',
-    note_bottom: '저해상도 다운로드는 크레딧 없이 무제한 무료입니다. 고해상도·초고해상도 다운로드 시 이미지당 1크레딧이 차감됩니다. 엔터프라이즈 플랜은 월 무제한 생성이 가능합니다.',
-    promo_banner: '🔥 한시적 프로모션 — 지금 구독하면 첫 달 이용료가 무료입니다!',
-    promo_sub: '언제든지 조기 종료될 수 있습니다 · 지금 바로 혜택을 받으세요',
-    first_month_free: '첫달 무료',
-    buy_promo: '첫달 무료로 시작',
+    enterprise_features: ['월 무제한 생성', '저해상도 무제한', '일괄 처리', '우선 고객 지원'],
+    note_bottom: '저해상도 다운로드는 크레딧 없이 무제한 무료입니다. 고해상도 다운로드 시 이미지당 1크레딧이 차감됩니다.',
   };
 
   const priceMap: Record<string, string> = {
-    topup: t.price_topup,
-    starter: t.price_starter,
-    pro: t.price_pro,
+    topup:      t.price_topup,
+    starter:    t.price_starter,
+    business:   t.price_business,
     enterprise: t.price_enterprise,
   };
   const perImageMap: Record<string, string> = {
-    topup: t.per_image_topup,
-    starter: t.per_image_starter,
-    pro: t.per_image_pro,
-  };
-
-  const PLAN_NAMES: Record<string, string> = {
-    topup: t.topup_name || '1회 충전 (100 크레딧)',
-    starter: t.starter_name || '스타터 구독',
-    pro: t.pro_name || '비즈니스 구독',
-    enterprise: t.enterprise_name || '엔터프라이즈 구독',
+    topup:    t.per_image_topup,
+    starter:  t.per_image_starter,
+    business: t.per_image_business,
   };
 
   const handlePurchase = async (plan: typeof PLANS[number]) => {
@@ -101,58 +85,27 @@ export function PricingSection({ dict }: PricingSectionProps) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('로그인이 필요합니다.'); return; }
 
+    const priceId = PRICE_IDS[plan.key];
+    if (!priceId) { alert('결제 설정 오류입니다. 잠시 후 다시 시도해주세요.'); return; }
+
     setPaying(plan.key);
     try {
-      // 1. 고유 주문번호 생성
-      const orderId = `bgr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const paddle: Paddle = await initializePaddle({
+        environment: (process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production',
+        token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
+      }) as Paddle;
 
-      // 2. 부트페이 결제창 호출
-      const { default: Bootpay } = await import('@bootpay/client-js');
-
-      const response = await Bootpay.requestPayment({
-        application_id: APP_ID,
-        order_id: orderId,
-        order_name: PLAN_NAMES[plan.key],
-        price: PLAN_AMOUNTS[plan.key],
-        currency: 'KRW',
-        user: { email: user.email ?? '' },
+      paddle.Checkout.open({
+        items: [{ priceId, quantity: 1 }],
+        customer: { email: user.email ?? '' },
+        customData: { userId: user.id },
+        settings: {
+          successUrl: `${window.location.origin}/editor?payment=success`,
+        },
       });
-
-      const receiptId: string = (response as any)?.receipt_id ?? (response as any)?.data?.receipt_id;
-      if (!receiptId) throw new Error('영수증 ID를 받지 못했습니다.');
-
-      // 3. 서버 검증 및 크레딧 지급
-      const completeRes = await fetch('/api/payment/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ receiptId, plan: plan.key, orderId }),
-      });
-      if (!completeRes.ok) {
-        const e = await completeRes.json();
-        throw new Error(e.error || '결제 처리 실패');
-      }
-
-      // 4. 로컬 상태 업데이트
-      if (plan.unlimited) {
-        setUnlimited(true);
-        alert(t.alert_enterprise);
-      } else {
-        addCredits(plan.credits);
-        if (plan.key === 'topup') alert(t.alert_topup);
-        else if (plan.key === 'starter') alert(t.alert_starter);
-        else alert(t.alert_pro);
-      }
-    } catch (err: unknown) {
-      const errObj = err as any;
-      const event: string = errObj?.event ?? errObj?.data?.event ?? '';
-      if (event === 'cancel' || event === 'close') return;
-      const msg: string =
-        errObj?.message ??
-        errObj?.data?.message ??
-        errObj?.error_message ??
-        (err instanceof Error ? err.message : null) ??
-        '결제 처리 중 오류가 발생했습니다.';
-      if (msg) alert(msg);
+    } catch (err) {
+      console.error('[Paddle] checkout error', err);
+      alert('결제 창을 열지 못했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setPaying(null);
     }
@@ -161,7 +114,6 @@ export function PricingSection({ dict }: PricingSectionProps) {
   return (
     <section className="py-24 px-6" style={{ background: 'var(--bg-base)' }}>
       <div className="max-w-5xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             {t.title_1}<span className="gradient-text">{t.title_2}</span>
@@ -169,33 +121,14 @@ export function PricingSection({ dict }: PricingSectionProps) {
           <p className="text-base max-w-xl mx-auto mb-5" style={{ color: 'var(--text-muted)' }}>
             {t.subtitle}
           </p>
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <span
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold"
-              style={{ background: 'rgba(34,211,160,0.12)', color: '#22d3a0', border: '1px solid rgba(34,211,160,0.25)' }}
-            >
-              ✓ {t.free_badge}
-            </span>
-          </div>
+          <span
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold"
+            style={{ background: 'rgba(34,211,160,0.12)', color: '#22d3a0', border: '1px solid rgba(34,211,160,0.25)' }}
+          >
+            ✓ {t.free_badge}
+          </span>
         </div>
 
-        {/* 한시적 프로모션 배너 */}
-        <div
-          className="rounded-2xl p-4 mb-8 text-center"
-          style={{
-            background: 'linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(245,158,11,0.12) 100%)',
-            border: '1px solid rgba(239,68,68,0.35)',
-          }}
-        >
-          <p className="text-base font-bold mb-1" style={{ color: '#fca5a5' }}>
-            {t.promo_banner || '🔥 한시적 프로모션 — 지금 구독하면 첫 달 이용료가 무료입니다!'}
-          </p>
-          <p className="text-xs" style={{ color: 'rgba(252,165,165,0.7)' }}>
-            {t.promo_sub || '언제든지 조기 종료될 수 있습니다 · 지금 바로 혜택을 받으세요'}
-          </p>
-        </div>
-
-        {/* Current status */}
         {(credits > 0 || unlimited) && (
           <div
             className="text-center mb-8 py-3 rounded-2xl text-sm font-semibold"
@@ -207,14 +140,13 @@ export function PricingSection({ dict }: PricingSectionProps) {
           </div>
         )}
 
-        {/* Plan cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-16">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
-            const planName: string = t[`${plan.key}_name`] || plan.key;
-            const target: string   = t[`${plan.key}_target`] || '';
+            const planName: string  = t[`${plan.key}_name`] || plan.key;
+            const target: string    = t[`${plan.key}_target`] || '';
             const features: string[] = t[`${plan.key}_features`] || [];
-            const price = priceMap[plan.key] || '';
+            const price  = priceMap[plan.key] || '';
             const perImg = perImageMap[plan.key];
 
             return (
@@ -223,26 +155,16 @@ export function PricingSection({ dict }: PricingSectionProps) {
                 className="relative rounded-3xl p-6 flex flex-col"
                 style={{
                   background: 'var(--bg-surface)',
-                  border: `1px solid ${plan.popular ? plan.color + '55' : plan.promo ? 'rgba(239,68,68,0.4)' : 'var(--bg-border)'}`,
-                  boxShadow: plan.popular ? `0 0 40px ${plan.color}22` : plan.promo ? '0 0 30px rgba(239,68,68,0.1)' : 'none',
+                  border: `1px solid ${plan.popular ? plan.color + '55' : 'var(--bg-border)'}`,
+                  boxShadow: plan.popular ? `0 0 40px ${plan.color}22` : 'none',
                 }}
               >
-                {/* 인기 배지 */}
-                {plan.popular && !plan.promo && (
+                {plan.popular && (
                   <div
                     className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-4 py-1 rounded-full text-white"
                     style={{ background: 'var(--accent-gradient)' }}
                   >
                     {t.popular}
-                  </div>
-                )}
-                {/* 프로모션 배지 */}
-                {plan.promo && (
-                  <div
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-4 py-1 rounded-full text-white whitespace-nowrap"
-                    style={{ background: 'linear-gradient(90deg, #ef4444, #f97316)' }}
-                  >
-                    🎁 {t.first_month_free || '첫달 무료'}
                   </div>
                 )}
 
@@ -256,25 +178,12 @@ export function PricingSection({ dict }: PricingSectionProps) {
                   </div>
                 </div>
 
-                {plan.promo ? (
-                  <div className="mb-1">
-                    <span
-                      className="text-2xl font-black line-through"
-                      style={{ color: 'var(--text-subtle, #555)' }}
-                    >{price}</span>
-                    <span className="text-sm font-medium ml-1" style={{ color: 'var(--text-muted)' }}>{t.per_month}</span>
-                    <div className="text-xl font-black mt-0.5" style={{ color: '#f87171' }}>
-                      {t.first_month_free || '첫달 무료'} 🎉
-                    </div>
-                  </div>
-                ) : (
-                  <div className="mb-1">
-                    <span className="text-4xl font-black" style={{ color: 'var(--text-primary)' }}>{price}</span>
-                    <span className="text-sm font-medium ml-1" style={{ color: 'var(--text-muted)' }}>
-                      {plan.oneTime ? (t.one_time_label || '1회 충전') : t.per_month}
-                    </span>
-                  </div>
-                )}
+                <div className="mb-1">
+                  <span className="text-4xl font-black" style={{ color: 'var(--text-primary)' }}>{price}</span>
+                  <span className="text-sm font-medium ml-1" style={{ color: 'var(--text-muted)' }}>
+                    {plan.oneTime ? t.one_time_label : t.per_month}
+                  </span>
+                </div>
 
                 <div className="flex items-center gap-2 mb-5">
                   {plan.unlimited ? (
@@ -285,7 +194,7 @@ export function PricingSection({ dict }: PricingSectionProps) {
                     <>
                       <span className="text-lg font-bold" style={{ color: plan.color }}>{plan.credits.toLocaleString()}</span>
                       <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                        {plan.oneTime ? (t.credits_once || '크레딧') : t.credits_label}
+                        {plan.oneTime ? t.credits_once : t.credits_label}
                       </span>
                       {perImg && (
                         <span className="text-xs ml-auto px-2 py-0.5 rounded-full font-semibold" style={{ background: `${plan.color}18`, color: plan.color }}>
@@ -310,27 +219,18 @@ export function PricingSection({ dict }: PricingSectionProps) {
                   disabled={paying !== null}
                   className="w-full py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   style={
-                    plan.promo
-                      ? { background: 'linear-gradient(90deg, #ef4444, #f97316)', color: '#fff' }
-                      : plan.popular
-                        ? { background: 'var(--accent-gradient)', color: '#fff' }
-                        : { background: `${plan.color}22`, color: plan.color, border: `1px solid ${plan.color}44` }
+                    plan.popular
+                      ? { background: 'var(--accent-gradient)', color: '#fff' }
+                      : { background: `${plan.color}22`, color: plan.color, border: `1px solid ${plan.color}44` }
                   }
                 >
-                  {paying === plan.key
-                    ? '처리 중...'
-                    : plan.promo
-                      ? (t.buy_promo || '첫달 무료로 시작')
-                      : plan.oneTime
-                        ? (t.buy_topup || '충전하기')
-                        : t.buy}
+                  {paying === plan.key ? '처리 중...' : plan.oneTime ? t.buy_topup : t.buy}
                 </button>
               </div>
             );
           })}
         </div>
 
-        {/* Bottom note */}
         <div
           className="rounded-2xl p-6 text-center"
           style={{ background: 'var(--bg-surface)', border: '1px solid rgba(99,102,241,0.2)' }}
