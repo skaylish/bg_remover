@@ -28,13 +28,15 @@ function resizeImageIfNeeded(file: File): Promise<File> {
       canvas.height = h;
       const ctx = canvas.getContext('2d')!;
       ctx.drawImage(img, 0, 0, w, h);
+      // PNG 무손실 유지 — JPEG 변환 시 경계선 압축 아티팩트가 마스크 정확도를 떨어뜨림
       canvas.toBlob((blob) => {
         if (blob) {
-          resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          const ext = file.name.replace(/\.[^/.]+$/, '') + '.png';
+          resolve(new File([blob], ext, { type: 'image/png' }));
         } else {
           resolve(file);
         }
-      }, 'image/jpeg', 0.92);
+      }, 'image/png');
     };
     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
     img.src = url;

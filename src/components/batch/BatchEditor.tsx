@@ -147,7 +147,9 @@ export function BatchEditor() {
     try {
       const { removeBackground } = await import('@imgly/background-removal');
       const blob = await removeBackground(item.file, {
-        model: 'isnet' as const,
+        model: 'isnet_fp16' as const,
+        device: 'gpu' as const,
+        proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
         progress: (_key: string, current: number, total: number) => {
           if (total > 0) {
@@ -163,15 +165,16 @@ export function BatchEditor() {
     }
   };
 
-  // Run all pending
+  // Run all pending — 2개씩 병렬 처리
   const runAll = async () => {
     setIsRunning(true);
     abortRef.current = false;
 
     const pending = items.filter((i) => i.status === 'pending' || i.status === 'error');
-    for (const item of pending) {
+    const CONCURRENCY = 2;
+    for (let i = 0; i < pending.length; i += CONCURRENCY) {
       if (abortRef.current) break;
-      await processOne(item);
+      await Promise.all(pending.slice(i, i + CONCURRENCY).map(processOne));
     }
     setIsRunning(false);
   };

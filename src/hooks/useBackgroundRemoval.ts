@@ -21,6 +21,8 @@ export function useBackgroundRemoval() {
       const blob = await removeBackground(file, {
         debug: false,
         model: 'isnet' as const,
+        device: 'gpu' as const,
+        proxyToWorker: true,
         output: {
           format: 'image/png' as const,
           quality: 1,
