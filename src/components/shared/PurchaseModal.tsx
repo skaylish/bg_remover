@@ -1,7 +1,7 @@
 'use client';
 
 // 크레딧 부족 시 표시되는 결제 모달 — Paddle Checkout으로 결제 시작
-import { X, Zap, Star, Building2, Check, Infinity, Package } from 'lucide-react';
+import { X, Zap, Flame, Star, Rocket, Building2, Check } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
@@ -9,16 +9,18 @@ import { createClient } from '@/lib/supabase/client';
 import { initializePaddle, type Paddle } from '@paddle/paddle-js';
 
 const PLANS = [
-  { key: 'topup',      icon: Package,   credits: 100, unlimited: false, color: '#f59e0b', popular: false, oneTime: true  },
-  { key: 'starter',    icon: Zap,       credits: 100, unlimited: false, color: '#6366f1', popular: false, oneTime: false },
-  { key: 'business',   icon: Star,      credits: 500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false },
-  { key: 'enterprise', icon: Building2, credits: 0,   unlimited: true,  color: '#22d3a0', popular: false, oneTime: false },
+  { key: 'starter',    icon: Zap,       credits:  100, unlimited: false, color: '#6366f1', popular: false, oneTime: false },
+  { key: 'lite',       icon: Flame,     credits:  300, unlimited: false, color: '#3b82f6', popular: false, oneTime: false },
+  { key: 'business',   icon: Star,      credits:  500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false },
+  { key: 'growth',     icon: Rocket,    credits: 2000, unlimited: false, color: '#f59e0b', popular: false, oneTime: false },
+  { key: 'enterprise', icon: Building2, credits: 5000, unlimited: false, color: '#22d3a0', popular: false, oneTime: false },
 ];
 
 const PRICE_IDS: Record<string, string> = {
-  topup:      process.env.NEXT_PUBLIC_PADDLE_PRICE_TOPUP      ?? '',
   starter:    process.env.NEXT_PUBLIC_PADDLE_PRICE_STARTER    ?? '',
+  lite:       process.env.NEXT_PUBLIC_PADDLE_PRICE_LITE       ?? '',
   business:   process.env.NEXT_PUBLIC_PADDLE_PRICE_BUSINESS   ?? '',
+  growth:     process.env.NEXT_PUBLIC_PADDLE_PRICE_GROWTH     ?? '',
   enterprise: process.env.NEXT_PUBLIC_PADDLE_PRICE_ENTERPRISE ?? '',
 };
 
@@ -43,43 +45,45 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
   const t = dict?.pricing || {
     popular: '인기',
     per_month: '/월',
-    one_time_label: '1회 충전',
     credits_label: '크레딧/월',
-    credits_once: '크레딧',
-    unlimited_label: '무제한 생성',
     per_image: '장당',
     buy: '구독 시작하기',
-    buy_topup: '충전하기',
-    topup_name: '1회 충전',
-    topup_features: ['100 크레딧 즉시 지급', '고해상도 다운로드', '저해상도 무제한 무료'],
-    price_topup: '$6.99',
-    price_starter: '$3.99',
+    price_starter:    '$3.99',
+    price_lite:       '$8.99',
     price_business: '$12.99',
     price_enterprise: '$59.99',
-    per_image_topup: '$0.07',
-    per_image_starter: '$0.04',
+    price_growth:     '$29.99',
+    per_image_starter:    '$0.040',
+    per_image_lite:       '$0.030',
     per_image_business: '$0.026',
-    starter_name: 'Starter',
-    business_name: 'Business',
+    starter_name:    'Starter',
+    lite_name:       'Lite',
+    business_name:   'Business',
+    growth_name:     'Growth',
     enterprise_name: 'Enterprise',
-    starter_features: ['월 100 크레딧', '고해상도 다운로드'],
-    business_features: ['월 500 크레딧', '고해상도 다운로드', '일괄 처리'],
-    enterprise_features: ['월 무제한 생성', '일괄 처리', '우선 지원'],
+    starter_features:    ['월 100 크레딧', '고해상도 다운로드'],
+    lite_features:       ['월 300 크레딧', '고해상도 다운로드'],
+    business_features:   ['월 500 크레딧', '고해상도 다운로드', '일괄 처리'],
+    growth_features:     ['월 2,000 크레딧', '고해상도 다운로드', '일괄 처리'],
+    enterprise_features: ['월 5,000 크레딧', '일괄 처리', '우선 지원'],
     modal_title: '크레딧이 부족합니다',
     modal_desc: '고해상도 다운로드는 크레딧 1개가 필요합니다. 충전하거나 구독하고 바로 사용하세요.',
     modal_see_all: '전체 요금 안내 보기 →',
   };
 
   const priceMap: Record<string, string> = {
-    topup:      t.price_topup,
     starter:    t.price_starter,
+    lite:       t.price_lite,
     business:   t.price_business,
+    growth:     t.price_growth,
     enterprise: t.price_enterprise,
   };
   const perImageMap: Record<string, string> = {
-    topup:    t.per_image_topup,
-    starter:  t.per_image_starter,
-    business: t.per_image_business,
+    starter:    t.per_image_starter,
+    lite:       t.per_image_lite,
+    business:   t.per_image_business,
+    growth:     t.per_image_growth,
+    enterprise: t.per_image_enterprise,
   };
 
   const handlePurchase = async (plan: typeof PLANS[number]) => {
@@ -140,7 +144,7 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
             const planName: string = t[`${plan.key}_name`] || plan.key;
@@ -180,15 +184,9 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
                   {plan.oneTime ? t.one_time_label : t.per_month}
                 </p>
 
-                {plan.unlimited ? (
-                  <p className="flex items-center gap-1 text-xs font-semibold mb-3" style={{ color: plan.color }}>
-                    <Infinity size={13} /> {t.unlimited_label}
-                  </p>
-                ) : (
-                  <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
-                    {plan.credits.toLocaleString()} {plan.oneTime ? t.credits_once : t.credits_label}
-                  </p>
-                )}
+                <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+                  {plan.credits.toLocaleString()} {t.credits_label}
+                </p>
 
                 <ul className="space-y-1 mb-4">
                   {features.map((f) => (

@@ -94,7 +94,12 @@
     "title_1": "Perfect Results for ",
     "title_2": "Every Category",
     "subtitle": "Products, people, animals, cars — remove backgrounds from any image with a single click.",
-    "tabs": { "product": "Product", "person": "Person", "animal": "Animal", "car": "Car" },
+    "tabs": {
+      "product": "Product",
+      "person": "Person",
+      "animal": "Animal",
+      "car": "Car"
+    },
     "before": "Before",
     "after": "After"
   },
@@ -103,12 +108,30 @@
     "title_2": "For?",
     "subtitle": "From photographers to developers — BGRemover is designed for every professional's workflow.",
     "items": [
-      { "title": "Photographers", "description": "Quickly remove backgrounds from portraits and product shots, then deliver to clients." },
-      { "title": "E-Commerce", "description": "Batch-process product images with white or transparent backgrounds at scale." },
-      { "title": "Marketers", "description": "Prepare clean images for ad creatives in seconds, not hours." },
-      { "title": "Designers", "description": "Instantly get perfect cutouts for compositing and collages." },
-      { "title": "Developers", "description": "Easily integrate automated background removal into your app or service." },
-      { "title": "Individuals", "description": "Make your profile pictures, social posts, and gift images look amazing." }
+      {
+        "title": "Photographers",
+        "description": "Quickly remove backgrounds from portraits and product shots, then deliver to clients."
+      },
+      {
+        "title": "E-Commerce",
+        "description": "Batch-process product images with white or transparent backgrounds at scale."
+      },
+      {
+        "title": "Marketers",
+        "description": "Prepare clean images for ad creatives in seconds, not hours."
+      },
+      {
+        "title": "Designers",
+        "description": "Instantly get perfect cutouts for compositing and collages."
+      },
+      {
+        "title": "Developers",
+        "description": "Easily integrate automated background removal into your app or service."
+      },
+      {
+        "title": "Individuals",
+        "description": "Make your profile pictures, social posts, and gift images look amazing."
+      }
     ]
   },
   "testimonials": {
@@ -116,51 +139,99 @@
     "title_2": "Worldwide",
     "subtitle": "Thousands of designers, marketers, and developers use BGRemover every day.",
     "items": [
-      { "name": "Alex Kim", "role": "E-Commerce Owner", "text": "I process dozens of product images daily. This tool cut my workflow time by over 80%. The quality is beyond what I expected.", "rating": 5 },
-      { "name": "Sophie Laurent", "role": "Photographer", "text": "The edge precision is incredible. Even fine hair strands come out clean. Much faster than Photoshop.", "rating": 5 },
-      { "name": "Marcus Johnson", "role": "UI Designer", "text": "I love that images never leave my browser. Privacy matters when working with client assets.", "rating": 4 },
-      { "name": "Yuki Tanaka", "role": "Content Creator", "text": "So useful for social content. The ability to immediately apply gradient backgrounds after removal completely changed my workflow.", "rating": 5 }
+      {
+        "name": "Alex Kim",
+        "role": "E-Commerce Owner",
+        "text": "I process dozens of product images daily. This tool cut my workflow time by over 80%. The quality is beyond what I expected.",
+        "rating": 5
+      },
+      {
+        "name": "Sophie Laurent",
+        "role": "Photographer",
+        "text": "The edge precision is incredible. Even fine hair strands come out clean. Much faster than Photoshop.",
+        "rating": 5
+      },
+      {
+        "name": "Marcus Johnson",
+        "role": "UI Designer",
+        "text": "I love that images never leave my browser. Privacy matters when working with client assets.",
+        "rating": 4
+      },
+      {
+        "name": "Yuki Tanaka",
+        "role": "Content Creator",
+        "text": "So useful for social content. The ability to immediately apply gradient backgrounds after removal completely changed my workflow.",
+        "rating": 5
+      }
     ]
   },
   "pricing": {
     "title_1": "Simple, ",
     "title_2": "Transparent Pricing",
-    "subtitle": "Subscribe monthly or top up once. Low-res previews are always free.",
+    "subtitle": "Subscribe to get started. Free low-resolution previews are always available.",
     "free_badge": "Low-res Free",
     "popular": "Popular",
     "per_month": "/mo",
-    "one_time_label": "one-time",
     "credits_label": "credits/mo",
     "credits_once": "credits",
     "unlimited_label": "Unlimited",
     "per_image": "per image",
     "buy": "Subscribe Now",
-    "buy_topup": "Top Up Now",
     "current_credits": "Current Credits",
     "current_unlimited": "Current Plan: Enterprise (Unlimited)",
-    "topup_name": "One-time Top Up",
-    "topup_target": "Occasional users",
-    "topup_features": ["100 credits instantly", "HD downloads", "Low-res unlimited free"],
     "starter_name": "Starter",
     "starter_target": "Bloggers, Individuals",
-    "starter_features": ["100 credits/month", "HD downloads", "Low-res unlimited free"],
+    "starter_features": [
+      "100 credits/month",
+      "HD downloads",
+      "Low-res unlimited free"
+    ],
     "business_name": "Business",
     "business_target": "Small shops, Marketers",
-    "business_features": ["500 credits/month", "HD downloads", "Low-res unlimited free", "Batch processing"],
+    "business_features": [
+      "500 credits/month",
+      "HD downloads",
+      "Low-res unlimited free",
+      "Batch processing"
+    ],
     "enterprise_name": "Enterprise",
-    "enterprise_target": "Large sellers, Platforms, Bulk",
-    "enterprise_features": ["Unlimited HD generation/month", "Low-res unlimited free", "Batch processing", "Priority support"],
-    "price_topup": "$6.99",
+    "enterprise_target": "Large sellers, platforms",
+    "enterprise_features": [
+      "5,000 credits/mo",
+      "Hi-res download",
+      "Unlimited free low-res",
+      "Batch processing",
+      "Priority support"
+    ],
     "price_starter": "$3.99",
     "price_business": "$12.99",
     "price_enterprise": "$59.99",
-    "per_image_topup": "$0.07",
     "per_image_starter": "$0.04",
     "per_image_business": "$0.026",
     "modal_title": "Not enough credits",
     "modal_desc": "HD downloads require 1 credit. Top up or subscribe to use right away.",
     "modal_see_all": "View full pricing →",
-    "note_bottom": "Low-res downloads are always free with no credits required. HD downloads cost 1 credit per image. The Enterprise plan includes unlimited monthly generation."
+    "note_bottom": "Low-res downloads are always free with no credits required. HD downloads cost 1 credit per image. The Enterprise plan includes unlimited monthly generation.",
+    "price_lite": "$8.99",
+    "price_growth": "$29.99",
+    "per_image_lite": "$0.030",
+    "per_image_growth": "$0.015",
+    "per_image_enterprise": "$0.012",
+    "lite_name": "Lite",
+    "lite_target": "Freelancers, small projects",
+    "lite_features": [
+      "300 credits/mo",
+      "Hi-res download",
+      "Unlimited free low-res"
+    ],
+    "growth_name": "Growth",
+    "growth_target": "Mid-size sellers, agencies",
+    "growth_features": [
+      "2,000 credits/mo",
+      "Hi-res download",
+      "Unlimited free low-res",
+      "Batch processing"
+    ]
   },
   "comparison": {
     "title_1": "See How We Compare ",
@@ -170,7 +241,6 @@
     "col_price": "Lowest Price/Image",
     "col_free_lowres": "Free Low-res",
     "col_browser": "Browser Processing",
-    "col_no_expiry": "Credits Never Expire",
     "cta": "Start for Free Now",
     "badge_cheapest": "Cheapest",
     "note": "* Prices from official websites as of 2024. Exchange rate: 1 USD = 1,350 KRW."
@@ -189,24 +259,57 @@
     "sample_car": "Car"
   },
   "howItWorks": {
-    "title_1": "Frictionless ", "title_2": "Workflow",
+    "title_1": "Frictionless ",
+    "title_2": "Workflow",
     "subtitle": "No accounts. No installations. Three steps to flawless background synthesis.",
     "steps": [
-      { "title": "Initialize Workspace", "description": "Drop any high-resolution image into the synthesis zone. Compatible with JPG, PNG, and next-gen WEBP formats." },
-      { "title": "Neural Processing", "description": "Our proprietary deep learning architecture analyzes structural depth and edge coherence in real-time." },
-      { "title": "Deploy Masterpiece", "description": "Download the pristine, artifact-free asset with perfect alpha channels, or continue editing." }
+      {
+        "title": "Initialize Workspace",
+        "description": "Drop any high-resolution image into the synthesis zone. Compatible with JPG, PNG, and next-gen WEBP formats."
+      },
+      {
+        "title": "Neural Processing",
+        "description": "Our proprietary deep learning architecture analyzes structural depth and edge coherence in real-time."
+      },
+      {
+        "title": "Deploy Masterpiece",
+        "description": "Download the pristine, artifact-free asset with perfect alpha channels, or continue editing."
+      }
     ]
   },
   "features": {
-    "title_1": "The Architecture of ", "title_2": "Perfection",
+    "title_1": "The Architecture of ",
+    "title_2": "Perfection",
     "subtitle": "Professional-grade segmentation made accessible. No subscriptions. No watermarks. Just pure, unadulterated power.",
     "items": [
-      { "title": "Neural Velocity", "description": "Execute state-of-the-art ONNX models directly in your browser. Complete segmentation in under 3 seconds." },
-      { "title": "Precision Tools", "description": "Refine edges with magical foreground and background brushes. You are always in control of the final output." },
-      { "title": "Infinite Canvas", "description": "Export as transparent PNGs, or drop in custom chromatic gradients and scenic backgrounds instantly." },
-      { "title": "Pristine Export", "description": "Zero compression loss. Download your masterpieces in full native resolution without artifacts." },
-      { "title": "Absolute Privacy", "description": "Your images never touch a server. All neural processing occurs securely on your local machine." },
-      { "title": "Offline Execution", "description": "Works via service workers. Once loaded, our AI is available anytime, anywhere, completely offline." }
+      {
+        "title": "Neural Velocity",
+        "description": "Execute state-of-the-art ONNX models directly in your browser. Complete segmentation in under 3 seconds."
+      },
+      {
+        "title": "Precision Tools",
+        "description": "Refine edges with magical foreground and background brushes. You are always in control of the final output."
+      },
+      {
+        "title": "Infinite Canvas",
+        "description": "Export as transparent PNGs, or drop in custom chromatic gradients and scenic backgrounds instantly."
+      },
+      {
+        "title": "Pristine Export",
+        "description": "Zero compression loss. Download your masterpieces in full native resolution without artifacts."
+      },
+      {
+        "title": "Absolute Privacy",
+        "description": "Your images never touch a server. All neural processing occurs securely on your local machine."
+      },
+      {
+        "title": "Offline Execution",
+        "description": "Works via service workers. Once loaded, our AI is available anytime, anywhere, completely offline."
+      },
+      {
+        "title": "Adaptive AI Precision",
+        "description": "Tune the background removal sensitivity with a single slider. Protect delicate foreground details — text, fur, hair — with surgical accuracy."
+      }
     ]
   },
   "footer": {
@@ -216,5 +319,35 @@
     "terms": "Terms of Service",
     "business": "Business Info",
     "contact": "Contact Us"
+  },
+  "batch": {
+    "title": "Batch Background Removal",
+    "subtitle": "Process multiple images at once as transparent PNGs",
+    "locked_title": "Batch editing requires a paid plan",
+    "locked_desc": "Subscribe to the Business or Enterprise plan to process multiple images at once.",
+    "upgrade_btn": "Upgrade Plan",
+    "plan_credits_business": "500 credits/mo",
+    "plan_credits_enterprise": "5,000 credits/mo",
+    "per_month": "/mo",
+    "stat_total": "Total",
+    "stat_done": "Done",
+    "stat_failed": "Failed",
+    "stat_pending": "Pending",
+    "drop_active": "Drop images here",
+    "drop_idle": "Drag & drop or click to add images",
+    "drop_hint": "JPG, PNG, WEBP · Max 25MB · Multiple files supported",
+    "run_n": "Process {n}",
+    "run_done": "All done",
+    "stop": "Stop",
+    "download_zip": "Download ZIP ({n})",
+    "clear_all": "Clear all",
+    "progress_label": "Overall progress",
+    "empty": "No images yet",
+    "status_pending": "Pending",
+    "status_done": "Done",
+    "status_error": "Failed",
+    "card_download": "Download",
+    "card_remove": "Remove",
+    "error_processing": "Processing failed"
   }
 }

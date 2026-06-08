@@ -14,6 +14,37 @@ import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { PurchaseModal } from '@/components/shared/PurchaseModal';
 import type { CanvasEditorHandle } from './CanvasEditor';
 
+// sensitivity(0~100)를 gamma curve로 적용해 processedDataUrl 재생성
+// sensitivity 50 = gamma 1.0 (원본 그대로)
+// sensitivity > 50 = gamma < 1 (alpha 강화 → 전경 보존)
+// sensitivity < 50 = gamma > 1 (alpha 약화 → 배경 제거 강화)
+async function applyAlphaSensitivity(rawDataUrl: string, sensitivity: number): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      // sensitivity 50 → gamma = 1 (변화 없음)
+      const gamma = Math.pow(2, (50 - sensitivity) / 25);
+      if (Math.abs(gamma - 1) > 0.01) {
+        for (let i = 3; i < data.length; i += 4) {
+          data[i] = Math.round(255 * Math.pow(data[i] / 255, gamma));
+        }
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.src = rawDataUrl;
+  });
+}
+
 const CanvasEditor = dynamic(
   () => import('./CanvasEditor').then((m) => m.CanvasEditor),
   { ssr: false, loading: () => <div className="flex-1 flex items-center justify-center" style={{ background: 'var(--bg-base)' }}><LoadingSpinner size={40} /></div> }
@@ -26,11 +57,18 @@ export function EditorLayout({ dict }: { dict?: any }) {
   const originalDataUrl = useEditorStore((s) => s.originalDataUrl);
   const originalFile = useEditorStore((s) => s.originalFile);
   const processedDataUrl = useEditorStore((s) => s.processedDataUrl);
+  const rawProcessedDataUrl = useEditorStore((s) => s.rawProcessedDataUrl);
+  const removalSensitivity = useEditorStore((s) => s.removalSensitivity);
   const setProcessedBlob = useEditorStore((s) => s.setProcessedBlob);
+  const setProcessedDataUrl = useEditorStore((s) => s.setProcessedDataUrl);
+  const setRawProcessedDataUrl = useEditorStore((s) => s.setRawProcessedDataUrl);
   const isProcessing = useEditorStore((s) => s.isProcessing);
   const setIsProcessing = useEditorStore((s) => s.setIsProcessing);
   const processingError = useEditorStore((s) => s.processingError);
   const setProcessingError = useEditorStore((s) => s.setProcessingError);
+
+  const canUndo = useEditorStore((s) => s.canUndo);
+  const canRedo = useEditorStore((s) => s.canRedo);
 
   const useCredit = useCreditStore((s) => s.useCredit);
 
@@ -38,6 +76,8 @@ export function EditorLayout({ dict }: { dict?: any }) {
   const canvasRef = useRef<CanvasEditorHandle>(null);
   const [editorReady, setEditorReady] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  // Strict Mode에서 useEffect가 두 번 실행될 때 ONNX 세션 중복 시작 방지
+  const processingStartedRef = useRef(false);
 
   const t = dict?.editor?.layout || {
     removing_bg: 'AI 배경 제거 중...',
@@ -56,20 +96,36 @@ export function EditorLayout({ dict }: { dict?: any }) {
       setEditorReady(true);
       return;
     }
+    if (processingStartedRef.current) return;
+    processingStartedRef.current = true;
 
     setIsProcessing(true);
     process(originalFile)
       .then((blob) => {
         const url = URL.createObjectURL(blob);
         setProcessedBlob(blob, url);
+        setRawProcessedDataUrl(url);
         setEditorReady(true);
       })
       .catch((err) => {
+        processingStartedRef.current = false;
         setProcessingError(err instanceof Error ? err.message : '처리 실패');
       })
       .finally(() => setIsProcessing(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // removalSensitivity 변경 시 rawProcessedDataUrl에 gamma 재적용
+  // setTimeout으로 지연: ONNX WebGPU 세션이 완전히 종료된 후 canvas 작업 실행
+  useEffect(() => {
+    if (!rawProcessedDataUrl || !editorReady) return;
+    const id = setTimeout(() => {
+      applyAlphaSensitivity(rawProcessedDataUrl, removalSensitivity)
+        .then(setProcessedDataUrl)
+        .catch(() => {});
+    }, 100);
+    return () => clearTimeout(id);
+  }, [removalSensitivity, rawProcessedDataUrl, editorReady, setProcessedDataUrl]);
 
   const download = (blob: Blob, ext: string) => {
     const url = URL.createObjectURL(blob);
@@ -104,8 +160,8 @@ export function EditorLayout({ dict }: { dict?: any }) {
         dict={dict}
         onUndo={() => canvasRef.current?.undo()}
         onRedo={() => canvasRef.current?.redo()}
-        canUndo={canvasRef.current?.canUndo}
-        canRedo={canvasRef.current?.canRedo}
+        canUndo={canUndo}
+        canRedo={canRedo}
         onDownloadPng={handleDownloadPng}
         onDownloadJpeg={handleDownloadJpeg}
       />

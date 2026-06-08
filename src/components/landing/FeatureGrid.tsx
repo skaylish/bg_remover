@@ -1,9 +1,9 @@
 'use client';
 
-import { Zap, Wand2, Layers, Download, Shield, Cpu } from 'lucide-react';
+import { Zap, Wand2, Layers, Download, Shield, Cpu, SlidersHorizontal } from 'lucide-react';
 
-const ICONS = [Zap, Wand2, Layers, Download, Shield, Cpu];
-const COLORS = ['#a0fff0', '#c799ff', '#aa8aff', '#bc87fe', '#ff6e84', '#8A2BE2'];
+const ICONS = [Zap, Wand2, Layers, Download, Shield, Cpu, SlidersHorizontal];
+const COLORS = ['#a0fff0', '#c799ff', '#aa8aff', '#bc87fe', '#ff6e84', '#8A2BE2', '#a78bfa'];
 
 export function FeatureGrid({ dict }: { dict?: any }) {
   const t = dict?.features || {
@@ -15,7 +15,8 @@ export function FeatureGrid({ dict }: { dict?: any }) {
       { title: "Infinite Canvas", description: "Export as transparent PNGs, or drop in custom chromatic gradients and scenic backgrounds instantly." },
       { title: "Pristine Export", description: "Zero compression loss. Download your masterpieces in full native resolution without artifacts." },
       { title: "Absolute Privacy", description: "Your images never touch a server. All neural processing occurs securely on your local machine." },
-      { title: "Offline Execution", description: "Works via service workers. Once loaded, our AI is available anytime, anywhere, completely offline." }
+      { title: "Offline Execution", description: "Works via service workers. Once loaded, our AI is available anytime, anywhere, completely offline." },
+      { title: "Adaptive AI Precision", description: "Tune the background removal sensitivity with a single slider. Protect delicate foreground details — text, fur, hair — while eliminating backgrounds with surgical accuracy." }
     ]
   };
 
@@ -40,12 +41,13 @@ export function FeatureGrid({ dict }: { dict?: any }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuresData.map((feature: any) => {
+          {featuresData.map((feature: any, idx: number) => {
             const Icon = feature.icon;
+            const isLastCentered = idx === featuresData.length - 1 && featuresData.length % 3 === 1;
             return (
               <div
                 key={feature.title}
-                className="glass-card p-8 group relative overflow-hidden"
+                className={`glass-card p-8 group relative overflow-hidden${isLastCentered ? ' lg:col-start-2' : ''}`}
               >
                 {/* Subtle hover gradient inside card */}
                 <div 

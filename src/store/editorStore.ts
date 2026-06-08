@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { EditorStore, EditorMode, BrushType, BackgroundType, GradientConfig, EffectsConfig } from '@/types';
+import type { EditorStore, EditorMode, BackgroundType, GradientConfig, EffectsConfig } from '@/types';
 
 const DEFAULT_GRADIENT: GradientConfig = { from: '#6366f1', to: '#a855f7', angle: 135 };
 const DEFAULT_EFFECTS: EffectsConfig = {
@@ -18,11 +18,14 @@ export const useEditorStore = create<EditorStore>((set) => ({
   originalDataUrl: null,
   processedBlob: null,
   processedDataUrl: null,
+  rawProcessedDataUrl: null,
 
   mode: 'view',
   brushSize: 20,
-  brushType: 'erase',
+  removalSensitivity: 50,
   zoom: 1,
+  canUndo: false,
+  canRedo: false,
 
   backgroundColor: '#ffffff',
   backgroundType: 'transparent',
@@ -38,12 +41,25 @@ export const useEditorStore = create<EditorStore>((set) => ({
   processingProgress: 0,
   processingError: null,
 
-  setOriginalFile: (file, dataUrl) => set({ originalFile: file, originalDataUrl: dataUrl }),
+  setOriginalFile: (file, dataUrl) => set({
+    originalFile: file,
+    originalDataUrl: dataUrl,
+    processedBlob: null,
+    processedDataUrl: null,
+    rawProcessedDataUrl: null,
+    removalSensitivity: 50,
+    canUndo: false,
+    canRedo: false,
+  }),
   setProcessedBlob: (blob, dataUrl) => set({ processedBlob: blob, processedDataUrl: dataUrl }),
+  setProcessedDataUrl: (url) => set({ processedDataUrl: url }),
+  setRawProcessedDataUrl: (url) => set({ rawProcessedDataUrl: url }),
   setMode: (mode: EditorMode) => set({ mode }),
   setBrushSize: (brushSize) => set({ brushSize }),
-  setBrushType: (brushType: BrushType) => set({ brushType }),
+  setRemovalSensitivity: (removalSensitivity) => set({ removalSensitivity }),
   setZoom: (zoom) => set({ zoom }),
+  setCanUndo: (canUndo) => set({ canUndo }),
+  setCanRedo: (canRedo) => set({ canRedo }),
   setBackgroundColor: (backgroundColor) => set({ backgroundColor }),
   setBackgroundType: (backgroundType: BackgroundType) => set({ backgroundType }),
   setBackgroundImageUrl: (backgroundImageUrl) => set({ backgroundImageUrl }),
@@ -60,10 +76,13 @@ export const useEditorStore = create<EditorStore>((set) => ({
       originalDataUrl: null,
       processedBlob: null,
       processedDataUrl: null,
+      rawProcessedDataUrl: null,
       mode: 'view',
       brushSize: 20,
-      brushType: 'erase',
+      removalSensitivity: 50,
       zoom: 1,
+      canUndo: false,
+      canRedo: false,
       backgroundColor: '#ffffff',
       backgroundType: 'transparent',
       backgroundImageUrl: null,

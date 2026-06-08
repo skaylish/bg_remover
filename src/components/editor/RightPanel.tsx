@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { Upload } from 'lucide-react';
 import { useEditorStore } from '@/store/editorStore';
 import type { BackgroundType, ShadowType } from '@/types';
 
@@ -63,12 +64,32 @@ function BackgroundTab({ dict }: { dict?: any }) {
   const setBackgroundGradient = useEditorStore((s) => s.setBackgroundGradient);
   const backgroundBlur = useEditorStore((s) => s.backgroundBlur);
   const setBackgroundBlur = useEditorStore((s) => s.setBackgroundBlur);
+  const removalSensitivity = useEditorStore((s) => s.removalSensitivity);
+  const setRemovalSensitivity = useEditorStore((s) => s.setRemovalSensitivity);
+  const backgroundImageUrl = useEditorStore((s) => s.backgroundImageUrl);
+  const setBackgroundImageUrl = useEditorStore((s) => s.setBackgroundImageUrl);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const url = ev.target?.result as string;
+      setBackgroundImageUrl(url);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   const t = dict?.editor?.panel || {
-    bg_transparent: '투명', bg_color: '단색', bg_gradient: '그라디언트', bg_blur: '블러',
+    bg_transparent: '투명', bg_color: '단색', bg_gradient: '그라디언트', bg_blur: '블러', bg_image: '이미지',
     save_transparent_png: '투명 배경으로 PNG 저장', select_color: '색상 선택', presets: '프리셋',
     gradient_presets: '그라디언트 프리셋', custom: '커스텀', start: '시작', end: '끝', angle: '각도',
-    blur_desc: '원본 이미지를 흐릿하게 블러 처리하여 배경으로 사용합니다.', blur_strength: '블러 강도', preview_canvas: '미리보기는 캔버스에서 확인'
+    blur_desc: '원본 이미지를 흐릿하게 블러 처리하여 배경으로 사용합니다.', blur_strength: '블러 강도', preview_canvas: '미리보기는 캔버스에서 확인',
+    removal_sensitivity: '배경제거 민감도', sensitivity_hint_low: '전경 보존', sensitivity_hint_high: '배경 제거',
+    removal_sensitivity_title: 'AI 배경제거 정밀도', removal_sensitivity_desc: '배경 제거 강도를 조절해 텍스트·세밀한 전경 요소를 보호하세요.',
+    bg_image_title: '배경 이미지', bg_image_upload: '이미지 업로드', bg_image_replace: '이미지 교체',
   };
 
   const types: { id: BackgroundType; label: string; emoji: string }[] = [
@@ -76,27 +97,85 @@ function BackgroundTab({ dict }: { dict?: any }) {
     { id: 'color', label: t.bg_color, emoji: '🎨' },
     { id: 'gradient', label: t.bg_gradient, emoji: '🌈' },
     { id: 'blur', label: t.bg_blur, emoji: '🌫️' },
+    { id: 'image', label: t.bg_image || '이미지', emoji: '🖼️' },
   ];
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Type selector */}
-      <div className="grid grid-cols-2 gap-1.5">
-        {types.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setBackgroundType(t.id)}
-            className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-xs font-medium transition-all"
-            style={{
-              background: backgroundType === t.id ? 'rgba(99,102,241,0.2)' : 'var(--bg-raised)',
-              border: `1px solid ${backgroundType === t.id ? 'rgba(99,102,241,0.5)' : 'var(--bg-border)'}`,
-              color: backgroundType === t.id ? 'var(--accent-glow)' : 'var(--text-muted)',
-            }}
+      {/* 배경제거 민감도 — 특화 기능 강조 */}
+      <div
+        className="flex flex-col gap-2.5 p-3 rounded-xl relative"
+        style={{
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.07))',
+          border: '1.5px solid rgba(99,102,241,0.45)',
+          boxShadow: '0 0 18px rgba(99,102,241,0.14), inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}
+      >
+        <div className="flex items-center gap-1.5">
+          <span style={{ color: '#a78bfa', fontSize: '11px' }}>✦</span>
+          <span className="text-xs font-semibold" style={{ color: '#c4b5fd' }}>
+            {t.removal_sensitivity_title || 'AI 배경제거 정밀도'}
+          </span>
+          <span
+            className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+            style={{ background: 'rgba(99,102,241,0.25)', color: '#a78bfa', border: '1px solid rgba(99,102,241,0.35)' }}
           >
-            <span>{t.emoji}</span>
-            {t.label}
-          </button>
-        ))}
+            AI
+          </span>
+        </div>
+        <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+          {t.removal_sensitivity_desc || '배경 제거 강도를 조절해 텍스트·세밀한 전경 요소를 보호하세요.'}
+        </p>
+        <Slider
+          label=""
+          value={removalSensitivity}
+          min={0}
+          max={100}
+          onChange={setRemovalSensitivity}
+        />
+        <div className="flex justify-between text-[10px]" style={{ color: 'rgba(167,139,250,0.6)' }}>
+          <span>{t.sensitivity_hint_high || '배경 제거 강화'}</span>
+          <span>{t.sensitivity_hint_low || '전경 보존'}</span>
+        </div>
+      </div>
+
+      {/* Type selector */}
+      <div>
+        <div className="grid grid-cols-2 gap-1.5 mb-1.5">
+          {types.filter((tp) => tp.id !== 'image').map((tp) => (
+            <button
+              key={tp.id}
+              onClick={() => setBackgroundType(tp.id)}
+              className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-xs font-medium transition-all"
+              style={{
+                background: backgroundType === tp.id ? 'rgba(99,102,241,0.2)' : 'var(--bg-raised)',
+                border: `1px solid ${backgroundType === tp.id ? 'rgba(99,102,241,0.5)' : 'var(--bg-border)'}`,
+                color: backgroundType === tp.id ? 'var(--accent-glow)' : 'var(--text-muted)',
+              }}
+            >
+              <span>{tp.emoji}</span>
+              {tp.label}
+            </button>
+          ))}
+        </div>
+        {/* 이미지 버튼 — 전체 너비 */}
+        {(() => {
+          const imgType = types.find((tp) => tp.id === 'image')!;
+          return (
+            <button
+              onClick={() => setBackgroundType('image')}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-medium transition-all"
+              style={{
+                background: backgroundType === 'image' ? 'rgba(99,102,241,0.2)' : 'var(--bg-raised)',
+                border: `1px solid ${backgroundType === 'image' ? 'rgba(99,102,241,0.5)' : 'var(--bg-border)'}`,
+                color: backgroundType === 'image' ? 'var(--accent-glow)' : 'var(--text-muted)',
+              }}
+            >
+              <span>{imgType.emoji}</span>
+              {imgType.label}
+            </button>
+          );
+        })()}
       </div>
 
       {/* Transparent preview */}
@@ -205,6 +284,58 @@ function BackgroundTab({ dict }: { dict?: any }) {
               {t.preview_canvas}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Image background */}
+      {backgroundType === 'image' && (
+        <div className="flex flex-col gap-3">
+          <SectionTitle>{t.bg_image_title || '배경 이미지'}</SectionTitle>
+
+          {backgroundImageUrl ? (
+            <div
+              className="relative w-full rounded-xl overflow-hidden group cursor-pointer"
+              style={{ height: '100px', border: '1px solid var(--bg-border)' }}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <img src={backgroundImageUrl} alt="bg" className="w-full h-full object-cover" />
+              <div
+                className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ background: 'rgba(0,0,0,0.5)' }}
+              >
+                {t.bg_image_replace || '이미지 교체'}
+              </div>
+            </div>
+          ) : (
+            <button
+              className="w-full flex flex-col items-center justify-center gap-2 rounded-xl transition-all"
+              style={{
+                height: '100px',
+                border: '1.5px dashed rgba(99,102,241,0.35)',
+                background: 'rgba(99,102,241,0.04)',
+                color: 'var(--text-muted)',
+              }}
+              onClick={() => fileInputRef.current?.click()}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.65)'; e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.35)'; e.currentTarget.style.background = 'rgba(99,102,241,0.04)'; }}
+            >
+              <Upload size={20} style={{ color: '#a78bfa', opacity: 0.8 }} />
+              <span className="text-xs font-medium" style={{ color: '#c4b5fd' }}>
+                {t.bg_image_upload || '이미지 업로드'}
+              </span>
+              <span className="text-[10px]" style={{ color: 'var(--text-subtle)' }}>
+                PNG · JPG · WEBP
+              </span>
+            </button>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            style={{ display: 'none' }}
+            onChange={handleImageUpload}
+          />
         </div>
       )}
     </div>

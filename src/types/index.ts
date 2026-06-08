@@ -1,5 +1,4 @@
 export type EditorMode = 'foreground' | 'background' | 'view';
-export type BrushType = 'add' | 'erase';
 export type OutputFormat = 'png' | 'jpeg';
 export type BackgroundType = 'transparent' | 'color' | 'gradient' | 'blur' | 'image';
 export type ShadowType = 'none' | 'soft' | 'drop' | 'float';
@@ -26,11 +25,14 @@ export interface EditorStore {
   originalDataUrl: string | null;
   processedBlob: Blob | null;
   processedDataUrl: string | null;
+  rawProcessedDataUrl: string | null; // AI 처리 원본 (sensitivity 적용 전)
 
   mode: EditorMode;
   brushSize: number;
-  brushType: BrushType;
+  removalSensitivity: number; // 0–100, 50=기본(원본), 높을수록 전경 보존, 낮을수록 배경 제거 강화
   zoom: number;
+  canUndo: boolean;
+  canRedo: boolean;
 
   // Background
   backgroundColor: string;
@@ -50,10 +52,14 @@ export interface EditorStore {
 
   setOriginalFile: (file: File, dataUrl: string) => void;
   setProcessedBlob: (blob: Blob, dataUrl: string) => void;
+  setProcessedDataUrl: (url: string) => void;
+  setRawProcessedDataUrl: (url: string | null) => void;
   setMode: (mode: EditorMode) => void;
   setBrushSize: (size: number) => void;
-  setBrushType: (type: BrushType) => void;
+  setRemovalSensitivity: (v: number) => void;
   setZoom: (zoom: number) => void;
+  setCanUndo: (v: boolean) => void;
+  setCanRedo: (v: boolean) => void;
   setBackgroundColor: (color: string) => void;
   setBackgroundType: (type: BackgroundType) => void;
   setBackgroundImageUrl: (url: string | null) => void;

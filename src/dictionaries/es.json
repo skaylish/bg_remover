@@ -94,7 +94,12 @@
     "title_1": "Resultados Perfectos en ",
     "title_2": "Cada Categoría",
     "subtitle": "Productos, personas, animales, autos — elimina el fondo de cualquier imagen con un clic.",
-    "tabs": { "product": "Producto", "person": "Persona", "animal": "Animal", "car": "Auto" },
+    "tabs": {
+      "product": "Producto",
+      "person": "Persona",
+      "animal": "Animal",
+      "car": "Auto"
+    },
     "before": "Antes",
     "after": "Después"
   },
@@ -103,12 +108,30 @@
     "title_2": "Es?",
     "subtitle": "De fotógrafos a desarrolladores — BGRemover está diseñado para el flujo de trabajo de cada profesional.",
     "items": [
-      { "title": "Fotógrafos", "description": "Elimina fondos de retratos y fotos de productos rápidamente." },
-      { "title": "E-Commerce", "description": "Procesa imágenes de productos con fondos blancos o transparentes a gran escala." },
-      { "title": "Marketers", "description": "Prepara imágenes limpias para creatividades publicitarias en segundos." },
-      { "title": "Diseñadores", "description": "Obtén recortes perfectos para composición y collages al instante." },
-      { "title": "Desarrolladores", "description": "Integra fácilmente la eliminación automática de fondos en tu app." },
-      { "title": "Usuarios Individuales", "description": "Haz que tus fotos de perfil y publicaciones en redes sociales luzcan increíbles." }
+      {
+        "title": "Fotógrafos",
+        "description": "Elimina fondos de retratos y fotos de productos rápidamente."
+      },
+      {
+        "title": "E-Commerce",
+        "description": "Procesa imágenes de productos con fondos blancos o transparentes a gran escala."
+      },
+      {
+        "title": "Marketers",
+        "description": "Prepara imágenes limpias para creatividades publicitarias en segundos."
+      },
+      {
+        "title": "Diseñadores",
+        "description": "Obtén recortes perfectos para composición y collages al instante."
+      },
+      {
+        "title": "Desarrolladores",
+        "description": "Integra fácilmente la eliminación automática de fondos en tu app."
+      },
+      {
+        "title": "Usuarios Individuales",
+        "description": "Haz que tus fotos de perfil y publicaciones en redes sociales luzcan increíbles."
+      }
     ]
   },
   "testimonials": {
@@ -116,51 +139,99 @@
     "title_2": "de Todo el Mundo",
     "subtitle": "Miles de diseñadores, marketers y desarrolladores usan BGRemover cada día.",
     "items": [
-      { "name": "Alex Kim", "role": "Propietario E-Commerce", "text": "Proceso docenas de imágenes de productos a diario. Esta herramienta redujo mi tiempo de trabajo en más del 80%.", "rating": 5 },
-      { "name": "Sophie Laurent", "role": "Fotógrafa", "text": "La precisión en los bordes es increíble. Incluso el cabello fino sale limpio. Mucho más rápido que Photoshop.", "rating": 5 },
-      { "name": "Marcus Johnson", "role": "Diseñador UI", "text": "Me encanta que las imágenes nunca abandonen mi navegador. La privacidad importa cuando trabajas con activos de clientes.", "rating": 4 },
-      { "name": "Yuki Tanaka", "role": "Creador de Contenido", "text": "Tan útil para contenido social. Poder aplicar fondos de degradado inmediatamente cambió completamente mi flujo.", "rating": 5 }
+      {
+        "name": "Alex Kim",
+        "role": "Propietario E-Commerce",
+        "text": "Proceso docenas de imágenes de productos a diario. Esta herramienta redujo mi tiempo de trabajo en más del 80%.",
+        "rating": 5
+      },
+      {
+        "name": "Sophie Laurent",
+        "role": "Fotógrafa",
+        "text": "La precisión en los bordes es increíble. Incluso el cabello fino sale limpio. Mucho más rápido que Photoshop.",
+        "rating": 5
+      },
+      {
+        "name": "Marcus Johnson",
+        "role": "Diseñador UI",
+        "text": "Me encanta que las imágenes nunca abandonen mi navegador. La privacidad importa cuando trabajas con activos de clientes.",
+        "rating": 4
+      },
+      {
+        "name": "Yuki Tanaka",
+        "role": "Creador de Contenido",
+        "text": "Tan útil para contenido social. Poder aplicar fondos de degradado inmediatamente cambió completamente mi flujo.",
+        "rating": 5
+      }
     ]
   },
   "pricing": {
     "title_1": "Precios ",
     "title_2": "Simples y Transparentes",
-    "subtitle": "Suscríbete mensualmente o recarga una vez. Las previsualizaciones en baja resolución son siempre gratuitas.",
+    "subtitle": "Suscríbete para empezar. Las vistas previas en baja resolución siempre son gratuitas.",
     "free_badge": "Baja resolución gratis",
     "popular": "Popular",
     "per_month": "/mes",
-    "one_time_label": "única vez",
     "credits_label": "créditos/mes",
     "credits_once": "créditos",
     "unlimited_label": "Ilimitado",
     "per_image": "por imagen",
     "buy": "Suscribirse ahora",
-    "buy_topup": "Recargar ahora",
     "current_credits": "Créditos actuales",
     "current_unlimited": "Plan actual: Enterprise (Ilimitado)",
-    "topup_name": "Recarga única",
-    "topup_target": "Usuarios ocasionales",
-    "topup_features": ["100 créditos al instante", "Descargas HD", "Baja resolución ilimitada gratis"],
     "starter_name": "Starter",
     "starter_target": "Bloggers, Usuarios individuales",
-    "starter_features": ["100 créditos/mes", "Descargas HD", "Baja resolución ilimitada gratis"],
+    "starter_features": [
+      "100 créditos/mes",
+      "Descargas HD",
+      "Baja resolución ilimitada gratis"
+    ],
     "business_name": "Business",
     "business_target": "Tiendas pequeñas, Marketers",
-    "business_features": ["500 créditos/mes", "Descargas HD", "Baja resolución ilimitada gratis", "Procesamiento por lotes"],
+    "business_features": [
+      "500 créditos/mes",
+      "Descargas HD",
+      "Baja resolución ilimitada gratis",
+      "Procesamiento por lotes"
+    ],
     "enterprise_name": "Enterprise",
-    "enterprise_target": "Grandes vendedores, Plataformas",
-    "enterprise_features": ["Generación HD ilimitada/mes", "Baja resolución ilimitada gratis", "Procesamiento por lotes", "Soporte prioritario"],
-    "price_topup": "$6.99",
+    "enterprise_target": "Grandes vendedores, plataformas",
+    "enterprise_features": [
+      "5.000 créditos/mes",
+      "Descarga en alta res",
+      "Baja res ilimitada gratis",
+      "Procesamiento en lote",
+      "Soporte prioritario"
+    ],
     "price_starter": "$3.99",
     "price_business": "$12.99",
     "price_enterprise": "$59.99",
-    "per_image_topup": "$0.07",
     "per_image_starter": "$0.04",
     "per_image_business": "$0.026",
     "modal_title": "Créditos insuficientes",
     "modal_desc": "Las descargas en HD requieren 1 crédito. Recarga o suscríbete para usar de inmediato.",
     "modal_see_all": "Ver precios completos →",
-    "note_bottom": "Las descargas en baja resolución son siempre gratuitas sin necesidad de créditos. Las descargas en HD cuestan 1 crédito por imagen. El plan Enterprise incluye generación mensual ilimitada."
+    "note_bottom": "Las descargas en baja resolución son siempre gratuitas sin necesidad de créditos. Las descargas en HD cuestan 1 crédito por imagen. El plan Enterprise incluye generación mensual ilimitada.",
+    "price_lite": "$8.99",
+    "price_growth": "$29.99",
+    "per_image_lite": "$0.030",
+    "per_image_growth": "$0.015",
+    "per_image_enterprise": "$0.012",
+    "lite_name": "Lite",
+    "lite_target": "Freelancers, pequeños proyectos",
+    "lite_features": [
+      "300 créditos/mes",
+      "Descarga en alta res",
+      "Baja res ilimitada gratis"
+    ],
+    "growth_name": "Growth",
+    "growth_target": "Vendedores medianos, agencias",
+    "growth_features": [
+      "2.000 créditos/mes",
+      "Descarga en alta res",
+      "Baja res ilimitada gratis",
+      "Procesamiento en lote"
+    ]
   },
   "comparison": {
     "title_1": "Compare Nuestros Precios ",
@@ -170,7 +241,6 @@
     "col_price": "Precio mínimo/imagen",
     "col_free_lowres": "Baja res. gratis",
     "col_browser": "Proceso en navegador",
-    "col_no_expiry": "Créditos sin vencer",
     "cta": "Comenzar gratis ahora",
     "badge_cheapest": "Más barato",
     "note": "* Precios de sitios oficiales en 2024. Cambio: 1 USD = 1.350 KRW."
@@ -189,24 +259,57 @@
     "sample_car": "Auto"
   },
   "howItWorks": {
-    "title_1": "Flujo de Trabajo ", "title_2": "Sin Fricciones",
+    "title_1": "Flujo de Trabajo ",
+    "title_2": "Sin Fricciones",
     "subtitle": "Sin cuentas. Sin instalaciones. Tres pasos para una síntesis de fondo perfecta.",
     "steps": [
-      { "title": "Inicializar Espacio", "description": "Suelte cualquier imagen de alta resolución en la zona de síntesis. Compatible con formatos JPG, PNG y WEBP." },
-      { "title": "Procesamiento Neuronal", "description": "Nuestra arquitectura patentada analiza la profundidad estructural y la coherencia de los bordes en tiempo real." },
-      { "title": "Obra Maestra", "description": "Descargue el recurso en su estado original, con canales alfa perfectos, o siga editando." }
+      {
+        "title": "Inicializar Espacio",
+        "description": "Suelte cualquier imagen de alta resolución en la zona de síntesis. Compatible con formatos JPG, PNG y WEBP."
+      },
+      {
+        "title": "Procesamiento Neuronal",
+        "description": "Nuestra arquitectura patentada analiza la profundidad estructural y la coherencia de los bordes en tiempo real."
+      },
+      {
+        "title": "Obra Maestra",
+        "description": "Descargue el recurso en su estado original, con canales alfa perfectos, o siga editando."
+      }
     ]
   },
   "features": {
-    "title_1": "La Arquitectura de la ", "title_2": "Perfección",
+    "title_1": "La Arquitectura de la ",
+    "title_2": "Perfección",
     "subtitle": "Segmentación pro accesible para todos. Sin suscripciones. Sin marcas de agua. Solo potencia pura.",
     "items": [
-      { "title": "Velocidad Neuronal", "description": "Ejecute modelos ONNX de última generación en su navegador. Segmentación completa en <3 segundos." },
-      { "title": "Herramientas de Precisión", "description": "Refine los bordes con mágicos pinceles de primer plano y fondo. Siempre tiene el control." },
-      { "title": "Lienzo Infinito", "description": "Exporte como PNG transparentes o aplique degradados cromáticos y fondos escénicos." },
-      { "title": "Exportación Prístina", "description": "Cero pérdida de compresión. Descargue sus obras en resolución nativa completa sin artefactos." },
-      { "title": "Privacidad Absoluta", "description": "Sus imágenes nunca tocan un servidor. El procesamiento ocurre de forma segura en su máquina." },
-      { "title": "Ejecución Fuera de Línea", "description": "Una vez cargada, nuestra IA está disponible en todo momento y lugar, totalmente offline." }
+      {
+        "title": "Velocidad Neuronal",
+        "description": "Ejecute modelos ONNX de última generación en su navegador. Segmentación completa en <3 segundos."
+      },
+      {
+        "title": "Herramientas de Precisión",
+        "description": "Refine los bordes con mágicos pinceles de primer plano y fondo. Siempre tiene el control."
+      },
+      {
+        "title": "Lienzo Infinito",
+        "description": "Exporte como PNG transparentes o aplique degradados cromáticos y fondos escénicos."
+      },
+      {
+        "title": "Exportación Prístina",
+        "description": "Cero pérdida de compresión. Descargue sus obras en resolución nativa completa sin artefactos."
+      },
+      {
+        "title": "Privacidad Absoluta",
+        "description": "Sus imágenes nunca tocan un servidor. El procesamiento ocurre de forma segura en su máquina."
+      },
+      {
+        "title": "Ejecución Fuera de Línea",
+        "description": "Una vez cargada, nuestra IA está disponible en todo momento y lugar, totalmente offline."
+      },
+      {
+        "title": "Precisión AI Adaptativa",
+        "description": "Ajusta la sensibilidad de eliminación con un solo deslizador. Protege detalles delicados — texto, pelaje, cabello — con precisión quirúrgica."
+      }
     ]
   },
   "footer": {
@@ -216,5 +319,35 @@
     "terms": "Términos de Servicio",
     "business": "Información Empresarial",
     "contact": "Contáctenos"
+  },
+  "batch": {
+    "title": "Eliminación en lote",
+    "subtitle": "Procesa múltiples imágenes a la vez como PNGs transparentes",
+    "locked_title": "La edición en lote requiere un plan de pago",
+    "locked_desc": "Suscríbete al plan Business o Enterprise para procesar múltiples imágenes a la vez.",
+    "upgrade_btn": "Mejorar plan",
+    "plan_credits_business": "500 créditos/mes",
+    "plan_credits_enterprise": "5.000 créditos/mes",
+    "per_month": "/mes",
+    "stat_total": "Total",
+    "stat_done": "Listo",
+    "stat_failed": "Error",
+    "stat_pending": "Pendiente",
+    "drop_active": "Suelta las imágenes aquí",
+    "drop_idle": "Arrastra o haz clic para agregar imágenes",
+    "drop_hint": "JPG, PNG, WEBP · Máx 25MB · Múltiples archivos",
+    "run_n": "Procesar {n}",
+    "run_done": "Todo completado",
+    "stop": "Detener",
+    "download_zip": "Descargar ZIP ({n})",
+    "clear_all": "Limpiar todo",
+    "progress_label": "Progreso general",
+    "empty": "Aún no hay imágenes",
+    "status_pending": "Pendiente",
+    "status_done": "Listo",
+    "status_error": "Error",
+    "card_download": "Descargar",
+    "card_remove": "Eliminar",
+    "error_processing": "Error de procesamiento"
   }
 }

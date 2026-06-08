@@ -1,5 +1,6 @@
 'use client';
 
+// 일괄 배경 제거 에디터 — 다국어 dict 기반
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
@@ -24,15 +25,7 @@ interface BatchItem {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function uid() {
-  return Math.random().toString(36).slice(2);
-}
-
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes}B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)}MB`;
-}
+function uid() { return Math.random().toString(36).slice(2); }
 
 function downloadBlob(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
@@ -42,10 +35,14 @@ function downloadBlob(blob: Blob, name: string) {
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
-function StatusBadge({ status, progress }: { status: ItemStatus; progress: number }) {
+function StatusBadge({ status, progress, labels }: {
+  status: ItemStatus;
+  progress: number;
+  labels: { pending: string; done: string; error: string };
+}) {
   if (status === 'pending') return (
     <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-      style={{ background: 'var(--bg-border)', color: 'var(--text-muted)' }}>대기</span>
+      style={{ background: 'var(--bg-border)', color: 'var(--text-muted)' }}>{labels.pending}</span>
   );
   if (status === 'processing') return (
     <span className="text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1"
@@ -56,26 +53,153 @@ function StatusBadge({ status, progress }: { status: ItemStatus; progress: numbe
   if (status === 'done') return (
     <span className="text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1"
       style={{ background: 'rgba(34,211,160,0.15)', color: 'var(--success)' }}>
-      <CheckCircle size={10} />완료
+      <CheckCircle size={10} />{labels.done}
     </span>
   );
   return (
     <span className="text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1"
       style={{ background: 'rgba(248,113,113,0.15)', color: 'var(--danger)' }}>
-      <AlertCircle size={10} />실패
+      <AlertCircle size={10} />{labels.error}
     </span>
   );
 }
 
+// ─── Stat chip ────────────────────────────────────────────────────────────────
+function StatChip({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="flex flex-col items-center">
+      <span className="text-lg font-bold" style={{ color }}>{value}</span>
+      <span className="text-[10px]" style={{ color: 'var(--text-subtle)' }}>{label}</span>
+    </div>
+  );
+}
+
+// ─── Batch card ───────────────────────────────────────────────────────────────
+function BatchCard({ item, onRemove, onDownload, labels, statusLabels }: {
+  item: BatchItem;
+  onRemove: () => void;
+  onDownload: () => void;
+  labels: { download: string; remove: string; error: string };
+  statusLabels: { pending: string; done: string; error: string };
+}) {
+  const [hover, setHover] = useState(false);
+
+  return (
+    <div
+      className="relative rounded-2xl overflow-hidden group transition-all duration-200"
+      style={{
+        background: 'var(--bg-surface)',
+        border: `1px solid ${item.status === 'done' ? 'rgba(34,211,160,0.25)' : item.status === 'error' ? 'rgba(248,113,113,0.25)' : 'var(--bg-border)'}`,
+        aspectRatio: '1',
+      }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      <div className="absolute inset-0">
+        {item.status === 'done' && item.resultUrl ? (
+          <div className="w-full h-full checker-bg">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={item.resultUrl} alt={item.file.name} className="w-full h-full object-contain" />
+          </div>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={item.previewUrl} alt={item.file.name} className="w-full h-full object-cover" />
+        )}
+      </div>
+
+      {item.status === 'processing' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+          style={{ background: 'rgba(10,10,15,0.75)', backdropFilter: 'blur(4px)' }}>
+          <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent-glow)' }} />
+          <div className="w-3/4">
+            <div className="w-full rounded-full overflow-hidden" style={{ height: '3px', background: 'var(--bg-border)' }}>
+              <div className="h-full rounded-full transition-all duration-300"
+                style={{ width: `${item.progress}%`, background: 'var(--accent-gradient)' }} />
+            </div>
+          </div>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.progress}%</span>
+        </div>
+      )}
+
+      {item.status === 'error' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1"
+          style={{ background: 'rgba(10,10,15,0.8)' }}>
+          <AlertCircle size={20} style={{ color: 'var(--danger)' }} />
+          <span className="text-[10px] text-center px-2" style={{ color: 'var(--danger)' }}>{labels.error}</span>
+        </div>
+      )}
+
+      {hover && item.status !== 'processing' && (
+        <div className="absolute inset-0 flex items-center justify-center gap-2"
+          style={{ background: 'rgba(10,10,15,0.6)', backdropFilter: 'blur(2px)' }}>
+          {item.status === 'done' && (
+            <button onClick={onDownload}
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+              style={{ background: 'rgba(34,211,160,0.2)', border: '1px solid rgba(34,211,160,0.4)', color: 'var(--success)' }}
+              title={labels.download}>
+              <Download size={16} />
+            </button>
+          )}
+          <button onClick={onRemove}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+            style={{ background: 'rgba(248,113,113,0.2)', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--danger)' }}
+            title={labels.remove}>
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      <div className="absolute bottom-0 left-0 right-0 px-2 py-1.5 flex items-center justify-between"
+        style={{ background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(4px)' }}>
+        <span className="text-[10px] truncate flex-1 mr-1" style={{ color: 'var(--text-muted)' }} title={item.file.name}>
+          {item.file.name}
+        </span>
+        <StatusBadge status={item.status} progress={item.progress} labels={statusLabels} />
+      </div>
+    </div>
+  );
+}
+
 // ─── Main BatchEditor ─────────────────────────────────────────────────────────
-export function BatchEditor() {
+export function BatchEditor({ dict }: { dict?: any }) {
+  const t = dict?.batch || {
+    title: '일괄 배경 제거',
+    subtitle: '여러 이미지를 한 번에 투명 PNG로 처리합니다',
+    locked_title: '일괄 편집은 유료 플랜 전용입니다',
+    locked_desc: '비즈니스 또는 엔터프라이즈 플랜을 구독하면 여러 이미지를 한 번에 처리할 수 있습니다.',
+    upgrade_btn: '플랜 업그레이드',
+    plan_credits_business: '월 500 크레딧',
+    plan_credits_enterprise: '월 5,000 크레딧',
+    per_month: '/월',
+    stat_total: '전체',
+    stat_done: '완료',
+    stat_failed: '실패',
+    stat_pending: '대기',
+    drop_active: '이미지를 여기에 놓으세요',
+    drop_idle: '이미지를 드래그하거나 클릭해서 추가',
+    drop_hint: 'JPG, PNG, WEBP · 최대 25MB · 여러 파일 동시 선택 가능',
+    run_n: '{n}개 처리 시작',
+    run_done: '모두 완료됨',
+    stop: '중지',
+    download_zip: '전체 ZIP 다운로드 ({n}개)',
+    clear_all: '전체 삭제',
+    progress_label: '전체 진행률',
+    empty: '아직 이미지가 없습니다',
+    status_pending: '대기',
+    status_done: '완료',
+    status_error: '실패',
+    card_download: '다운로드',
+    card_remove: '삭제',
+    error_processing: '처리 실패',
+  };
+
   const [items, setItems] = useState<BatchItem[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const abortRef = useRef(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [planChecked, setPlanChecked] = useState(false);
   const useCreditDB = useCreditStore((s) => s.useCreditDB);
-  const plan      = useCreditStore((s) => s.plan);
+  const plan       = useCreditStore((s) => s.plan);
   const syncFromDB = useCreditStore((s) => s.syncFromDB);
 
   useEffect(() => {
@@ -84,27 +208,20 @@ export function BatchEditor() {
 
   const hasBatchAccess = plan === 'pro' || plan === 'enterprise';
 
-  // Stats
-  const total = items.length;
-  const done = items.filter((i) => i.status === 'done').length;
-  const failed = items.filter((i) => i.status === 'error').length;
+  const total   = items.length;
+  const done    = items.filter((i) => i.status === 'done').length;
+  const failed  = items.filter((i) => i.status === 'error').length;
   const pending = items.filter((i) => i.status === 'pending').length;
 
-  // Add files
   const addFiles = useCallback((files: File[]) => {
     const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp'];
-    const MAX_MB = 25;
     const newItems: BatchItem[] = files
-      .filter((f) => ACCEPTED.includes(f.type) && f.size <= MAX_MB * 1024 * 1024)
+      .filter((f) => ACCEPTED.includes(f.type) && f.size <= 25 * 1024 * 1024)
       .map((f) => ({
-        id: uid(),
-        file: f,
+        id: uid(), file: f,
         previewUrl: URL.createObjectURL(f),
-        resultUrl: null,
-        resultBlob: null,
-        status: 'pending',
-        error: null,
-        progress: 0,
+        resultUrl: null, resultBlob: null,
+        status: 'pending', error: null, progress: 0,
       }));
     setItems((prev) => [...prev, ...newItems]);
   }, []);
@@ -115,33 +232,29 @@ export function BatchEditor() {
     onDrop: addFiles,
   });
 
-  // Remove item
   const removeItem = useCallback((id: string) => {
     setItems((prev) => {
       const item = prev.find((i) => i.id === id);
       if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
-      if (item?.resultUrl) URL.revokeObjectURL(item.resultUrl);
+      if (item?.resultUrl)  URL.revokeObjectURL(item.resultUrl);
       return prev.filter((i) => i.id !== id);
     });
   }, []);
 
-  // Clear all
   const clearAll = useCallback(() => {
     setItems((prev) => {
       prev.forEach((i) => {
         if (i.previewUrl) URL.revokeObjectURL(i.previewUrl);
-        if (i.resultUrl) URL.revokeObjectURL(i.resultUrl);
+        if (i.resultUrl)  URL.revokeObjectURL(i.resultUrl);
       });
       return [];
     });
   }, []);
 
-  // Update item helper
   const updateItem = (id: string, patch: Partial<BatchItem>) => {
     setItems((prev) => prev.map((i) => i.id === id ? { ...i, ...patch } : i));
   };
 
-  // Process single item
   const processOne = async (item: BatchItem) => {
     updateItem(item.id, { status: 'processing', progress: 0 });
     try {
@@ -152,29 +265,25 @@ export function BatchEditor() {
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
         progress: (_key: string, current: number, total: number) => {
-          if (total > 0) {
-            updateItem(item.id, { progress: Math.round((current / total) * 100) });
-          }
+          if (total > 0) updateItem(item.id, { progress: Math.round((current / total) * 100) });
         },
       });
       const resultUrl = URL.createObjectURL(blob);
       updateItem(item.id, { status: 'done', resultBlob: blob, resultUrl, progress: 100 });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : '처리 실패';
+      const msg = err instanceof Error ? err.message : t.error_processing;
       updateItem(item.id, { status: 'error', error: msg });
     }
   };
 
-  // Run all pending — 2개씩 병렬 처리
   const runAll = async () => {
     setIsRunning(true);
     abortRef.current = false;
-
-    const pending = items.filter((i) => i.status === 'pending' || i.status === 'error');
+    const queue = items.filter((i) => i.status === 'pending' || i.status === 'error');
     const CONCURRENCY = 2;
-    for (let i = 0; i < pending.length; i += CONCURRENCY) {
+    for (let i = 0; i < queue.length; i += CONCURRENCY) {
       if (abortRef.current) break;
-      await Promise.all(pending.slice(i, i + CONCURRENCY).map(processOne));
+      await Promise.all(queue.slice(i, i + CONCURRENCY).map(processOne));
     }
     setIsRunning(false);
   };
@@ -182,48 +291,38 @@ export function BatchEditor() {
   const stopAll = () => {
     abortRef.current = true;
     setIsRunning(false);
-    // Reset processing items back to pending
     setItems((prev) =>
       prev.map((i) => i.status === 'processing' ? { ...i, status: 'pending', progress: 0 } : i)
     );
   };
 
-  // 크레딧 차감 후 단일 다운로드
   const handleDownloadOne = useCallback(async (item: BatchItem) => {
     if (!item.resultBlob) return;
     const ok = await useCreditDB();
     if (!ok) { setShowPurchaseModal(true); return; }
-    const name = item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
-    downloadBlob(item.resultBlob, name);
+    downloadBlob(item.resultBlob, item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png');
   }, [useCreditDB]);
 
-  // Download all as ZIP — 이미지 수만큼 크레딧 차감
   const downloadAll = async () => {
     const doneItems = items.filter((i) => i.status === 'done' && i.resultBlob);
     if (!doneItems.length) return;
-
-    // 크레딧 차감 (순차적으로 — 하나라도 부족하면 중단)
     const paid: BatchItem[] = [];
     for (const item of doneItems) {
       const ok = await useCreditDB();
-      if (!ok) {
-        setShowPurchaseModal(true);
-        // 이미 차감된 항목만 ZIP
-        if (!paid.length) return;
-        break;
-      }
+      if (!ok) { setShowPurchaseModal(true); if (!paid.length) return; break; }
       paid.push(item);
     }
-
     const { default: JSZip } = await import('jszip');
     const zip = new JSZip();
     paid.forEach((item) => {
-      const name = item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
-      zip.file(name, item.resultBlob!);
+      zip.file(item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png', item.resultBlob!);
     });
     const blob = await zip.generateAsync({ type: 'blob' });
     downloadBlob(blob, 'removed-backgrounds.zip');
   };
+
+  const statusLabels = { pending: t.status_pending, done: t.status_done, error: t.status_error };
+  const cardLabels   = { download: t.card_download, remove: t.card_remove, error: t.status_error };
 
   // 플랜 확인 중
   if (!planChecked) {
@@ -234,7 +333,7 @@ export function BatchEditor() {
     );
   }
 
-  // 비즈니스/엔터프라이즈 미가입
+  // 미가입 잠금 화면
   if (!hasBatchAccess) {
     return (
       <>
@@ -251,42 +350,22 @@ export function BatchEditor() {
             </div>
             <div>
               <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-                일괄 편집은 유료 플랜 전용입니다
+                {t.locked_title}
               </h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                비즈니스 또는 엔터프라이즈 플랜을 구독하면<br />여러 이미지를 한 번에 처리할 수 있습니다.
+                {t.locked_desc}
               </p>
-            </div>
-            <div
-              className="w-full rounded-2xl p-4 text-left"
-              style={{ background: 'var(--bg-raised)', border: '1px solid var(--bg-border)' }}
-            >
-              {[
-                { name: '비즈니스', price: '₩19,900/30일', credits: '월 500 크레딧', color: '#a855f7' },
-                { name: '엔터프라이즈', price: '₩99,000/30일', credits: '무제한 생성', color: '#22d3a0' },
-              ].map((p) => (
-                <div key={p.name} className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
-                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{p.name}</span>
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{p.credits}</span>
-                  </div>
-                  <span className="text-sm font-bold" style={{ color: p.color }}>{p.price}</span>
-                </div>
-              ))}
             </div>
             <button
               onClick={() => setShowPurchaseModal(true)}
               className="w-full py-3 rounded-2xl text-sm font-bold text-white transition-all hover:opacity-90"
               style={{ background: 'var(--accent-gradient)' }}
             >
-              플랜 업그레이드
+              {t.upgrade_btn}
             </button>
           </div>
         </div>
-        {showPurchaseModal && (
-          <PurchaseModal onClose={() => setShowPurchaseModal(false)} />
-        )}
+        {showPurchaseModal && <PurchaseModal onClose={() => setShowPurchaseModal(false)} dict={dict} />}
       </>
     );
   }
@@ -299,27 +378,20 @@ export function BatchEditor() {
         style={{ borderBottom: '1px solid var(--bg-border)', background: 'var(--bg-surface)' }}
       >
         <div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            일괄 배경 제거
-          </h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            여러 이미지를 한 번에 투명 PNG로 처리합니다
-          </p>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{t.title}</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>{t.subtitle}</p>
         </div>
-
-        {/* Stats */}
         {total > 0 && (
           <div className="flex items-center gap-4">
-            <StatChip label="전체" value={total} color="var(--text-muted)" />
-            <StatChip label="완료" value={done} color="var(--success)" />
-            {failed > 0 && <StatChip label="실패" value={failed} color="var(--danger)" />}
-            <StatChip label="대기" value={pending} color="var(--accent-glow)" />
+            <StatChip label={t.stat_total}   value={total}   color="var(--text-muted)" />
+            <StatChip label={t.stat_done}    value={done}    color="var(--success)" />
+            {failed > 0 && <StatChip label={t.stat_failed} value={failed} color="var(--danger)" />}
+            <StatChip label={t.stat_pending} value={pending} color="var(--accent-glow)" />
           </div>
         )}
       </div>
 
       <div className="flex-1 flex flex-col gap-6 p-8 max-w-5xl mx-auto w-full">
-
         {/* Drop zone */}
         <div
           {...getRootProps()}
@@ -340,11 +412,9 @@ export function BatchEditor() {
               <Upload size={24} style={{ color: isDragActive ? 'var(--accent-glow)' : 'var(--text-muted)' }} />
             </div>
             <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {isDragActive ? '이미지를 여기에 놓으세요' : '이미지를 드래그하거나 클릭해서 추가'}
+              {isDragActive ? t.drop_active : t.drop_idle}
             </p>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              JPG, PNG, WEBP · 최대 25MB · 여러 파일 동시 선택 가능
-            </p>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.drop_hint}</p>
           </div>
         </div>
 
@@ -358,7 +428,7 @@ export function BatchEditor() {
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition-all btn-glow disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ImageIcon size={16} />
-                {pending > 0 ? `${pending}개 처리 시작` : '모두 완료됨'}
+                {pending > 0 ? t.run_n.replace('{n}', String(pending)) : t.run_done}
               </button>
             ) : (
               <button
@@ -366,8 +436,7 @@ export function BatchEditor() {
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
                 style={{ background: 'rgba(248,113,113,0.15)', color: 'var(--danger)', border: '1px solid rgba(248,113,113,0.3)' }}
               >
-                <X size={16} />
-                중지
+                <X size={16} />{t.stop}
               </button>
             )}
 
@@ -378,7 +447,7 @@ export function BatchEditor() {
                 style={{ background: 'rgba(34,211,160,0.12)', color: 'var(--success)', border: '1px solid rgba(34,211,160,0.3)' }}
               >
                 <PackageOpen size={16} />
-                전체 ZIP 다운로드 ({done}개)
+                {t.download_zip.replace('{n}', String(done))}
               </button>
             )}
 
@@ -390,8 +459,7 @@ export function BatchEditor() {
               onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--danger)')}
               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
             >
-              <Trash2 size={15} />
-              전체 삭제
+              <Trash2 size={15} />{t.clear_all}
             </button>
           </div>
         )}
@@ -400,7 +468,7 @@ export function BatchEditor() {
         {isRunning && total > 0 && (
           <div className="rounded-xl p-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--bg-border)' }}>
             <div className="flex justify-between text-xs mb-2">
-              <span style={{ color: 'var(--text-muted)' }}>전체 진행률</span>
+              <span style={{ color: 'var(--text-muted)' }}>{t.progress_label}</span>
               <span style={{ color: 'var(--accent-glow)' }}>{done} / {total}</span>
             </div>
             <div className="w-full rounded-full overflow-hidden" style={{ height: '4px', background: 'var(--bg-border)' }}>
@@ -425,6 +493,8 @@ export function BatchEditor() {
                 item={item}
                 onRemove={() => removeItem(item.id)}
                 onDownload={() => handleDownloadOne(item)}
+                labels={cardLabels}
+                statusLabels={statusLabels}
               />
             ))}
           </div>
@@ -439,127 +509,12 @@ export function BatchEditor() {
             >
               <ImageIcon size={32} style={{ color: 'var(--text-subtle)' }} />
             </div>
-            <p style={{ color: 'var(--text-subtle)' }}>아직 이미지가 없습니다</p>
+            <p style={{ color: 'var(--text-subtle)' }}>{t.empty}</p>
           </div>
         )}
       </div>
 
-      {showPurchaseModal && (
-        <PurchaseModal onClose={() => setShowPurchaseModal(false)} />
-      )}
-    </div>
-  );
-}
-
-// ─── Stat chip ────────────────────────────────────────────────────────────────
-function StatChip({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div className="flex flex-col items-center">
-      <span className="text-lg font-bold" style={{ color }}>{value}</span>
-      <span className="text-[10px]" style={{ color: 'var(--text-subtle)' }}>{label}</span>
-    </div>
-  );
-}
-
-// ─── Batch card ───────────────────────────────────────────────────────────────
-function BatchCard({
-  item, onRemove, onDownload,
-}: {
-  item: BatchItem;
-  onRemove: () => void;
-  onDownload: () => void;
-}) {
-  const [hover, setHover] = useState(false);
-
-  return (
-    <div
-      className="relative rounded-2xl overflow-hidden group transition-all duration-200"
-      style={{
-        background: 'var(--bg-surface)',
-        border: `1px solid ${item.status === 'done' ? 'rgba(34,211,160,0.25)' : item.status === 'error' ? 'rgba(248,113,113,0.25)' : 'var(--bg-border)'}`,
-        aspectRatio: '1',
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-    >
-      {/* Image area */}
-      <div className="absolute inset-0">
-        {item.status === 'done' && item.resultUrl ? (
-          <div className="w-full h-full checker-bg">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.resultUrl} alt={item.file.name} className="w-full h-full object-contain" />
-          </div>
-        ) : (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={item.previewUrl} alt={item.file.name} className="w-full h-full object-cover" />
-        )}
-      </div>
-
-      {/* Processing overlay */}
-      {item.status === 'processing' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
-          style={{ background: 'rgba(10,10,15,0.75)', backdropFilter: 'blur(4px)' }}>
-          <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent-glow)' }} />
-          <div className="w-3/4">
-            <div className="w-full rounded-full overflow-hidden" style={{ height: '3px', background: 'var(--bg-border)' }}>
-              <div
-                className="h-full rounded-full transition-all duration-300"
-                style={{ width: `${item.progress}%`, background: 'var(--accent-gradient)' }}
-              />
-            </div>
-          </div>
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{item.progress}%</span>
-        </div>
-      )}
-
-      {/* Error overlay */}
-      {item.status === 'error' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1"
-          style={{ background: 'rgba(10,10,15,0.8)' }}>
-          <AlertCircle size={20} style={{ color: 'var(--danger)' }} />
-          <span className="text-[10px] text-center px-2" style={{ color: 'var(--danger)' }}>처리 실패</span>
-        </div>
-      )}
-
-      {/* Hover actions */}
-      {hover && item.status !== 'processing' && (
-        <div className="absolute inset-0 flex items-center justify-center gap-2"
-          style={{ background: 'rgba(10,10,15,0.6)', backdropFilter: 'blur(2px)' }}>
-          {item.status === 'done' && (
-            <button
-              onClick={onDownload}
-              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
-              style={{ background: 'rgba(34,211,160,0.2)', border: '1px solid rgba(34,211,160,0.4)', color: 'var(--success)' }}
-              title="다운로드"
-            >
-              <Download size={16} />
-            </button>
-          )}
-          <button
-            onClick={onRemove}
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all hover:scale-110"
-            style={{ background: 'rgba(248,113,113,0.2)', border: '1px solid rgba(248,113,113,0.3)', color: 'var(--danger)' }}
-            title="삭제"
-          >
-            <X size={16} />
-          </button>
-        </div>
-      )}
-
-      {/* Footer bar */}
-      <div
-        className="absolute bottom-0 left-0 right-0 px-2 py-1.5 flex items-center justify-between"
-        style={{ background: 'rgba(10,10,15,0.85)', backdropFilter: 'blur(4px)' }}
-      >
-        <span
-          className="text-[10px] truncate flex-1 mr-1"
-          style={{ color: 'var(--text-muted)' }}
-          title={item.file.name}
-        >
-          {item.file.name}
-        </span>
-        <StatusBadge status={item.status} progress={item.progress} />
-      </div>
+      {showPurchaseModal && <PurchaseModal onClose={() => setShowPurchaseModal(false)} dict={dict} />}
     </div>
   );
 }

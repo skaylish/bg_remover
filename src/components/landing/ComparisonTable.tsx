@@ -16,34 +16,30 @@ const COMPETITORS = [
     freePreview: true,
     freeLowRes: true,
     browserProcess: true,
-    noExpiry: true,
   },
   {
-    name: 'ClippingMagic',
+    name: 'C*****Magic',
     us: false,
     pricePerImage: '₩38~95',
     freePreview: true,
     freeLowRes: false,
     browserProcess: false,
-    noExpiry: false,
   },
   {
-    name: 'remove.bg',
+    name: 'r*****.bg',
     us: false,
     pricePerImage: '₩270+',
     freePreview: true,
     freeLowRes: false,
     browserProcess: false,
-    noExpiry: false,
   },
   {
-    name: 'removal.ai',
+    name: 'r*****.ai',
     us: false,
     pricePerImage: '₩135+',
     freePreview: true,
     freeLowRes: true,
     browserProcess: false,
-    noExpiry: false,
   },
 ];
 
@@ -74,7 +70,6 @@ export function ComparisonTable({ dict }: ComparisonTableProps) {
     { key: 'freePreview', label: '미리보기 무료' },
     { key: 'freeLowRes', label: t.col_free_lowres },
     { key: 'browserProcess', label: t.col_browser },
-    { key: 'noExpiry', label: t.col_no_expiry },
   ] as const;
 
   return (

@@ -94,7 +94,12 @@
     "title_1": "Hasil Sempurna untuk ",
     "title_2": "Setiap Kategori",
     "subtitle": "Produk, orang, hewan, mobil — hapus latar belakang gambar apa pun dengan satu klik.",
-    "tabs": { "product": "Produk", "person": "Orang", "animal": "Hewan", "car": "Mobil" },
+    "tabs": {
+      "product": "Produk",
+      "person": "Orang",
+      "animal": "Hewan",
+      "car": "Mobil"
+    },
     "before": "Sebelum",
     "after": "Sesudah"
   },
@@ -103,12 +108,30 @@
     "title_2": "Layanan Ini?",
     "subtitle": "Dari fotografer hingga developer — BGRemover dirancang untuk alur kerja setiap profesional.",
     "items": [
-      { "title": "Fotografer", "description": "Hapus latar dari foto potret dan produk dengan cepat, lalu kirim ke klien." },
-      { "title": "E-Commerce", "description": "Proses gambar produk berlatar putih atau transparan dalam jumlah besar." },
-      { "title": "Marketer", "description": "Siapkan gambar bersih untuk materi iklan dalam hitungan detik." },
-      { "title": "Desainer", "description": "Dapatkan potongan sempurna untuk komposisi dan kolase secara instan." },
-      { "title": "Developer", "description": "Integrasikan penghapusan latar otomatis ke aplikasi Anda dengan mudah." },
-      { "title": "Pengguna Individu", "description": "Buat foto profil, posting media sosial, dan gambar hadiah Anda tampak luar biasa." }
+      {
+        "title": "Fotografer",
+        "description": "Hapus latar dari foto potret dan produk dengan cepat, lalu kirim ke klien."
+      },
+      {
+        "title": "E-Commerce",
+        "description": "Proses gambar produk berlatar putih atau transparan dalam jumlah besar."
+      },
+      {
+        "title": "Marketer",
+        "description": "Siapkan gambar bersih untuk materi iklan dalam hitungan detik."
+      },
+      {
+        "title": "Desainer",
+        "description": "Dapatkan potongan sempurna untuk komposisi dan kolase secara instan."
+      },
+      {
+        "title": "Developer",
+        "description": "Integrasikan penghapusan latar otomatis ke aplikasi Anda dengan mudah."
+      },
+      {
+        "title": "Pengguna Individu",
+        "description": "Buat foto profil, posting media sosial, dan gambar hadiah Anda tampak luar biasa."
+      }
     ]
   },
   "testimonials": {
@@ -116,51 +139,99 @@
     "title_2": "di Seluruh Dunia",
     "subtitle": "Ribuan desainer, marketer, dan developer menggunakan BGRemover setiap hari.",
     "items": [
-      { "name": "Alex Kim", "role": "Pemilik E-Commerce", "text": "Saya memproses puluhan gambar produk setiap hari. Alat ini memotong waktu kerja saya lebih dari 80%.", "rating": 5 },
-      { "name": "Sophie Laurent", "role": "Fotografer", "text": "Ketepatan tepi sangat mengesankan. Bahkan rambut halus pun terpotong bersih. Jauh lebih cepat dari Photoshop.", "rating": 5 },
-      { "name": "Marcus Johnson", "role": "Desainer UI", "text": "Saya suka bahwa gambar tidak pernah meninggalkan browser saya. Privasi penting saat bekerja dengan aset klien.", "rating": 4 },
-      { "name": "Yuki Tanaka", "role": "Pembuat Konten", "text": "Sangat berguna untuk konten sosial. Kemampuan menerapkan latar gradien langsung setelah penghapusan mengubah alur kerja saya.", "rating": 5 }
+      {
+        "name": "Alex Kim",
+        "role": "Pemilik E-Commerce",
+        "text": "Saya memproses puluhan gambar produk setiap hari. Alat ini memotong waktu kerja saya lebih dari 80%.",
+        "rating": 5
+      },
+      {
+        "name": "Sophie Laurent",
+        "role": "Fotografer",
+        "text": "Ketepatan tepi sangat mengesankan. Bahkan rambut halus pun terpotong bersih. Jauh lebih cepat dari Photoshop.",
+        "rating": 5
+      },
+      {
+        "name": "Marcus Johnson",
+        "role": "Desainer UI",
+        "text": "Saya suka bahwa gambar tidak pernah meninggalkan browser saya. Privasi penting saat bekerja dengan aset klien.",
+        "rating": 4
+      },
+      {
+        "name": "Yuki Tanaka",
+        "role": "Pembuat Konten",
+        "text": "Sangat berguna untuk konten sosial. Kemampuan menerapkan latar gradien langsung setelah penghapusan mengubah alur kerja saya.",
+        "rating": 5
+      }
     ]
   },
   "pricing": {
     "title_1": "Harga ",
     "title_2": "Sederhana & Transparan",
-    "subtitle": "Berlangganan bulanan atau isi sekali. Pratinjau resolusi rendah selalu gratis.",
+    "subtitle": "Berlangganan untuk mulai. Pratinjau resolusi rendah selalu gratis.",
     "free_badge": "Resolusi rendah gratis",
     "popular": "Populer",
     "per_month": "/bln",
-    "one_time_label": "sekali isi",
     "credits_label": "kredit/bln",
     "credits_once": "kredit",
     "unlimited_label": "Tak Terbatas",
     "per_image": "per gambar",
     "buy": "Berlangganan Sekarang",
-    "buy_topup": "Isi Sekarang",
     "current_credits": "Kredit saat ini",
     "current_unlimited": "Paket saat ini: Enterprise (Tak Terbatas)",
-    "topup_name": "Isi Sekali",
-    "topup_target": "Pengguna sesekali",
-    "topup_features": ["100 kredit langsung", "Unduh HD", "Resolusi rendah tak terbatas gratis"],
     "starter_name": "Starter",
     "starter_target": "Blogger, Pengguna individu",
-    "starter_features": ["100 kredit/bulan", "Unduh HD", "Resolusi rendah tak terbatas gratis"],
+    "starter_features": [
+      "100 kredit/bulan",
+      "Unduh HD",
+      "Resolusi rendah tak terbatas gratis"
+    ],
     "business_name": "Business",
     "business_target": "Toko kecil, Marketer",
-    "business_features": ["500 kredit/bulan", "Unduh HD", "Resolusi rendah tak terbatas gratis", "Pemrosesan massal"],
+    "business_features": [
+      "500 kredit/bulan",
+      "Unduh HD",
+      "Resolusi rendah tak terbatas gratis",
+      "Pemrosesan massal"
+    ],
     "enterprise_name": "Enterprise",
-    "enterprise_target": "Penjual besar, Platform, Massal",
-    "enterprise_features": ["Generasi HD tak terbatas/bulan", "Resolusi rendah tak terbatas gratis", "Pemrosesan massal", "Dukungan prioritas"],
-    "price_topup": "$6.99",
+    "enterprise_target": "Penjual besar, platform",
+    "enterprise_features": [
+      "5.000 kredit/bln",
+      "Unduh resolusi tinggi",
+      "Resolusi rendah gratis tak terbatas",
+      "Pemrosesan batch",
+      "Dukungan prioritas"
+    ],
     "price_starter": "$3.99",
     "price_business": "$12.99",
     "price_enterprise": "$59.99",
-    "per_image_topup": "$0.07",
     "per_image_starter": "$0.04",
     "per_image_business": "$0.026",
     "modal_title": "Kredit tidak mencukupi",
     "modal_desc": "Unduhan HD memerlukan 1 kredit. Isi kredit atau berlangganan untuk digunakan sekarang.",
     "modal_see_all": "Lihat semua harga →",
-    "note_bottom": "Unduhan resolusi rendah selalu gratis tanpa kredit. Unduhan HD membutuhkan 1 kredit per gambar. Paket Enterprise mencakup pembuatan tak terbatas setiap bulan."
+    "note_bottom": "Unduhan resolusi rendah selalu gratis tanpa kredit. Unduhan HD membutuhkan 1 kredit per gambar. Paket Enterprise mencakup pembuatan tak terbatas setiap bulan.",
+    "price_lite": "$8.99",
+    "price_growth": "$29.99",
+    "per_image_lite": "$0.030",
+    "per_image_growth": "$0.015",
+    "per_image_enterprise": "$0.012",
+    "lite_name": "Lite",
+    "lite_target": "Freelancer, proyek kecil",
+    "lite_features": [
+      "300 kredit/bln",
+      "Unduh resolusi tinggi",
+      "Resolusi rendah gratis tak terbatas"
+    ],
+    "growth_name": "Growth",
+    "growth_target": "Penjual menengah, agensi",
+    "growth_features": [
+      "2.000 kredit/bln",
+      "Unduh resolusi tinggi",
+      "Resolusi rendah gratis tak terbatas",
+      "Pemrosesan batch"
+    ]
   },
   "comparison": {
     "title_1": "Bandingkan Harga Kami ",
@@ -170,7 +241,6 @@
     "col_price": "Harga minimum/gambar",
     "col_free_lowres": "Resolusi rendah gratis",
     "col_browser": "Proses di browser",
-    "col_no_expiry": "Kredit tidak kedaluwarsa",
     "cta": "Mulai gratis sekarang",
     "badge_cheapest": "Termurah",
     "note": "* Harga dari situs resmi per 2024. Kurs: 1 USD = 1.350 KRW."
@@ -189,24 +259,57 @@
     "sample_car": "Mobil"
   },
   "howItWorks": {
-    "title_1": "Alur Kerja ", "title_2": "Tanpa Hambatan",
+    "title_1": "Alur Kerja ",
+    "title_2": "Tanpa Hambatan",
     "subtitle": "Tanpa akun. Tanpa instalasi. Tiga langkah untuk sintesis latar belakang yang sempurna.",
     "steps": [
-      { "title": "Inisialisasi Area", "description": "Jatuhkan gambar resolusi tinggi ke dalam area sintesis. Mendukung format JPG, PNG, dan WEBP." },
-      { "title": "Pemrosesan Neural", "description": "Arsitektur deep learning kami menganalisis kedalaman struktural dan koherensi tepi secara real-time." },
-      { "title": "Unduh Hasil", "description": "Unduh aset murni tanpa artefak dengan channel alfa yang sempurna, atau lanjutkan pengeditan." }
+      {
+        "title": "Inisialisasi Area",
+        "description": "Jatuhkan gambar resolusi tinggi ke dalam area sintesis. Mendukung format JPG, PNG, dan WEBP."
+      },
+      {
+        "title": "Pemrosesan Neural",
+        "description": "Arsitektur deep learning kami menganalisis kedalaman struktural dan koherensi tepi secara real-time."
+      },
+      {
+        "title": "Unduh Hasil",
+        "description": "Unduh aset murni tanpa artefak dengan channel alfa yang sempurna, atau lanjutkan pengeditan."
+      }
     ]
   },
   "features": {
-    "title_1": "Arsitektur ", "title_2": "Kesempurnaan",
+    "title_1": "Arsitektur ",
+    "title_2": "Kesempurnaan",
     "subtitle": "Segmentasi tingkat profesional. Tanpa langganan. Tanpa tanda air. Murni kekuatan AI.",
     "items": [
-      { "title": "Kecepatan Neural", "description": "Jalankan model ONNX mutakhir langsung di browser Anda. Segmentasi butuh kurang dari 3 detik." },
-      { "title": "Alat Presisi", "description": "Sempurnakan tepi dengan kuas latar depan dan latar belakang. Anda mengontrol hasil akhirnya." },
-      { "title": "Kanvas Tak Terbatas", "description": "Ekspor sebagai PNG transparan, atau tambahkan gradien kromatik dan latar pemandangan instan." },
-      { "title": "Ekspor Sempurna", "description": "Nol kompresi. Unduh karya agung Anda dalam resolusi asli penuh tanpa masalah distorsi." },
-      { "title": "Privasi Mutlak", "description": "Gambar Anda tidak pernah dikirim ke server. Diproses secara aman di perangkat lokal Anda." },
-      { "title": "Mode Offline", "description": "Setelah dimuat, AI kami dapat digunakan kapan saja, di mana saja, sepenuhnya offline di perangkat." }
+      {
+        "title": "Kecepatan Neural",
+        "description": "Jalankan model ONNX mutakhir langsung di browser Anda. Segmentasi butuh kurang dari 3 detik."
+      },
+      {
+        "title": "Alat Presisi",
+        "description": "Sempurnakan tepi dengan kuas latar depan dan latar belakang. Anda mengontrol hasil akhirnya."
+      },
+      {
+        "title": "Kanvas Tak Terbatas",
+        "description": "Ekspor sebagai PNG transparan, atau tambahkan gradien kromatik dan latar pemandangan instan."
+      },
+      {
+        "title": "Ekspor Sempurna",
+        "description": "Nol kompresi. Unduh karya agung Anda dalam resolusi asli penuh tanpa masalah distorsi."
+      },
+      {
+        "title": "Privasi Mutlak",
+        "description": "Gambar Anda tidak pernah dikirim ke server. Diproses secara aman di perangkat lokal Anda."
+      },
+      {
+        "title": "Mode Offline",
+        "description": "Setelah dimuat, AI kami dapat digunakan kapan saja, di mana saja, sepenuhnya offline di perangkat."
+      },
+      {
+        "title": "Presisi AI Adaptif",
+        "description": "Atur sensitivitas penghapusan latar dengan satu slider. Lindungi detail foreground halus seperti teks, bulu, dan rambut."
+      }
     ]
   },
   "footer": {
@@ -216,5 +319,35 @@
     "terms": "Syarat Layanan",
     "business": "Informasi Bisnis",
     "contact": "Hubungi Kami"
+  },
+  "batch": {
+    "title": "Penghapusan Latar Massal",
+    "subtitle": "Proses banyak gambar sekaligus sebagai PNG transparan",
+    "locked_title": "Pengeditan massal memerlukan paket berbayar",
+    "locked_desc": "Berlangganan paket Business atau Enterprise untuk memproses banyak gambar sekaligus.",
+    "upgrade_btn": "Tingkatkan Paket",
+    "plan_credits_business": "500 kredit/bln",
+    "plan_credits_enterprise": "5.000 kredit/bln",
+    "per_month": "/bln",
+    "stat_total": "Total",
+    "stat_done": "Selesai",
+    "stat_failed": "Gagal",
+    "stat_pending": "Menunggu",
+    "drop_active": "Lepaskan gambar di sini",
+    "drop_idle": "Seret & lepas atau klik untuk menambah gambar",
+    "drop_hint": "JPG, PNG, WEBP · Maks 25MB · Beberapa file didukung",
+    "run_n": "Proses {n}",
+    "run_done": "Semua selesai",
+    "stop": "Hentikan",
+    "download_zip": "Unduh ZIP ({n})",
+    "clear_all": "Hapus semua",
+    "progress_label": "Kemajuan keseluruhan",
+    "empty": "Belum ada gambar",
+    "status_pending": "Menunggu",
+    "status_done": "Selesai",
+    "status_error": "Gagal",
+    "card_download": "Unduh",
+    "card_remove": "Hapus",
+    "error_processing": "Gagal diproses"
   }
 }

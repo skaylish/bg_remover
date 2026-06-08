@@ -1,23 +1,25 @@
 'use client';
 
 // 랜딩 페이지 요금제 섹션 — Paddle Checkout 연동
-import { Check, Zap, Star, Building2, Infinity, Package } from 'lucide-react';
+import { Check, Zap, Flame, Star, Rocket, Building2 } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { initializePaddle, type Paddle } from '@paddle/paddle-js';
 
 const PLANS = [
-  { key: 'topup',      icon: Package,    credits: 100, unlimited: false, color: '#f59e0b', popular: false, oneTime: true  },
-  { key: 'starter',    icon: Zap,        credits: 100, unlimited: false, color: '#6366f1', popular: false, oneTime: false },
-  { key: 'business',   icon: Star,       credits: 500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false },
-  { key: 'enterprise', icon: Building2,  credits: 0,   unlimited: true,  color: '#22d3a0', popular: false, oneTime: false },
+  { key: 'starter',    icon: Zap,       credits:  100, unlimited: false, color: '#6366f1', popular: false, oneTime: false },
+  { key: 'lite',       icon: Flame,     credits:  300, unlimited: false, color: '#3b82f6', popular: false, oneTime: false },
+  { key: 'business',   icon: Star,      credits:  500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false },
+  { key: 'growth',     icon: Rocket,    credits: 2000, unlimited: false, color: '#f59e0b', popular: false, oneTime: false },
+  { key: 'enterprise', icon: Building2, credits: 5000, unlimited: false, color: '#22d3a0', popular: false, oneTime: false },
 ];
 
 const PRICE_IDS: Record<string, string> = {
-  topup:      process.env.NEXT_PUBLIC_PADDLE_PRICE_TOPUP      ?? '',
   starter:    process.env.NEXT_PUBLIC_PADDLE_PRICE_STARTER    ?? '',
+  lite:       process.env.NEXT_PUBLIC_PADDLE_PRICE_LITE       ?? '',
   business:   process.env.NEXT_PUBLIC_PADDLE_PRICE_BUSINESS   ?? '',
+  growth:     process.env.NEXT_PUBLIC_PADDLE_PRICE_GROWTH     ?? '',
   enterprise: process.env.NEXT_PUBLIC_PADDLE_PRICE_ENTERPRISE ?? '',
 };
 
@@ -41,11 +43,11 @@ export function PricingSection({ dict }: PricingSectionProps) {
   const t = dict?.pricing || {
     title_1: '심플하고 ',
     title_2: '투명한 요금제',
-    subtitle: '구독 또는 1회 충전으로 이용하세요. 저해상도 미리보기는 항상 무료입니다.',
+    subtitle: '구독제로 이용하세요. 저해상도 미리보기는 항상 무료입니다.',
     free_badge: '저해상도 무료',
     popular: '인기',
     per_month: '/월',
-    one_time_label: '1회 충전',
+    one_time_label: '',
     credits_label: '크레딧/월',
     credits_once: '크레딧',
     unlimited_label: '무제한 생성',
@@ -54,38 +56,47 @@ export function PricingSection({ dict }: PricingSectionProps) {
     buy_topup: '충전하기',
     current_credits: '현재 보유 크레딧',
     current_unlimited: '현재 플랜: Enterprise (무제한)',
-    topup_name: '1회 충전',
-    topup_target: '가끔 쓰는 사용자',
-    topup_features: ['100 크레딧 즉시 지급', '고해상도 다운로드', '저해상도 무제한 무료'],
-    price_topup: '$6.99',
-    price_starter: '$3.99',
-    price_business: '$12.99',
+    price_starter:    '$3.99',
+    price_lite:       '$8.99',
+    price_business:   '$12.99',
+    price_growth:     '$29.99',
     price_enterprise: '$59.99',
-    per_image_topup: '$0.07',
-    per_image_starter: '$0.04',
-    per_image_business: '$0.026',
+    per_image_starter:    '$0.040',
+    per_image_lite:       '$0.030',
+    per_image_business:   '$0.026',
+    per_image_growth:     '$0.015',
+    per_image_enterprise: '$0.012',
     starter_name: 'Starter',
     starter_target: '블로거, 개인 사용자',
     starter_features: ['월 100 크레딧 지급', '고해상도 다운로드', '저해상도 무제한 무료'],
+    lite_name: 'Lite',
+    lite_target: '프리랜서, 소규모 작업',
+    lite_features: ['월 300 크레딧 지급', '고해상도 다운로드', '저해상도 무제한 무료'],
     business_name: 'Business',
     business_target: '소형 쇼핑몰, 마케터',
     business_features: ['월 500 크레딧 지급', '고해상도 다운로드', '저해상도 무제한 무료', '일괄 처리 지원'],
+    growth_name: 'Growth',
+    growth_target: '중형 셀러, 에이전시',
+    growth_features: ['월 2,000 크레딧 지급', '고해상도 다운로드', '저해상도 무제한 무료', '일괄 처리 지원'],
     enterprise_name: 'Enterprise',
-    enterprise_target: '대형 셀러, 플랫폼, 대량 처리',
-    enterprise_features: ['월 무제한 생성', '저해상도 무제한', '일괄 처리', '우선 고객 지원'],
+    enterprise_target: '대형 셀러, 플랫폼',
+    enterprise_features: ['월 5,000 크레딧 지급', '고해상도 다운로드', '저해상도 무제한 무료', '일괄 처리 지원', '우선 고객 지원'],
     note_bottom: '저해상도 다운로드는 크레딧 없이 무제한 무료입니다. 고해상도 다운로드 시 이미지당 1크레딧이 차감됩니다.',
   };
 
   const priceMap: Record<string, string> = {
-    topup:      t.price_topup,
     starter:    t.price_starter,
+    lite:       t.price_lite,
     business:   t.price_business,
+    growth:     t.price_growth,
     enterprise: t.price_enterprise,
   };
   const perImageMap: Record<string, string> = {
-    topup:    t.per_image_topup,
-    starter:  t.per_image_starter,
-    business: t.per_image_business,
+    starter:    t.per_image_starter,
+    lite:       t.per_image_lite,
+    business:   t.per_image_business,
+    growth:     t.per_image_growth,
+    enterprise: t.per_image_enterprise,
   };
 
   const handlePurchase = async (plan: typeof PLANS[number]) => {
@@ -119,7 +130,7 @@ export function PricingSection({ dict }: PricingSectionProps) {
 
   return (
     <section className="py-24 px-6" style={{ background: 'var(--bg-base)' }}>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             {t.title_1}<span className="gradient-text">{t.title_2}</span>
@@ -146,7 +157,7 @@ export function PricingSection({ dict }: PricingSectionProps) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-16">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
             const planName: string  = t[`${plan.key}_name`] || plan.key;
@@ -158,7 +169,7 @@ export function PricingSection({ dict }: PricingSectionProps) {
             return (
               <div
                 key={plan.key}
-                className="relative rounded-3xl p-6 flex flex-col"
+                className="relative rounded-3xl p-5 flex flex-col"
                 style={{
                   background: 'var(--bg-surface)',
                   border: `1px solid ${plan.popular ? plan.color + '55' : 'var(--bg-border)'}`,
@@ -167,54 +178,42 @@ export function PricingSection({ dict }: PricingSectionProps) {
               >
                 {plan.popular && (
                   <div
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-4 py-1 rounded-full text-white"
+                    className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold px-4 py-1 rounded-full text-white whitespace-nowrap"
                     style={{ background: 'var(--accent-gradient)' }}
                   >
                     {t.popular}
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: `${plan.color}22` }}>
-                    <Icon size={22} style={{ color: plan.color }} />
+                {/* 아이콘 + 플랜명 */}
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center" style={{ background: `${plan.color}22` }}>
+                    <Icon size={18} style={{ color: plan.color }} />
                   </div>
-                  <div>
-                    <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{planName}</p>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{target}</p>
-                  </div>
+                  <p className="font-bold text-base leading-tight" style={{ color: 'var(--text-primary)' }}>{planName}</p>
                 </div>
 
+                {/* 가격 */}
                 <div className="mb-1">
-                  <span className="text-4xl font-black" style={{ color: 'var(--text-primary)' }}>{price}</span>
-                  <span className="text-sm font-medium ml-1" style={{ color: 'var(--text-muted)' }}>
-                    {plan.oneTime ? t.one_time_label : t.per_month}
-                  </span>
+                  <span className="text-3xl font-black" style={{ color: 'var(--text-primary)' }}>{price}</span>
+                  <span className="text-xs font-medium ml-1" style={{ color: 'var(--text-muted)' }}>{t.per_month}</span>
                 </div>
 
-                <div className="flex items-center gap-2 mb-5">
-                  {plan.unlimited ? (
-                    <span className="flex items-center gap-1.5 text-lg font-bold" style={{ color: plan.color }}>
-                      <Infinity size={20} /> {t.unlimited_label}
+                {/* 크레딧 + 장당 */}
+                <div className="mb-4">
+                  <span className="text-sm font-bold" style={{ color: plan.color }}>{plan.credits.toLocaleString()}</span>
+                  <span className="text-xs ml-1" style={{ color: 'var(--text-muted)' }}>{t.credits_label}</span>
+                  {perImg && (
+                    <span className="block text-[11px] mt-0.5" style={{ color: plan.color, opacity: 0.75 }}>
+                      {t.per_image} {perImg}
                     </span>
-                  ) : (
-                    <>
-                      <span className="text-lg font-bold" style={{ color: plan.color }}>{plan.credits.toLocaleString()}</span>
-                      <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                        {plan.oneTime ? t.credits_once : t.credits_label}
-                      </span>
-                      {perImg && (
-                        <span className="text-xs ml-auto px-2 py-0.5 rounded-full font-semibold" style={{ background: `${plan.color}18`, color: plan.color }}>
-                          {t.per_image} {perImg}
-                        </span>
-                      )}
-                    </>
                   )}
                 </div>
 
-                <ul className="space-y-2.5 mb-6 flex-1">
+                <ul className="space-y-1.5 mb-5 flex-1">
                   {features.map((f: string) => (
-                    <li key={f} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                      <Check size={15} style={{ color: plan.color, flexShrink: 0, marginTop: 1 }} />
+                    <li key={f} className="flex items-start gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+                      <Check size={12} style={{ color: plan.color, flexShrink: 0, marginTop: 1 }} />
                       {f}
                     </li>
                   ))}
@@ -223,14 +222,14 @@ export function PricingSection({ dict }: PricingSectionProps) {
                 <button
                   onClick={() => handlePurchase(plan)}
                   disabled={paying !== null}
-                  className="w-full py-3 rounded-2xl text-sm font-bold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-2.5 rounded-2xl text-xs font-bold transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   style={
                     plan.popular
                       ? { background: 'var(--accent-gradient)', color: '#fff' }
                       : { background: `${plan.color}22`, color: plan.color, border: `1px solid ${plan.color}44` }
                   }
                 >
-                  {paying === plan.key ? '처리 중...' : plan.oneTime ? t.buy_topup : t.buy}
+                  {paying === plan.key ? '처리 중...' : t.buy}
                 </button>
               </div>
             );

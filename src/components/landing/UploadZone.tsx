@@ -98,7 +98,7 @@ export function UploadZone({ dict }: { dict?: any }) {
     return () => document.removeEventListener('paste', handler);
   }, [handleFile]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     accept: { 'image/jpeg': [], 'image/png': [], 'image/webp': [] },
     multiple: false,
     onDrop: (accepted) => { if (accepted[0]) handleFile(accepted[0]); },
@@ -167,7 +167,7 @@ export function UploadZone({ dict }: { dict?: any }) {
               <button
                 className="px-8 py-3 rounded-full font-semibold text-[15px] transition-all hover:scale-105 active:scale-95 shadow-lg"
                 style={{ background: '#c799ff', color: '#0e0e0e' }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); open(); }}
               >
                 {t.button}
               </button>
