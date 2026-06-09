@@ -1,27 +1,26 @@
 'use client';
 
-// 크레딧 부족 시 표시되는 결제 모달 — Paddle Checkout으로 결제 시작
+// 크레딧 부족 시 표시되는 결제 모달 — LemonSqueezy Checkout 연동
 import { X, Zap, Flame, Star, Rocket, Building2, Check } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { initializePaddle, type Paddle } from '@paddle/paddle-js';
 
 const PLANS = [
-  { key: 'starter',    icon: Zap,       credits:  100, unlimited: false, color: '#6366f1', popular: false, oneTime: false },
-  { key: 'lite',       icon: Flame,     credits:  300, unlimited: false, color: '#3b82f6', popular: false, oneTime: false },
-  { key: 'business',   icon: Star,      credits:  500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false },
-  { key: 'growth',     icon: Rocket,    credits: 2000, unlimited: false, color: '#f59e0b', popular: false, oneTime: false },
-  { key: 'enterprise', icon: Building2, credits: 5000, unlimited: false, color: '#22d3a0', popular: false, oneTime: false },
+  { key: 'starter',    icon: Zap,       credits:  100, color: '#6366f1', popular: false },
+  { key: 'lite',       icon: Flame,     credits:  300, color: '#3b82f6', popular: false },
+  { key: 'business',   icon: Star,      credits:  500, color: '#a855f7', popular: true  },
+  { key: 'growth',     icon: Rocket,    credits: 2000, color: '#f59e0b', popular: false },
+  { key: 'enterprise', icon: Building2, credits: 5000, color: '#22d3a0', popular: false },
 ];
 
-const PRICE_IDS: Record<string, string> = {
-  starter:    process.env.NEXT_PUBLIC_PADDLE_PRICE_STARTER    ?? '',
-  lite:       process.env.NEXT_PUBLIC_PADDLE_PRICE_LITE       ?? '',
-  business:   process.env.NEXT_PUBLIC_PADDLE_PRICE_BUSINESS   ?? '',
-  growth:     process.env.NEXT_PUBLIC_PADDLE_PRICE_GROWTH     ?? '',
-  enterprise: process.env.NEXT_PUBLIC_PADDLE_PRICE_ENTERPRISE ?? '',
+const VARIANT_IDS: Record<string, string> = {
+  starter:    process.env.NEXT_PUBLIC_LS_VARIANT_STARTER    ?? '',
+  lite:       process.env.NEXT_PUBLIC_LS_VARIANT_LITE       ?? '',
+  business:   process.env.NEXT_PUBLIC_LS_VARIANT_BUSINESS   ?? '',
+  growth:     process.env.NEXT_PUBLIC_LS_VARIANT_GROWTH     ?? '',
+  enterprise: process.env.NEXT_PUBLIC_LS_VARIANT_ENTERPRISE ?? '',
 };
 
 interface PurchaseModalProps {
@@ -33,14 +32,6 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
   const params = useParams();
   const lang = (params?.lang as string) || 'ko';
   const [paying, setPaying] = useState<string | null>(null);
-  const paddleRef = useRef<Paddle | null>(null);
-
-  useEffect(() => {
-    initializePaddle({
-      environment: (process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production',
-      token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
-    }).then((p) => { if (p) paddleRef.current = p; });
-  }, []);
 
   const t = dict?.pricing || {
     popular: '인기',
@@ -91,25 +82,24 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('로그인이 필요합니다.'); return; }
 
-    const priceId = PRICE_IDS[plan.key];
-    if (!priceId) { alert('결제 설정 오류입니다. 잠시 후 다시 시도해주세요.'); return; }
+    const variantId = VARIANT_IDS[plan.key];
+    if (!variantId) { alert('결제 설정 오류입니다. 잠시 후 다시 시도해주세요.'); return; }
 
     setPaying(plan.key);
     try {
-      const paddle = paddleRef.current;
-      if (!paddle) { alert('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.'); setPaying(null); return; }
-
-      paddle.Checkout.open({
-        items: [{ priceId, quantity: 1 }],
-        customer: { email: user.email ?? '' },
-        customData: { userId: user.id },
-        settings: {
-          successUrl: `${window.location.origin}/${lang}/editor?payment=success`,
-        },
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ variantId }),
       });
+      const { url, error } = await res.json();
+      if (!url) { alert(error ?? '결제 창을 열지 못했습니다.'); return; }
+      const ls = (window as any).LemonSqueezy;
+      if (ls?.Url?.Open) { ls.Url.Open(url); onClose(); }
+      else window.open(url, '_blank');
       onClose();
     } catch (err) {
-      console.error('[Paddle] checkout error', err);
+      console.error('[LS] checkout error', err);
       alert('결제 창을 열지 못했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setPaying(null);
@@ -180,9 +170,7 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
                 </div>
 
                 <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{price}</p>
-                <p className="text-[10px] mb-3" style={{ color: 'var(--text-muted)' }}>
-                  {plan.oneTime ? t.one_time_label : t.per_month}
-                </p>
+                <p className="text-[10px] mb-3" style={{ color: 'var(--text-muted)' }}>{t.per_month}</p>
 
                 <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
                   {plan.credits.toLocaleString()} {t.credits_label}
@@ -207,7 +195,7 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
                       : { background: `${plan.color}33`, color: plan.color, border: `1px solid ${plan.color}44` }
                   }
                 >
-                  {paying === plan.key ? '처리 중...' : plan.oneTime ? t.buy_topup : t.buy}
+                  {paying === plan.key ? '처리 중...' : t.buy}
                 </button>
               </div>
             );

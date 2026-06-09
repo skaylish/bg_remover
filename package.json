@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@imgly/background-removal": "^1.7.0",
-    "@paddle/paddle-js": "^1.6.4",
-    "@paddle/paddle-node-sdk": "^3.8.0",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.100.1",
     "fabric": "^5.5.2",

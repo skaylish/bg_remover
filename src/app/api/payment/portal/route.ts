@@ -1,12 +1,8 @@
-// 사용자의 Paddle Customer Portal URL을 생성하는 엔드포인트
+// 사용자의 LemonSqueezy 고객 포털 URL을 반환하는 엔드포인트
 import { NextResponse } from 'next/server';
-import { Environment, LogLevel, Paddle } from '@paddle/paddle-node-sdk';
 import { createClient, createServiceClient } from '@/lib/supabase/server';
 
-const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
-  environment: process.env.PADDLE_ENVIRONMENT === 'production' ? Environment.production : Environment.sandbox,
-  logLevel: LogLevel.none,
-});
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const supabase = await createClient();
@@ -14,16 +10,30 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const service = createServiceClient();
-  const { data: profile } = await service
-    .from('profiles')
-    .select('paddle_customer_id')
-    .eq('id', user.id)
-    .single();
+  const { data: sub } = await service
+    .from('subscriptions')
+    .select('lemonsqueezy_subscription_id')
+    .eq('user_id', user.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  if (!profile?.paddle_customer_id) {
+  if (!sub?.lemonsqueezy_subscription_id) {
     return NextResponse.json({ error: 'No active subscription' }, { status: 404 });
   }
 
-  const session = await paddle.customerPortalSessions.create(profile.paddle_customer_id, []);
-  return NextResponse.json({ url: (session as any).urls?.general?.overview });
+  const res = await fetch(
+    `https://api.lemonsqueezy.com/v1/subscriptions/${sub.lemonsqueezy_subscription_id}`,
+    { headers: { Authorization: `Bearer ${process.env.LEMONSQUEEZY_API_KEY}` } },
+  );
+
+  if (!res.ok) return NextResponse.json({ error: 'Failed to fetch subscription' }, { status: 500 });
+
+  const json = await res.json();
+  const portalUrl: string | undefined = json.data?.attributes?.urls?.customer_portal;
+
+  if (!portalUrl) return NextResponse.json({ error: 'Portal URL not available' }, { status: 500 });
+
+  return NextResponse.json({ url: portalUrl });
 }

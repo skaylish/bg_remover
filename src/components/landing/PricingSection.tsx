@@ -1,26 +1,25 @@
 'use client';
 
-// 랜딩 페이지 요금제 섹션 — Paddle Checkout 연동
+// 랜딩 페이지 요금제 섹션 — LemonSqueezy Checkout 연동
 import { Check, Zap, Flame, Star, Rocket, Building2 } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { initializePaddle, type Paddle } from '@paddle/paddle-js';
 
 const PLANS = [
-  { key: 'starter',    icon: Zap,       credits:  100, unlimited: false, color: '#6366f1', popular: false, oneTime: false },
-  { key: 'lite',       icon: Flame,     credits:  300, unlimited: false, color: '#3b82f6', popular: false, oneTime: false },
-  { key: 'business',   icon: Star,      credits:  500, unlimited: false, color: '#a855f7', popular: true,  oneTime: false },
-  { key: 'growth',     icon: Rocket,    credits: 2000, unlimited: false, color: '#f59e0b', popular: false, oneTime: false },
-  { key: 'enterprise', icon: Building2, credits: 5000, unlimited: false, color: '#22d3a0', popular: false, oneTime: false },
+  { key: 'starter',    icon: Zap,       credits:  100, color: '#6366f1', popular: false },
+  { key: 'lite',       icon: Flame,     credits:  300, color: '#3b82f6', popular: false },
+  { key: 'business',   icon: Star,      credits:  500, color: '#a855f7', popular: true  },
+  { key: 'growth',     icon: Rocket,    credits: 2000, color: '#f59e0b', popular: false },
+  { key: 'enterprise', icon: Building2, credits: 5000, color: '#22d3a0', popular: false },
 ];
 
-const PRICE_IDS: Record<string, string> = {
-  starter:    process.env.NEXT_PUBLIC_PADDLE_PRICE_STARTER    ?? '',
-  lite:       process.env.NEXT_PUBLIC_PADDLE_PRICE_LITE       ?? '',
-  business:   process.env.NEXT_PUBLIC_PADDLE_PRICE_BUSINESS   ?? '',
-  growth:     process.env.NEXT_PUBLIC_PADDLE_PRICE_GROWTH     ?? '',
-  enterprise: process.env.NEXT_PUBLIC_PADDLE_PRICE_ENTERPRISE ?? '',
+const VARIANT_IDS: Record<string, string> = {
+  starter:    process.env.NEXT_PUBLIC_LS_VARIANT_STARTER    ?? '',
+  lite:       process.env.NEXT_PUBLIC_LS_VARIANT_LITE       ?? '',
+  business:   process.env.NEXT_PUBLIC_LS_VARIANT_BUSINESS   ?? '',
+  growth:     process.env.NEXT_PUBLIC_LS_VARIANT_GROWTH     ?? '',
+  enterprise: process.env.NEXT_PUBLIC_LS_VARIANT_ENTERPRISE ?? '',
 };
 
 interface PricingSectionProps {
@@ -31,14 +30,6 @@ export function PricingSection({ dict }: PricingSectionProps) {
   const credits   = useCreditStore((s) => s.credits);
   const unlimited = useCreditStore((s) => s.unlimited);
   const [paying, setPaying] = useState<string | null>(null);
-  const paddleRef = useRef<Paddle | null>(null);
-
-  useEffect(() => {
-    initializePaddle({
-      environment: (process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ?? 'sandbox') as 'sandbox' | 'production',
-      token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
-    }).then((p) => { if (p) paddleRef.current = p; });
-  }, []);
 
   const t = dict?.pricing || {
     title_1: '심플하고 ',
@@ -104,24 +95,24 @@ export function PricingSection({ dict }: PricingSectionProps) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('로그인이 필요합니다.'); return; }
 
-    const priceId = PRICE_IDS[plan.key];
-    if (!priceId) { alert('결제 설정 오류입니다. 잠시 후 다시 시도해주세요.'); return; }
+    const variantId = VARIANT_IDS[plan.key];
+    if (!variantId) { alert('결제 설정 오류입니다. 잠시 후 다시 시도해주세요.'); return; }
 
     setPaying(plan.key);
     try {
-      const paddle = paddleRef.current;
-      if (!paddle) { alert('결제 모듈 로딩 중입니다. 잠시 후 다시 시도해주세요.'); setPaying(null); return; }
-
-      paddle.Checkout.open({
-        items: [{ priceId, quantity: 1 }],
-        customer: { email: user.email ?? '' },
-        customData: { userId: user.id },
-        settings: {
-          successUrl: `${window.location.origin}/editor?payment=success`,
-        },
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ variantId }),
       });
+      const { url, error } = await res.json();
+      if (!url) { alert(error ?? '결제 창을 열지 못했습니다.'); return; }
+      // LemonSqueezy 오버레이 오픈 (lemon.js 로드 후 사용 가능)
+      const ls = (window as any).LemonSqueezy;
+      if (ls?.Url?.Open) ls.Url.Open(url);
+      else window.open(url, '_blank');
     } catch (err) {
-      console.error('[Paddle] checkout error', err);
+      console.error('[LS] checkout error', err);
       alert('결제 창을 열지 못했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setPaying(null);
