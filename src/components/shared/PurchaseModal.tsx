@@ -92,8 +92,9 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ variantId }),
       });
-      const { url, error } = await res.json();
-      if (!url) { alert(error ?? '결제 창을 열지 못했습니다.'); return; }
+      const json = await res.json();
+      if (!json.url) { alert((json.detail || json.error) ?? '결제 창을 열지 못했습니다.'); return; }
+      const url = json.url;
       const ls = (window as any).LemonSqueezy;
       if (ls?.Url?.Open) { ls.Url.Open(url); onClose(); }
       else window.open(url, '_blank');
