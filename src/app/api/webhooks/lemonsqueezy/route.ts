@@ -14,11 +14,11 @@ const PLAN_CREDITS: Record<string, number> = {
 };
 
 const VARIANT_TO_PLAN: Record<string, string> = {
-  [process.env.NEXT_PUBLIC_LS_VARIANT_STARTER    ?? 'x']: 'starter',
-  [process.env.NEXT_PUBLIC_LS_VARIANT_LITE       ?? 'x']: 'lite',
-  [process.env.NEXT_PUBLIC_LS_VARIANT_BUSINESS   ?? 'x']: 'business',
-  [process.env.NEXT_PUBLIC_LS_VARIANT_GROWTH     ?? 'x']: 'growth',
-  [process.env.NEXT_PUBLIC_LS_VARIANT_ENTERPRISE ?? 'x']: 'enterprise',
+  [process.env.NEXT_PUBLIC_LS_VARIANT_STARTER    ?? 'x1']: 'starter',
+  [process.env.NEXT_PUBLIC_LS_VARIANT_LITE       ?? 'x2']: 'lite',
+  [process.env.NEXT_PUBLIC_LS_VARIANT_BUSINESS   ?? 'x3']: 'business',
+  [process.env.NEXT_PUBLIC_LS_VARIANT_GROWTH     ?? 'x4']: 'growth',
+  [process.env.NEXT_PUBLIC_LS_VARIANT_ENTERPRISE ?? 'x5']: 'enterprise',
 };
 
 function verifySignature(rawBody: string, signature: string): boolean {
@@ -44,38 +44,73 @@ export async function POST(request: Request) {
   const attrs     = event.data?.attributes ?? {};
   const lsId      = String(event.data?.id ?? '');
 
+  console.log(`[LS webhook] event: ${eventName}, id: ${lsId}`);
+
   const service = createServiceClient();
 
   // ── 최초 구독 생성 ────────────────────────────────────────────────────────────
   if (eventName === 'subscription_created') {
-    const userId: string | undefined = attrs.custom_data?.userId ?? event.meta?.custom_data?.userId;
+    const userId: string | undefined =
+      attrs.custom_data?.userId ??
+      event.meta?.custom_data?.userId;
     const variantId = String(attrs.variant_id ?? '');
     const plan = VARIANT_TO_PLAN[variantId];
 
+    console.log(`[LS webhook] subscription_created — userId:${userId} variantId:${variantId} plan:${plan}`);
+
     if (!userId || !plan) {
-      console.error('[LS] subscription_created: userId or plan missing', lsId, variantId);
+      console.error('[LS webhook] MISSING userId or plan — check NEXT_PUBLIC_LS_VARIANT_* env vars');
       return NextResponse.json({ ok: true });
     }
 
     const credits = PLAN_CREDITS[plan];
 
-    // 구독 레코드 생성
-    await service.from('subscriptions').upsert({
-      user_id:                        userId,
-      plan,
-      status:                         'active',
-      unlimited:                      false,
-      credits_per_month:              credits,
-      expires_at:                     attrs.renews_at ?? null,
-      lemonsqueezy_subscription_id:   lsId,
-    }, { onConflict: 'lemonsqueezy_subscription_id' });
+    // 기존 활성 구독 확인 → 있으면 update, 없으면 insert
+    const { data: existing } = await service
+      .from('subscriptions')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (existing) {
+      const { error: updateErr } = await service
+        .from('subscriptions')
+        .update({
+          plan,
+          status:            'active',
+          credits_per_month: credits,
+          expires_at:        attrs.renews_at ?? null,
+        })
+        .eq('id', existing.id);
+      if (updateErr) console.error('[LS webhook] subscriptions update error:', updateErr.message);
+    } else {
+      const { error: insertErr } = await service
+        .from('subscriptions')
+        .insert({
+          user_id:           userId,
+          plan,
+          status:            'active',
+          unlimited:         false,
+          credits_per_month: credits,
+          expires_at:        attrs.renews_at ?? null,
+        });
+      if (insertErr) console.error('[LS webhook] subscriptions insert error:', insertErr.message);
+    }
 
     // 크레딧 지급
-    const { data: current } = await service
-      .from('credits').select('balance').eq('user_id', userId).single();
-    await service.from('credits')
+    const { data: current, error: selErr } = await service
+      .from('credits')
+      .select('balance')
+      .eq('user_id', userId)
+      .single();
+    if (selErr) console.error('[LS webhook] credits select error:', selErr.message);
+
+    const { error: credErr } = await service
+      .from('credits')
       .update({ balance: (current?.balance ?? 0) + credits, unlimited: false })
       .eq('user_id', userId);
+    if (credErr) console.error('[LS webhook] credits update error:', credErr.message);
 
     await service.from('credit_transactions').insert({
       user_id:     userId,
@@ -84,6 +119,7 @@ export async function POST(request: Request) {
       description: `${plan} 구독 시작`,
     });
 
+    console.log(`[LS webhook] subscription_created OK — plan:${plan} credits:${credits}`);
     return NextResponse.json({ ok: true });
   }
 
@@ -96,17 +132,22 @@ export async function POST(request: Request) {
 
     const credits = PLAN_CREDITS[plan];
 
+    // 구독 테이블에서 user_id 조회 (LS subscription id로)
     const { data: sub } = await service
       .from('subscriptions')
-      .select('user_id, created_at')
-      .eq('lemonsqueezy_subscription_id', subId)
-      .single();
+      .select('id, user_id, created_at')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (!sub) return NextResponse.json({ ok: true });
+    if (!sub) {
+      console.error('[LS webhook] subscription_payment_success: no active subscription found');
+      return NextResponse.json({ ok: true });
+    }
 
-    // 첫 결제(생성 시점)와 동일한 이벤트가 올 수 있으므로 5분 여유를 두고 갱신만 처리
-    const createdAt = new Date(sub.created_at).getTime();
-    const isRenewal = Date.now() - createdAt > 5 * 60 * 1000;
+    // 구독 생성 5분 이내면 초기 결제이므로 갱신 처리 스킵
+    const isRenewal = Date.now() - new Date(sub.created_at).getTime() > 5 * 60 * 1000;
     if (!isRenewal) return NextResponse.json({ ok: true });
 
     await service.from('credits')
@@ -114,8 +155,8 @@ export async function POST(request: Request) {
       .eq('user_id', sub.user_id);
 
     await service.from('subscriptions')
-      .update({ expires_at: attrs.next_payment_date ?? null, status: 'active' })
-      .eq('lemonsqueezy_subscription_id', subId);
+      .update({ expires_at: attrs.next_payment_date ?? null, plan })
+      .eq('id', sub.id);
 
     await service.from('credit_transactions').insert({
       user_id:     sub.user_id,
@@ -129,22 +170,27 @@ export async function POST(request: Request) {
 
   // ── 구독 취소 ────────────────────────────────────────────────────────────────
   if (eventName === 'subscription_cancelled') {
-    await service
+    // LS subscription id를 저장한 컬럼이 있으면 사용, 없으면 마지막 활성 구독 처리
+    const { error } = await service
       .from('subscriptions')
       .update({ status: 'cancelled', cancel_at_period_end: true })
-      .eq('lemonsqueezy_subscription_id', lsId);
-
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (error) console.error('[LS webhook] cancel error:', error.message);
     return NextResponse.json({ ok: true });
   }
 
-  // ── 구독 상태 업데이트 (만료·정지 등) ────────────────────────────────────────
+  // ── 구독 상태 변경 ─────────────────────────────────────────────────────────
   if (eventName === 'subscription_updated') {
     const status: string = attrs.status ?? '';
-    if (status === 'expired' || status === 'paused' || status === 'past_due') {
+    if (['expired', 'paused', 'past_due'].includes(status)) {
       await service
         .from('subscriptions')
         .update({ status })
-        .eq('lemonsqueezy_subscription_id', lsId);
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1);
     }
     return NextResponse.json({ ok: true });
   }
