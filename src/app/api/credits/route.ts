@@ -7,13 +7,16 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const service = createServiceClient();
+
   const { data } = await supabase
     .from('credits')
     .select('balance, unlimited')
     .eq('user_id', user.id)
     .single();
 
-  const { data: sub } = await supabase
+  // RLS 우회: service client로 구독 조회
+  const { data: sub } = await service
     .from('subscriptions')
     .select('plan')
     .eq('user_id', user.id)

@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Scissors, Coins, LogOut, Settings, ChevronDown, ExternalLink } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
 import { useCreditStore } from '@/store/creditStore';
 import { createClient } from '@/lib/supabase/client';
@@ -24,6 +24,18 @@ const PLAN_META: Record<string, { label: string; color: string }> = {
 function extractLang(pathname: string, fallback: string): string {
   const segment = pathname.split('/')[1];
   return LOCALES.includes(segment) ? segment : fallback;
+}
+
+// 결제 완료 파라미터 감지 — useSearchParams는 Suspense 경계 필요
+function PaymentSuccessSync({ syncFromDB }: { syncFromDB: () => Promise<void> }) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams?.get('payment') === 'success') {
+      const timer = setTimeout(() => syncFromDB(), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, syncFromDB]);
+  return null;
 }
 
 export function Navbar({ lang: langProp = 'ko', dict }: { lang?: string; dict?: any }) {
@@ -74,6 +86,7 @@ export function Navbar({ lang: langProp = 'ko', dict }: { lang?: string; dict?: 
     });
     return () => subscription.unsubscribe();
   }, [syncFromDB]);
+
 
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -294,6 +307,9 @@ export function Navbar({ lang: langProp = 'ko', dict }: { lang?: string; dict?: 
       </header>
 
       {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+      <Suspense fallback={null}>
+        <PaymentSuccessSync syncFromDB={syncFromDB} />
+      </Suspense>
     </>
   );
 }
