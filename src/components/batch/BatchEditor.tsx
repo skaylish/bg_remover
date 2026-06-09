@@ -206,7 +206,7 @@ export function BatchEditor({ dict }: { dict?: any }) {
     syncFromDB().finally(() => setPlanChecked(true));
   }, [syncFromDB]);
 
-  const hasBatchAccess = plan === 'pro' || plan === 'enterprise';
+  const hasBatchAccess = plan === 'business' || plan === 'growth' || plan === 'enterprise';
 
   const total   = items.length;
   const done    = items.filter((i) => i.status === 'done').length;
