@@ -78,9 +78,10 @@ export async function POST(request: Request) {
         .from('subscriptions')
         .update({
           plan,
-          status:            'active',
-          credits_per_month: credits,
-          expires_at:        attrs.renews_at ?? null,
+          status:                       'active',
+          credits_per_month:            credits,
+          expires_at:                   attrs.renews_at ?? null,
+          lemonsqueezy_subscription_id: lsId,
         })
         .eq('id', existing.id);
       if (updateErr) console.error('[LS webhook] subscriptions update error:', updateErr.message);
@@ -88,12 +89,13 @@ export async function POST(request: Request) {
       const { error: insertErr } = await service
         .from('subscriptions')
         .insert({
-          user_id:           userId,
+          user_id:                      userId,
           plan,
-          status:            'active',
-          unlimited:         false,
-          credits_per_month: credits,
-          expires_at:        attrs.renews_at ?? null,
+          status:                       'active',
+          unlimited:                    false,
+          credits_per_month:            credits,
+          expires_at:                   attrs.renews_at ?? null,
+          lemonsqueezy_subscription_id: lsId,
         });
       if (insertErr) console.error('[LS webhook] subscriptions insert error:', insertErr.message);
     }
