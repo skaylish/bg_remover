@@ -18,21 +18,35 @@ export function useBackgroundRemoval() {
     try {
       const { removeBackground } = await import('@imgly/background-removal');
 
-      const blob = await removeBackground(file, {
-        debug: false,
-        model: 'isnet' as const,
-        device: 'gpu' as const,
-        proxyToWorker: true,
-        output: {
-          format: 'image/png' as const,
-          quality: 1,
-        },
-        progress: (_key: string, current: number, total: number) => {
-          if (total > 0) {
-            setProgress(Math.round((current / total) * 100));
-          }
-        },
-      });
+      const publicPath = `${window.location.origin}/bgremoval-cdn/`;
+      let blob: Blob;
+      try {
+        blob = await removeBackground(file, {
+          debug: false,
+          model: 'isnet' as const,
+          device: 'gpu' as const,
+          publicPath,
+          proxyToWorker: true,
+          output: { format: 'image/png' as const, quality: 1 },
+          progress: (_key: string, current: number, total: number) => {
+            if (total > 0) setProgress(Math.round((current / total) * 100));
+          },
+        });
+      } catch {
+        // GPU 실패 시 CPU fallback
+        setProgress(0);
+        blob = await removeBackground(file, {
+          debug: false,
+          model: 'isnet' as const,
+          device: 'cpu' as const,
+          publicPath,
+          proxyToWorker: true,
+          output: { format: 'image/png' as const, quality: 1 },
+          progress: (_key: string, current: number, total: number) => {
+            if (total > 0) setProgress(Math.round((current / total) * 100));
+          },
+        });
+      }
 
       setProgress(100);
       return blob;

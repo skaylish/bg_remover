@@ -6,9 +6,9 @@ import { useEffect } from 'react';
 export function ModelPreloader() {
   useEffect(() => {
     import('@imgly/background-removal').then(({ preload }) => {
-      preload({ model: 'isnet', device: 'gpu', proxyToWorker: true }).catch(() => {
-        // GPU 실패 시 CPU fallback으로 재시도
-        preload({ model: 'isnet', device: 'cpu', proxyToWorker: true }).catch(() => {});
+      const publicPath = `${window.location.origin}/bgremoval-cdn/`;
+      preload({ model: 'isnet', device: 'gpu', publicPath, proxyToWorker: true }).catch(() => {
+        preload({ model: 'isnet', device: 'cpu', publicPath, proxyToWorker: true }).catch(() => {});
       });
     });
   }, []);

@@ -259,8 +259,10 @@ export function BatchEditor({ dict }: { dict?: any }) {
     updateItem(item.id, { status: 'processing', progress: 0 });
     try {
       const { removeBackground } = await import('@imgly/background-removal');
+      const publicPath = `${window.location.origin}/bgremoval-cdn/`;
       const baseOpts = {
         model: 'isnet' as const,
+        publicPath,
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
         progress: (_key: string, current: number, total: number) => {

@@ -8,6 +8,15 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.googleusercontent.com' },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        // staticimgly.com CDN이 한국에서 차단될 경우 Vercel 서버를 통해 프록시
+        source: '/bgremoval-cdn/:path*',
+        destination: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/:path*',
+      },
+    ];
+  },
   async headers() {
     return [
       {
