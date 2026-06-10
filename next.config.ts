@@ -23,11 +23,19 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    // COOP/COEP는 middleware.ts에서 처리 (App Router 동적 경로 매칭 신뢰성)
+    // COOP/COEP는 middleware.ts가 주 경로. 아래는 백업.
+    const coepHeaders = [
+      { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+      { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
+    ];
     const cacheHeaders = [
       { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
     ];
     return [
+      { source: "/:lang/batch",          headers: coepHeaders },
+      { source: "/:lang/batch/:rest*",   headers: coepHeaders },
+      { source: "/:lang/editor",         headers: coepHeaders },
+      { source: "/:lang/editor/:rest*",  headers: coepHeaders },
       // 프록시 경로: 모델 파일 영구 캐싱
       { source: "/bgremoval-cdn/:path*",        headers: cacheHeaders },
       { source: "/(.*)/bgremoval-cdn/:path*",   headers: cacheHeaders },

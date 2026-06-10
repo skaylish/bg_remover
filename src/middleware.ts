@@ -4,17 +4,18 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-  response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
+
+  const { pathname } = request.nextUrl;
+  // /<lang>/batch, /<lang>/editor 및 그 하위 경로
+  if (/\/(batch|editor)(\/|$)/.test(pathname)) {
+    response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+    response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
+  }
+
   return response;
 }
 
 export const config = {
-  // /ko/editor, /en/editor, /ko/batch, /en/batch 등 (정확 경로 + 하위 경로 모두)
-  matcher: [
-    '/:lang/editor',
-    '/:lang/editor/:path*',
-    '/:lang/batch',
-    '/:lang/batch/:path*',
-  ],
+  // 정적 에셋(_next/static, 이미지 등) 제외한 모든 경로에서 실행
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
