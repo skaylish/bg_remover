@@ -34,7 +34,7 @@ export function useBackgroundRemoval() {
     try {
       const { removeBackground } = await import('@imgly/background-removal');
 
-      const publicPath = `${window.location.origin}/bgremoval-cdn/`;
+      const publicPath = `${window.location.origin}/bgmodel/`;
       const baseOpts = {
         debug: false,
         model: 'isnet' as const,

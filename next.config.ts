@@ -11,13 +11,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        // 루트 요청 → Edge 스트리밍 프록시 (응답 크기 제한 없음)
-        source: '/bgremoval-cdn/:path*',
-        destination: '/api/bgremoval-cdn/:path*',
-      },
-      {
-        // worker가 페이지 경로(/ko/ 등) 기준으로 상대경로 해석하는 경우
-        source: '/(.*)/bgremoval-cdn/:path*',
+        // 모델 프록시 → Edge 라우트 (proxy.ts에서 /bgmodel 리다이렉트 제외 처리)
+        source: '/bgmodel/:path*',
         destination: '/api/bgremoval-cdn/:path*',
       },
     ];
@@ -28,9 +23,8 @@ const nextConfig: NextConfig = {
       { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
     ];
     return [
-      // 프록시 경로: 모델 파일 영구 캐싱
-      { source: "/bgremoval-cdn/:path*",        headers: cacheHeaders },
-      { source: "/(.*)/bgremoval-cdn/:path*",   headers: cacheHeaders },
+      // 모델 파일 영구 캐싱
+      { source: "/bgmodel/:path*", headers: cacheHeaders },
     ];
   },
 };
