@@ -5,7 +5,10 @@
       "downloading_model": "Downloading AI model on first run",
       "processing": "Processing",
       "processing_failed": "Processing failure",
-      "restart": "Restart"
+      "restart": "Restart",
+      "downloading_model_title": "Downloading AI model...",
+      "downloading_model_hint": "Downloaded only once; subsequent runs are instant",
+      "download_label": "Downloading"
     },
     "topbar": {
       "go_back": "Go back",
@@ -348,6 +351,8 @@
     "status_error": "Failed",
     "card_download": "Download",
     "card_remove": "Remove",
-    "error_processing": "Processing failed"
+    "error_processing": "Processing failed",
+    "model_downloading": "Downloading AI model...",
+    "model_download_hint": "Downloaded only once; subsequent runs are instant"
   }
 }

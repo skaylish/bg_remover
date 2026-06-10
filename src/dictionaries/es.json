@@ -5,7 +5,10 @@
       "downloading_model": "Descargando modelo de IA en el primer inicio",
       "processing": "Procesando",
       "processing_failed": "Fallo de procesamiento",
-      "restart": "Reiniciar"
+      "restart": "Reiniciar",
+      "downloading_model_title": "Descargando modelo de IA...",
+      "downloading_model_hint": "Se descarga solo una vez; las siguientes ejecuciones son instantáneas",
+      "download_label": "Descargando"
     },
     "topbar": {
       "go_back": "Volver",
@@ -348,6 +351,8 @@
     "status_error": "Error",
     "card_download": "Descargar",
     "card_remove": "Eliminar",
-    "error_processing": "Error de procesamiento"
+    "error_processing": "Error de procesamiento",
+    "model_downloading": "Descargando modelo de IA...",
+    "model_download_hint": "Se descarga solo una vez; las siguientes ejecuciones son instantáneas"
   }
 }

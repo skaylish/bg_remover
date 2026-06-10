@@ -72,7 +72,7 @@ export function EditorLayout({ dict }: { dict?: any }) {
 
   const useCredit = useCreditStore((s) => s.useCredit);
 
-  const { process, progress } = useBackgroundRemoval();
+  const { process, progress, modelProgress, isDownloadingModel } = useBackgroundRemoval();
   const canvasRef = useRef<CanvasEditorHandle>(null);
   const [editorReady, setEditorReady] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
@@ -82,7 +82,10 @@ export function EditorLayout({ dict }: { dict?: any }) {
   const t = dict?.editor?.layout || {
     removing_bg: 'AI 배경 제거 중...',
     downloading_model: '첫 실행 시 AI 모델을 다운로드합니다',
+    downloading_model_title: 'AI 모델 다운로드 중...',
+    downloading_model_hint: '최초 1회만 다운로드되며, 이후에는 즉시 처리됩니다',
     processing: '처리 중',
+    download_label: '다운로드 중',
     processing_failed: '처리 실패',
     restart: '다시 시작'
   };
@@ -183,9 +186,18 @@ export function EditorLayout({ dict }: { dict?: any }) {
                 <LoadingSpinner size={36} />
               </div>
               <div className="w-64 text-center">
-                <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{t.removing_bg}</p>
-                <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>{t.downloading_model}</p>
-                <ProgressBar progress={progress} label={t.processing} />
+                {isDownloadingModel ? (
+                  <>
+                    <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{t.downloading_model_title}</p>
+                    <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>{t.downloading_model_hint}</p>
+                    <ProgressBar progress={modelProgress} label={t.download_label} />
+                  </>
+                ) : (
+                  <>
+                    <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{t.removing_bg}</p>
+                    <ProgressBar progress={progress} label={t.processing} />
+                  </>
+                )}
               </div>
             </div>
           )}

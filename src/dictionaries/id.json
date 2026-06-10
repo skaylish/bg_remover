@@ -5,7 +5,10 @@
       "downloading_model": "Mengunduh model AI pada awal",
       "processing": "Memproses",
       "processing_failed": "Gagal memproses",
-      "restart": "Mulai ulang"
+      "restart": "Mulai ulang",
+      "downloading_model_title": "Mengunduh model AI...",
+      "downloading_model_hint": "Hanya diunduh sekali; proses berikutnya instan",
+      "download_label": "Mengunduh"
     },
     "topbar": {
       "go_back": "Kembali",
@@ -348,6 +351,8 @@
     "status_error": "Gagal",
     "card_download": "Unduh",
     "card_remove": "Hapus",
-    "error_processing": "Gagal diproses"
+    "error_processing": "Gagal diproses",
+    "model_downloading": "Mengunduh model AI...",
+    "model_download_hint": "Hanya diunduh sekali; proses berikutnya instan"
   }
 }

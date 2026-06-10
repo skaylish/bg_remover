@@ -191,10 +191,14 @@ export function BatchEditor({ dict }: { dict?: any }) {
     card_download: '다운로드',
     card_remove: '삭제',
     error_processing: '처리 실패',
+    model_downloading: 'AI 모델 다운로드 중...',
+    model_download_hint: '최초 1회만 다운로드되며, 이후에는 즉시 처리됩니다',
   };
 
   const [items, setItems] = useState<BatchItem[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  // 모델 다운로드는 전역 1회 — 개별 이미지 진행과 분리해 별도 표시
+  const [modelDownload, setModelDownload] = useState<{ active: boolean; progress: number }>({ active: false, progress: 0 });
   const abortRef = useRef(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [planChecked, setPlanChecked] = useState(false);
@@ -265,8 +269,14 @@ export function BatchEditor({ dict }: { dict?: any }) {
         publicPath,
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
-        progress: (_key: string, current: number, total: number) => {
-          if (total > 0) updateItem(item.id, { progress: Math.round((current / total) * 100) });
+        // fetch: → 모델 다운로드(전역 배너), compute: → 개별 이미지 진행
+        progress: (key: string, current: number, total: number) => {
+          if (key.startsWith('fetch:')) {
+            if (total > 0) setModelDownload({ active: true, progress: Math.round((current / total) * 100) });
+          } else {
+            setModelDownload((s) => (s.active ? { active: false, progress: 0 } : s));
+            if (total > 0) updateItem(item.id, { progress: Math.round((current / total) * 100) });
+          }
         },
       };
       let blob: Blob;
@@ -286,7 +296,6 @@ export function BatchEditor({ dict }: { dict?: any }) {
   };
 
   const runAll = async () => {
-    console.log('[batch] crossOriginIsolated:', self.crossOriginIsolated, '| webgpu:', !!(navigator as any).gpu, '| cores:', navigator.hardwareConcurrency);
     setIsRunning(true);
     abortRef.current = false;
     const queue = items.filter((i) => i.status === 'pending' || i.status === 'error');
@@ -295,6 +304,7 @@ export function BatchEditor({ dict }: { dict?: any }) {
       if (abortRef.current) break;
       await Promise.all(queue.slice(i, i + CONCURRENCY).map(processOne));
     }
+    setModelDownload({ active: false, progress: 0 });
     setIsRunning(false);
   };
 
@@ -427,6 +437,25 @@ export function BatchEditor({ dict }: { dict?: any }) {
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t.drop_hint}</p>
           </div>
         </div>
+
+        {/* 모델 다운로드 배너 (전역 1회) */}
+        {modelDownload.active && (
+          <div className="rounded-xl p-4 flex items-center gap-4"
+            style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.3)' }}>
+            <Loader2 size={20} className="animate-spin flex-shrink-0" style={{ color: 'var(--accent-glow)' }} />
+            <div className="flex-1">
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t.model_downloading}</span>
+                <span className="text-xs font-medium" style={{ color: 'var(--accent-glow)' }}>{modelDownload.progress}%</span>
+              </div>
+              <div className="w-full rounded-full overflow-hidden" style={{ height: '4px', background: 'var(--bg-border)' }}>
+                <div className="h-full rounded-full transition-all duration-300"
+                  style={{ width: `${modelDownload.progress}%`, background: 'var(--accent-gradient)' }} />
+              </div>
+              <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-subtle)' }}>{t.model_download_hint}</p>
+            </div>
+          </div>
+        )}
 
         {/* Action bar */}
         {total > 0 && (

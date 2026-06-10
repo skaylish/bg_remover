@@ -5,7 +5,10 @@
       "downloading_model": "첫 실행 시 AI 모델을 다운로드합니다",
       "processing": "처리 중",
       "processing_failed": "처리 실패",
-      "restart": "다시 시작"
+      "restart": "다시 시작",
+      "downloading_model_title": "AI 모델 다운로드 중...",
+      "downloading_model_hint": "최초 1회만 다운로드되며, 이후에는 즉시 처리됩니다",
+      "download_label": "다운로드 중"
     },
     "topbar": {
       "go_back": "돌아가기",
@@ -348,6 +351,8 @@
     "status_error": "실패",
     "card_download": "다운로드",
     "card_remove": "삭제",
-    "error_processing": "처리 실패"
+    "error_processing": "처리 실패",
+    "model_downloading": "AI 모델 다운로드 중...",
+    "model_download_hint": "최초 1회만 다운로드되며, 이후에는 즉시 처리됩니다"
   }
 }
