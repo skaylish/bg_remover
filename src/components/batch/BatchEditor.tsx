@@ -259,15 +259,22 @@ export function BatchEditor({ dict }: { dict?: any }) {
     updateItem(item.id, { status: 'processing', progress: 0 });
     try {
       const { removeBackground } = await import('@imgly/background-removal');
-      const blob = await removeBackground(item.file, {
-        model: 'isnet_fp16' as const,
-        device: 'gpu' as const,
+      const baseOpts = {
+        model: 'isnet' as const,
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
         progress: (_key: string, current: number, total: number) => {
           if (total > 0) updateItem(item.id, { progress: Math.round((current / total) * 100) });
         },
-      });
+      };
+      let blob: Blob;
+      try {
+        blob = await removeBackground(item.file, { ...baseOpts, device: 'gpu' as const });
+      } catch {
+        // GPU 실패 시 CPU fallback
+        updateItem(item.id, { progress: 0 });
+        blob = await removeBackground(item.file, { ...baseOpts, device: 'cpu' as const });
+      }
       const resultUrl = URL.createObjectURL(blob);
       updateItem(item.id, { status: 'done', resultBlob: blob, resultUrl, progress: 100 });
     } catch (err) {
