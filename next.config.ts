@@ -23,19 +23,11 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    const coepHeaders = [
-      { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-      // credentialless: isolation 유지하면서 CORP 없는 cross-origin 리소스(구글 아바타 등) 허용
-      { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
-    ];
+    // COOP/COEP는 middleware.ts에서 처리 (App Router 동적 경로 매칭 신뢰성)
     const cacheHeaders = [
       { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
     ];
     return [
-      // 에디터·배치 페이지: COOP/COEP로 SharedArrayBuffer 활성화 (멀티스레드)
-      { source: "/editor(.*)",         headers: coepHeaders },
-      { source: "/:lang/editor(.*)",   headers: coepHeaders },
-      { source: "/:lang/batch(.*)",    headers: coepHeaders },
       // 프록시 경로: 모델 파일 영구 캐싱
       { source: "/bgremoval-cdn/:path*",        headers: cacheHeaders },
       { source: "/(.*)/bgremoval-cdn/:path*",   headers: cacheHeaders },
