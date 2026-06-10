@@ -11,8 +11,12 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        // staticimgly.com CDN이 한국에서 차단될 경우 Vercel 서버를 통해 프록시
         source: '/bgremoval-cdn/:path*',
+        destination: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/:path*',
+      },
+      {
+        // worker가 현재 페이지 경로(/ko/ 등)를 기준으로 상대경로 해석하는 경우
+        source: '/:lang/bgremoval-cdn/:path*',
         destination: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/:path*',
       },
     ];

@@ -260,6 +260,7 @@ export function BatchEditor({ dict }: { dict?: any }) {
     try {
       const { removeBackground } = await import('@imgly/background-removal');
       const publicPath = `${window.location.origin}/bgremoval-cdn/`;
+      console.log('[batch] publicPath:', publicPath);
       const baseOpts = {
         model: 'isnet' as const,
         publicPath,
