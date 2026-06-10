@@ -59,7 +59,14 @@ export async function proxy(request: NextRequest) {
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
-  if (pathnameHasLocale) return response;
+  if (pathnameHasLocale) {
+    // 배치·에디터 경로: crossOriginIsolated 활성화 (멀티스레드 WASM)
+    if (/\/(batch|editor)(\/|$)/.test(pathname)) {
+      response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+      response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
+    }
+    return response;
+  }
 
   const locale = getLocale(request);
   request.nextUrl.pathname = `/${locale}${pathname === '/' ? '' : pathname}`;
