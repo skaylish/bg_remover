@@ -11,14 +11,14 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        // 루트에서 직접 요청
+        // 루트 요청 → Edge 스트리밍 프록시 (응답 크기 제한 없음)
         source: '/bgremoval-cdn/:path*',
-        destination: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/:path*',
+        destination: '/api/bgremoval-cdn/:path*',
       },
       {
-        // worker가 페이지 경로 기준으로 상대경로 해석하는 경우 (임의 depth 처리)
+        // worker가 페이지 경로(/ko/ 등) 기준으로 상대경로 해석하는 경우
         source: '/(.*)/bgremoval-cdn/:path*',
-        destination: 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist/:path*',
+        destination: '/api/bgremoval-cdn/:path*',
       },
     ];
   },
