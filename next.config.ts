@@ -25,7 +25,8 @@ const nextConfig: NextConfig = {
   async headers() {
     const coepHeaders = [
       { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-      { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+      // credentialless: isolation 유지하면서 CORP 없는 cross-origin 리소스(구글 아바타 등) 허용
+      { key: "Cross-Origin-Embedder-Policy", value: "credentialless" },
     ];
     const cacheHeaders = [
       { key: "Cache-Control", value: "public, max-age=31536000, immutable" },

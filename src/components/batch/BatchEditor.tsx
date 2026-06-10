@@ -286,6 +286,7 @@ export function BatchEditor({ dict }: { dict?: any }) {
   };
 
   const runAll = async () => {
+    console.log('[batch] crossOriginIsolated:', self.crossOriginIsolated, '| webgpu:', !!(navigator as any).gpu, '| cores:', navigator.hardwareConcurrency);
     setIsRunning(true);
     abortRef.current = false;
     const queue = items.filter((i) => i.status === 'pending' || i.status === 'error');

@@ -22,6 +22,7 @@ export async function GET(
       'Content-Type': res.headers.get('Content-Type') ?? 'application/octet-stream',
       'Cache-Control': 'public, max-age=31536000, immutable',
       'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
     },
   });
 }
