@@ -267,7 +267,7 @@ export function BatchEditor({ dict }: { dict?: any }) {
       // device:'gpu' 지정 시 webgpu 어댑터 없으면 라이브러리가 자동으로 wasm 사용.
       // 수동 GPU→CPU 폴백은 'multiple initWasm' 오류를 유발하므로 사용 안 함.
       const blob = await removeBackground(item.file, {
-        model: 'isnet_fp16' as const,
+        model: 'isnet' as const,
         publicPath,
         device: 'gpu' as const,
         proxyToWorker: true,

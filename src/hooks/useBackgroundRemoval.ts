@@ -39,7 +39,7 @@ export function useBackgroundRemoval() {
       // 수동 GPU→CPU 폴백은 onnxruntime-web의 'multiple initWasm' 오류를 유발하므로 사용 안 함.
       const blob = await removeBackground(file, {
         debug: false,
-        model: 'isnet_fp16' as const,
+        model: 'isnet' as const,
         publicPath,
         device: 'gpu' as const,
         proxyToWorker: true,
