@@ -102,21 +102,21 @@ const CONTENT: Record<Lang, TermsContent> = {
       full: {
         label: '✅ 전액 환불 가능',
         items: [
-          '결제일로부터 7일 이내, 크레딧을 전혀 사용하지 않은 경우',
+          '결제일로부터 14일 이내, 크레딧을 전혀 사용하지 않은 경우',
           '서비스 오류로 인해 정상적인 이용이 불가능한 경우 (회사 귀책)',
         ],
       },
       partial: {
         label: '🔄 부분 환불',
         items: [
-          '결제일로부터 7일 이내, 일부 크레딧 사용 시: 잔여 크레딧 비율에 따라 비례 환불',
+          '결제일로부터 14일 이내, 일부 크레딧 사용 시: 잔여 크레딧 비율에 따라 비례 환불',
           '예: 100크레딧 중 30 사용 시 → 구독료의 70% 환불',
         ],
       },
       none: {
         label: '❌ 환불 불가',
         items: [
-          '결제일로부터 7일 초과 경과 후',
+          '결제일로부터 14일 초과 경과 후',
           '당월 지급된 크레딧을 전부 사용한 경우',
           '이용자의 약관 위반으로 인한 강제 해지',
         ],
@@ -206,21 +206,21 @@ const CONTENT: Record<Lang, TermsContent> = {
       full: {
         label: '✅ Full Refund',
         items: [
-          'Within 7 days of payment, if no credits have been used.',
+          'Within 14 days of payment, if no credits have been used.',
           'Service is unavailable due to a Company-attributable error.',
         ],
       },
       partial: {
         label: '🔄 Partial Refund',
         items: [
-          'Within 7 days of payment, if some credits have been used: prorated refund based on remaining credits.',
+          'Within 14 days of payment, if some credits have been used: prorated refund based on remaining credits.',
           'Example: 30 of 100 credits used → 70% of subscription fee refunded.',
         ],
       },
       none: {
         label: '❌ No Refund',
         items: [
-          'More than 7 days have passed since payment.',
+          'More than 14 days have passed since payment.',
           'All credits granted for the current period have been used.',
           'Account terminated due to violation of these Terms.',
         ],
@@ -310,21 +310,21 @@ const CONTENT: Record<Lang, TermsContent> = {
       full: {
         label: '✅ 全額返金',
         items: [
-          '決済日から7日以内、かつクレジットを一切使用していない場合',
+          '決済日から14日以内、かつクレジットを一切使用していない場合',
           '会社の帰責事由によりサービスが正常に利用できない場合',
         ],
       },
       partial: {
         label: '🔄 部分返金',
         items: [
-          '決済日から7日以内、一部クレジットを使用した場合: 残余クレジット比率に応じた按分返金',
+          '決済日から14日以内、一部クレジットを使用した場合: 残余クレジット比率に応じた按分返金',
           '例: 100クレジット中30使用 → 購読料の70%を返金',
         ],
       },
       none: {
         label: '❌ 返金不可',
         items: [
-          '決済日から7日超経過後',
+          '決済日から14日超経過後',
           '当月付与クレジットをすべて使用した場合',
           '規約違反による強制解約の場合',
         ],
@@ -414,21 +414,21 @@ const CONTENT: Record<Lang, TermsContent> = {
       full: {
         label: '✅ Reembolso Total',
         items: [
-          'Dentro de los 7 días posteriores al pago, si no se ha utilizado ningún crédito.',
+          'Dentro de los 14 días posteriores al pago, si no se ha utilizado ningún crédito.',
           'El Servicio no está disponible por causas imputables a la Empresa.',
         ],
       },
       partial: {
         label: '🔄 Reembolso Parcial',
         items: [
-          'Dentro de los 7 días posteriores al pago, si se han utilizado algunos créditos: reembolso proporcional según los créditos restantes.',
+          'Dentro de los 14 días posteriores al pago, si se han utilizado algunos créditos: reembolso proporcional según los créditos restantes.',
           'Ejemplo: 30 de 100 créditos usados → reembolso del 70% de la cuota.',
         ],
       },
       none: {
         label: '❌ Sin Reembolso',
         items: [
-          'Han transcurrido más de 7 días desde el pago.',
+          'Han transcurrido más de 14 días desde el pago.',
           'Se han consumido todos los créditos del período actual.',
           'La cuenta fue cancelada por infracción de estos Términos.',
         ],
@@ -518,21 +518,21 @@ const CONTENT: Record<Lang, TermsContent> = {
       full: {
         label: '✅ Pengembalian Dana Penuh',
         items: [
-          'Dalam 7 hari setelah pembayaran, jika tidak ada kredit yang digunakan.',
+          'Dalam 14 hari setelah pembayaran, jika tidak ada kredit yang digunakan.',
           'Layanan tidak tersedia karena kesalahan yang dapat diatribusikan kepada Perusahaan.',
         ],
       },
       partial: {
         label: '🔄 Pengembalian Dana Sebagian',
         items: [
-          'Dalam 7 hari setelah pembayaran, jika sebagian kredit telah digunakan: pengembalian dana prorata berdasarkan kredit yang tersisa.',
+          'Dalam 14 hari setelah pembayaran, jika sebagian kredit telah digunakan: pengembalian dana prorata berdasarkan kredit yang tersisa.',
           'Contoh: 30 dari 100 kredit digunakan → 70% biaya langganan dikembalikan.',
         ],
       },
       none: {
         label: '❌ Tidak Ada Pengembalian Dana',
         items: [
-          'Lebih dari 7 hari telah berlalu sejak pembayaran.',
+          'Lebih dari 14 hari telah berlalu sejak pembayaran.',
           'Semua kredit yang diberikan untuk periode saat ini telah digunakan.',
           'Akun dihentikan karena pelanggaran Syarat ini.',
         ],
