@@ -321,7 +321,8 @@
     "privacy": "개인정보처리방침",
     "terms": "이용약관",
     "business": "사업자 정보",
-    "contact": "문의하기"
+    "contact": "문의하기",
+    "license_prefix": "배경 제거 AI 모델"
   },
   "batch": {
     "title": "일괄 배경 제거",

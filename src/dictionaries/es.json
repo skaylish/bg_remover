@@ -321,7 +321,8 @@
     "privacy": "Política de Privacidad",
     "terms": "Términos de Servicio",
     "business": "Información Empresarial",
-    "contact": "Contáctenos"
+    "contact": "Contáctenos",
+    "license_prefix": "Modelo de IA de eliminación de fondo"
   },
   "batch": {
     "title": "Eliminación en lote",

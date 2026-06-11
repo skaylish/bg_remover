@@ -321,7 +321,8 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "business": "Business Info",
-    "contact": "Contact Us"
+    "contact": "Contact Us",
+    "license_prefix": "Background removal AI model"
   },
   "batch": {
     "title": "Batch Background Removal",

@@ -321,7 +321,8 @@
     "privacy": "プライバシーポリシー",
     "terms": "利用規約",
     "business": "事業者情報",
-    "contact": "お問い合わせ"
+    "contact": "お問い合わせ",
+    "license_prefix": "背景除去AIモデル"
   },
   "batch": {
     "title": "一括背景削除",

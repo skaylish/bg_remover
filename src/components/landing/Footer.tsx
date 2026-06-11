@@ -25,6 +25,7 @@ export function Footer({ dict }: { dict?: any }) {
     terms: '이용약관',
     business: '사업자 정보',
     contact: '문의하기',
+    license_prefix: '배경 제거 AI 모델',
   };
 
   return (
@@ -86,6 +87,26 @@ export function Footer({ dict }: { dict?: any }) {
             );
           })}
         </div>
+      </div>
+
+      {/* 오픈소스 모델 라이선스 고지 (BiRefNet, MIT) */}
+      <div
+        className="max-w-6xl mx-auto mt-8 pt-6 text-center"
+        style={{ borderTop: '1px solid var(--bg-border)' }}
+      >
+        <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-subtle)' }}>
+          {t.license_prefix ?? '배경 제거 AI 모델'}:{' '}
+          <a
+            href="https://github.com/ZhengPeng7/BiRefNet"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            BiRefNet
+          </a>{' '}
+          (MIT License) © Peng Zheng
+        </p>
       </div>
     </footer>
   );

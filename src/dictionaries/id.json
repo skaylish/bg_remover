@@ -321,7 +321,8 @@
     "privacy": "Kebijakan Privasi",
     "terms": "Syarat Layanan",
     "business": "Informasi Bisnis",
-    "contact": "Hubungi Kami"
+    "contact": "Hubungi Kami",
+    "license_prefix": "Model AI penghapus latar"
   },
   "batch": {
     "title": "Penghapusan Latar Massal",
