@@ -353,6 +353,9 @@
     "card_remove": "削除",
     "error_processing": "処理失敗",
     "model_downloading": "AIモデルをダウンロード中...",
-    "model_download_hint": "初回のみダウンロードされ、以降は即座に処理されます"
+    "model_download_hint": "初回のみダウンロードされ、以降は即座に処理されます",
+    "download_selected": "選択ダウンロード ({n}件)",
+    "select_all": "すべて選択",
+    "deselect_all": "選択解除"
   }
 }

@@ -353,6 +353,9 @@
     "card_remove": "Hapus",
     "error_processing": "Gagal diproses",
     "model_downloading": "Mengunduh model AI...",
-    "model_download_hint": "Hanya diunduh sekali; proses berikutnya instan"
+    "model_download_hint": "Hanya diunduh sekali; proses berikutnya instan",
+    "download_selected": "Unduh terpilih ({n})",
+    "select_all": "Pilih semua",
+    "deselect_all": "Batal pilih"
   }
 }

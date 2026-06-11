@@ -353,6 +353,9 @@
     "card_remove": "Eliminar",
     "error_processing": "Error de procesamiento",
     "model_downloading": "Descargando modelo de IA...",
-    "model_download_hint": "Se descarga solo una vez; las siguientes ejecuciones son instantáneas"
+    "model_download_hint": "Se descarga solo una vez; las siguientes ejecuciones son instantáneas",
+    "download_selected": "Descargar seleccionados ({n})",
+    "select_all": "Seleccionar todo",
+    "deselect_all": "Deseleccionar"
   }
 }

@@ -353,6 +353,9 @@
     "card_remove": "Remove",
     "error_processing": "Processing failed",
     "model_downloading": "Downloading AI model...",
-    "model_download_hint": "Downloaded only once; subsequent runs are instant"
+    "model_download_hint": "Downloaded only once; subsequent runs are instant",
+    "download_selected": "Download selected ({n})",
+    "select_all": "Select all",
+    "deselect_all": "Deselect all"
   }
 }

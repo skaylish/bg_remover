@@ -5,7 +5,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
   Upload, X, Download, CheckCircle, AlertCircle,
-  Loader2, ImageIcon, PackageOpen, Trash2, Lock
+  Loader2, ImageIcon, PackageOpen, Trash2, Lock, Check, CheckSquare, Square
 } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
 import { PurchaseModal } from '@/components/shared/PurchaseModal';
@@ -75,26 +75,44 @@ function StatChip({ label, value, color }: { label: string; value: number; color
 }
 
 // ─── Batch card ───────────────────────────────────────────────────────────────
-function BatchCard({ item, onRemove, onDownload, labels, statusLabels }: {
+function BatchCard({ item, onRemove, onDownload, selected, onToggleSelect, labels, statusLabels }: {
   item: BatchItem;
   onRemove: () => void;
   onDownload: () => void;
+  selected: boolean;
+  onToggleSelect: () => void;
   labels: { download: string; remove: string; error: string };
   statusLabels: { pending: string; done: string; error: string };
 }) {
   const [hover, setHover] = useState(false);
+  const isDone = item.status === 'done';
 
   return (
     <div
       className="relative rounded-2xl overflow-hidden group transition-all duration-200"
       style={{
         background: 'var(--bg-surface)',
-        border: `1px solid ${item.status === 'done' ? 'rgba(34,211,160,0.25)' : item.status === 'error' ? 'rgba(248,113,113,0.25)' : 'var(--bg-border)'}`,
+        border: `1px solid ${selected ? 'var(--accent-primary)' : item.status === 'done' ? 'rgba(34,211,160,0.25)' : item.status === 'error' ? 'rgba(248,113,113,0.25)' : 'var(--bg-border)'}`,
+        boxShadow: selected ? '0 0 0 1px var(--accent-primary)' : 'none',
         aspectRatio: '1',
       }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
+      {isDone && (
+        <button
+          onClick={onToggleSelect}
+          className="absolute top-2 left-2 z-10 w-6 h-6 rounded-md flex items-center justify-center transition-all hover:scale-110"
+          style={{
+            background: selected ? 'var(--accent-primary)' : 'rgba(10,10,15,0.55)',
+            border: `1.5px solid ${selected ? 'var(--accent-primary)' : 'rgba(255,255,255,0.5)'}`,
+            backdropFilter: 'blur(2px)',
+          }}
+          title={labels.download}
+        >
+          {selected && <Check size={14} color="#fff" strokeWidth={3} />}
+        </button>
+      )}
       <div className="absolute inset-0">
         {item.status === 'done' && item.resultUrl ? (
           <div className="w-full h-full checker-bg">
@@ -182,6 +200,9 @@ export function BatchEditor({ dict }: { dict?: any }) {
     run_done: '모두 완료됨',
     stop: '중지',
     download_zip: '전체 ZIP 다운로드 ({n}개)',
+    download_selected: '선택 다운로드 ({n}개)',
+    select_all: '전체 선택',
+    deselect_all: '선택 해제',
     clear_all: '전체 삭제',
     progress_label: '전체 진행률',
     empty: '아직 이미지가 없습니다',
@@ -199,6 +220,8 @@ export function BatchEditor({ dict }: { dict?: any }) {
   const [isRunning, setIsRunning] = useState(false);
   // 모델 다운로드는 전역 1회 — 개별 이미지 진행과 분리해 별도 표시
   const [modelDownload, setModelDownload] = useState<{ active: boolean; progress: number }>({ active: false, progress: 0 });
+  // 선택 다운로드용 — 완료된 이미지 id 집합
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const abortRef = useRef(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [planChecked, setPlanChecked] = useState(false);
@@ -243,6 +266,10 @@ export function BatchEditor({ dict }: { dict?: any }) {
       if (item?.resultUrl)  URL.revokeObjectURL(item.resultUrl);
       return prev.filter((i) => i.id !== id);
     });
+    setSelected((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev); next.delete(id); return next;
+    });
   }, []);
 
   const clearAll = useCallback(() => {
@@ -253,6 +280,7 @@ export function BatchEditor({ dict }: { dict?: any }) {
       });
       return [];
     });
+    setSelected(new Set());
   }, []);
 
   const updateItem = (id: string, patch: Partial<BatchItem>) => {
@@ -321,8 +349,9 @@ export function BatchEditor({ dict }: { dict?: any }) {
     downloadBlob(item.resultBlob, item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png');
   }, [useCreditDB]);
 
-  const downloadAll = async () => {
-    const doneItems = items.filter((i) => i.status === 'done' && i.resultBlob);
+  // 완료 이미지 목록을 크레딧 차감 후 다운로드 (1장이면 PNG, 여러 장이면 ZIP)
+  const downloadItems = async (targets: BatchItem[]) => {
+    const doneItems = targets.filter((i) => i.status === 'done' && i.resultBlob);
     if (!doneItems.length) return;
     const paid: BatchItem[] = [];
     for (const item of doneItems) {
@@ -330,14 +359,36 @@ export function BatchEditor({ dict }: { dict?: any }) {
       if (!ok) { setShowPurchaseModal(true); if (!paid.length) return; break; }
       paid.push(item);
     }
+    const nameOf = (item: BatchItem) => item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
+    if (paid.length === 1) {
+      downloadBlob(paid[0].resultBlob!, nameOf(paid[0]));
+      return;
+    }
     const { default: JSZip } = await import('jszip');
     const zip = new JSZip();
-    paid.forEach((item) => {
-      zip.file(item.file.name.replace(/\.[^/.]+$/, '') + '_nobg.png', item.resultBlob!);
-    });
+    paid.forEach((item) => zip.file(nameOf(item), item.resultBlob!));
     const blob = await zip.generateAsync({ type: 'blob' });
     downloadBlob(blob, 'removed-backgrounds.zip');
   };
+
+  const downloadAll = () => downloadItems(items);
+  const downloadSelected = () => downloadItems(items.filter((i) => selected.has(i.id)));
+
+  // 선택 토글
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const doneIds = items.filter((i) => i.status === 'done').map((i) => i.id);
+  const allSelected = doneIds.length > 0 && doneIds.every((id) => selected.has(id));
+  const toggleSelectAll = () => {
+    setSelected(allSelected ? new Set() : new Set(doneIds));
+  };
+  const selectedCount = doneIds.filter((id) => selected.has(id)).length;
 
   const statusLabels = { pending: t.status_pending, done: t.status_done, error: t.status_error };
   const cardLabels   = { download: t.card_download, remove: t.card_remove, error: t.status_error };
@@ -479,6 +530,28 @@ export function BatchEditor({ dict }: { dict?: any }) {
 
             {done > 0 && (
               <button
+                onClick={toggleSelectAll}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all"
+                style={{ background: 'var(--bg-raised)', color: 'var(--text-muted)', border: '1px solid var(--bg-border)' }}
+              >
+                {allSelected ? <CheckSquare size={16} /> : <Square size={16} />}
+                {allSelected ? t.deselect_all : t.select_all}
+              </button>
+            )}
+
+            {selectedCount > 0 && (
+              <button
+                onClick={downloadSelected}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
+                style={{ background: 'rgba(99,102,241,0.15)', color: 'var(--accent-glow)', border: '1px solid rgba(99,102,241,0.35)' }}
+              >
+                <Download size={16} />
+                {t.download_selected.replace('{n}', String(selectedCount))}
+              </button>
+            )}
+
+            {done > 0 && (
+              <button
                 onClick={downloadAll}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
                 style={{ background: 'rgba(34,211,160,0.12)', color: 'var(--success)', border: '1px solid rgba(34,211,160,0.3)' }}
@@ -530,6 +603,8 @@ export function BatchEditor({ dict }: { dict?: any }) {
                 item={item}
                 onRemove={() => removeItem(item.id)}
                 onDownload={() => handleDownloadOne(item)}
+                selected={selected.has(item.id)}
+                onToggleSelect={() => toggleSelect(item.id)}
                 labels={cardLabels}
                 statusLabels={statusLabels}
               />

@@ -353,6 +353,9 @@
     "card_remove": "삭제",
     "error_processing": "처리 실패",
     "model_downloading": "AI 모델 다운로드 중...",
-    "model_download_hint": "최초 1회만 다운로드되며, 이후에는 즉시 처리됩니다"
+    "model_download_hint": "최초 1회만 다운로드되며, 이후에는 즉시 처리됩니다",
+    "download_selected": "선택 다운로드 ({n}개)",
+    "select_all": "전체 선택",
+    "deselect_all": "선택 해제"
   }
 }
