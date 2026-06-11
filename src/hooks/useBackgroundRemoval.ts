@@ -36,11 +36,11 @@ export function useBackgroundRemoval() {
 
       const publicPath = `${window.location.origin}/bgmodel/`;
       // CPU(wasm) 단일 경로 — WebGPU는 이 환경에서 불안정(디바이스 손실/빈 출력/크래시).
-      // crossOriginIsolated=true이므로 멀티스레드 wasm으로 충분히 빠름.
-      // 양자화 모델(quint8)이 CPU에 최적(정확·경량·빠름).
+      // 풀 정밀도 isnet(fp32)은 CPU에서도 참조 정밀도 그대로 고품질 출력.
+      // crossOriginIsolated=true이므로 멀티스레드 wasm으로 처리.
       const blob = await removeBackground(file, {
         debug: false,
-        model: 'isnet_quint8' as const,
+        model: 'isnet' as const,
         publicPath,
         device: 'cpu' as const,
         proxyToWorker: true,

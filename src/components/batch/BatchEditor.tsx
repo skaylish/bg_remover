@@ -292,10 +292,10 @@ export function BatchEditor({ dict }: { dict?: any }) {
     try {
       const { removeBackground } = await import('@imgly/background-removal');
       const publicPath = `${window.location.origin}/bgmodel/`;
-      // CPU(wasm) 단일 경로 — WebGPU는 이 환경에서 불안정. crossOriginIsolated로
-      // 멀티스레드 wasm 사용. 양자화 모델(quint8)이 CPU에 최적.
+      // CPU(wasm) 단일 경로 — WebGPU 불안정 회피. 풀 정밀도 isnet(fp32)로 고품질.
+      // crossOriginIsolated=true로 멀티스레드 wasm 사용.
       const blob = await removeBackground(item.file, {
-        model: 'isnet_quint8' as const,
+        model: 'isnet' as const,
         publicPath,
         device: 'cpu' as const,
         proxyToWorker: true,
