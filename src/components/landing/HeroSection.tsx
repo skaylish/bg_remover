@@ -119,12 +119,12 @@ export function HeroSection({ dict }: { dict?: any }) {
             className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
             style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(168,85,247,0.14) 100%)', border: '1px solid rgba(129,140,248,0.4)' }}
           >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(129,140,248,0.2)' }}>
-              <Gift size={18} style={{ color: '#a78bfa' }} />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(129,140,248,0.2)' }}>
+              <Gift size={22} style={{ color: '#a78bfa' }} />
             </div>
-            <div className="flex flex-col gap-0.5 text-left">
-              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{t.promo_signup_credits}</span>
-              <span className="text-xs leading-snug" style={{ color: 'rgba(163,163,163,0.9)', wordBreak: 'keep-all' }}>{t.promo_signup_desc}</span>
+            <div className="flex flex-col gap-1 text-left">
+              <span className="text-base md:text-lg font-extrabold leading-tight" style={{ color: 'var(--text-primary)' }}>{t.promo_signup_credits}</span>
+              <span className="text-[13px] leading-snug" style={{ color: 'rgba(186,186,186,0.95)', wordBreak: 'keep-all' }}>{t.promo_signup_desc}</span>
             </div>
           </div>
           {/* 로컬 처리 / 프라이버시 */}
@@ -132,12 +132,12 @@ export function HeroSection({ dict }: { dict?: any }) {
             className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
             style={{ background: 'linear-gradient(135deg, rgba(34,211,160,0.14) 0%, rgba(16,185,129,0.10) 100%)', border: '1px solid rgba(34,211,160,0.35)' }}
           >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(34,211,160,0.18)' }}>
-              <ShieldCheck size={18} style={{ color: '#22d3a0' }} />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(34,211,160,0.18)' }}>
+              <ShieldCheck size={22} style={{ color: '#22d3a0' }} />
             </div>
-            <div className="flex flex-col gap-0.5 text-left">
-              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{t.value_local_title}</span>
-              <span className="text-xs leading-snug" style={{ color: 'rgba(163,163,163,0.9)', wordBreak: 'keep-all' }}>{t.value_local_desc}</span>
+            <div className="flex flex-col gap-1 text-left">
+              <span className="text-base md:text-lg font-extrabold leading-tight" style={{ color: 'var(--text-primary)' }}>{t.value_local_title}</span>
+              <span className="text-[13px] leading-snug" style={{ color: 'rgba(186,186,186,0.95)', wordBreak: 'keep-all' }}>{t.value_local_desc}</span>
             </div>
           </div>
           {/* AI 비용 절감 */}
@@ -145,12 +145,12 @@ export function HeroSection({ dict }: { dict?: any }) {
             className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
             style={{ background: 'linear-gradient(135deg, rgba(170,138,255,0.16) 0%, rgba(99,102,241,0.12) 100%)', border: '1px solid rgba(129,140,248,0.4)' }}
           >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(129,140,248,0.18)' }}>
-              <Sparkles size={18} style={{ color: '#a78bfa' }} />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(129,140,248,0.18)' }}>
+              <Sparkles size={22} style={{ color: '#a78bfa' }} />
             </div>
-            <div className="flex flex-col gap-0.5 text-left">
-              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{t.value_cost_title}</span>
-              <span className="text-xs leading-snug" style={{ color: 'rgba(163,163,163,0.9)', wordBreak: 'keep-all' }}>{t.value_cost_desc}</span>
+            <div className="flex flex-col gap-1 text-left">
+              <span className="text-base md:text-lg font-extrabold leading-tight" style={{ color: 'var(--text-primary)' }}>{t.value_cost_title}</span>
+              <span className="text-[13px] leading-snug" style={{ color: 'rgba(186,186,186,0.95)', wordBreak: 'keep-all' }}>{t.value_cost_desc}</span>
             </div>
           </div>
         </div>
