@@ -7,8 +7,8 @@ export function ModelPreloader() {
   useEffect(() => {
     import('@imgly/background-removal').then(({ preload }) => {
       const publicPath = `${window.location.origin}/bgmodel/`;
-      preload({ model: 'isnet', device: 'gpu', publicPath, proxyToWorker: true }).catch(() => {
-        preload({ model: 'isnet', device: 'cpu', publicPath, proxyToWorker: true }).catch(() => {});
+      preload({ model: 'isnet_quint8', device: 'gpu', publicPath, proxyToWorker: true }).catch(() => {
+        preload({ model: 'isnet_quint8', device: 'cpu', publicPath, proxyToWorker: true }).catch(() => {});
       });
     });
   }, []);

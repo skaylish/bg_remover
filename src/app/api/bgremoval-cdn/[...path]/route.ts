@@ -1,5 +1,7 @@
 // imgly 모델 파일 프록시 — staticimgly.com CDN 한국 차단 우회
-export const runtime = 'edge';
+// Node 런타임 스트리밍: 버퍼링 없이 전달해 Edge 타임아웃(504) 회피
+export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 const UPSTREAM_BASE = 'https://staticimgly.com/@imgly/background-removal-data/1.7.0/dist';
 
@@ -11,23 +13,19 @@ export async function GET(
   const upstream = `${UPSTREAM_BASE}/${path}`;
 
   const res = await fetch(upstream);
-  if (!res.ok) {
-    return new Response(null, { status: res.status });
+  if (!res.ok || !res.body) {
+    return new Response(null, { status: res.status || 502 });
   }
 
-  // arrayBuffer()는 Content-Encoding(gzip/br)을 반드시 해제하므로
-  // 압축 바이트가 그대로 전달돼 크기 검증이 실패하던 문제를 방지.
-  // 청크는 최대 4MB라 버퍼링 안전.
-  const buf = await res.arrayBuffer();
+  const headers = new Headers();
+  headers.set('Content-Type', res.headers.get('Content-Type') ?? 'application/octet-stream');
+  // upstream은 항상 비압축 Content-Length를 제공 — 그대로 전달해 클라이언트가 완전성 검증
+  const len = res.headers.get('Content-Length');
+  if (len) headers.set('Content-Length', len);
+  headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  headers.set('Access-Control-Allow-Origin', '*');
+  headers.set('Cross-Origin-Resource-Policy', 'cross-origin');
 
-  return new Response(buf, {
-    status: 200,
-    headers: {
-      'Content-Type': res.headers.get('Content-Type') ?? 'application/octet-stream',
-      'Content-Length': String(buf.byteLength),
-      'Cache-Control': 'public, max-age=31536000, immutable',
-      'Access-Control-Allow-Origin': '*',
-      'Cross-Origin-Resource-Policy': 'cross-origin',
-    },
-  });
+  // 스트리밍 전달 (버퍼링 없음)
+  return new Response(res.body, { status: 200, headers });
 }

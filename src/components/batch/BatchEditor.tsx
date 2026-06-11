@@ -265,7 +265,7 @@ export function BatchEditor({ dict }: { dict?: any }) {
       const { removeBackground } = await import('@imgly/background-removal');
       const publicPath = `${window.location.origin}/bgmodel/`;
       const baseOpts = {
-        model: 'isnet' as const,
+        model: 'isnet_quint8' as const,
         publicPath,
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },

@@ -37,7 +37,7 @@ export function useBackgroundRemoval() {
       const publicPath = `${window.location.origin}/bgmodel/`;
       const baseOpts = {
         debug: false,
-        model: 'isnet' as const,
+        model: 'isnet_quint8' as const,
         publicPath,
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
