@@ -9,8 +9,8 @@ import { useImageUpload } from '@/hooks/useImageUpload';
 
 // Unsplash sample images for each category
 const SAMPLES = [
-  { key: 'person', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=85' },
-  { key: 'product', url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=85' },
+  { key: 'person', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=85' },
+  { key: 'product', url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=85' },
   { key: 'animal', url: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=85' },
   { key: 'car', url: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=85' },
 ] as const;
