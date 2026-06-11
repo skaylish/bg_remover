@@ -2,7 +2,7 @@
 
 import { UploadZone } from './UploadZone';
 import { BeforeAfter } from './BeforeAfter';
-import { ArrowDown, Coins, Crown, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowDown, Coins, Crown, ShieldCheck, Sparkles, Gift } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -90,8 +90,43 @@ export function HeroSection({ dict }: { dict?: any }) {
           </Link>
         )}
 
-        {/* ─── 핵심 가치 강조 (최상단) ─── */}
-        <div className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2 fade-in" style={{ animationDelay: '0.06s' }}>
+        {/* Headline */}
+        <h1
+          className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-center tracking-tight fade-in pt-8"
+          style={{ animationDelay: '0.1s', letterSpacing: '-0.02em' }}
+        >
+          <span style={{ color: 'var(--text-primary)' }}>{t.headline_1}</span>
+          <br className="md:hidden" />
+          <span
+            className="gradient-text"
+            style={{ background: 'linear-gradient(90deg, #aa8aff, #a0fff0)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+          >
+            {t.headline_2}
+          </span>
+        </h1>
+
+        <p
+          className="text-lg md:text-xl mb-8 max-w-2xl mx-auto text-center font-light fade-in"
+          style={{ color: '#a3a3a3', animationDelay: '0.2s', wordBreak: 'keep-all' }}
+        >
+          {t.description}
+        </p>
+
+        {/* ─── 신규 가입 혜택 + 핵심 가치 (한 줄) ─── */}
+        <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 fade-in" style={{ animationDelay: '0.22s' }}>
+          {/* 신규 가입 10크레딧 */}
+          <div
+            className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(168,85,247,0.14) 100%)', border: '1px solid rgba(129,140,248,0.4)' }}
+          >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(129,140,248,0.2)' }}>
+              <Gift size={18} style={{ color: '#a78bfa' }} />
+            </div>
+            <div className="flex flex-col gap-0.5 text-left">
+              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{t.promo_signup_credits}</span>
+              <span className="text-xs leading-snug" style={{ color: 'rgba(163,163,163,0.9)', wordBreak: 'keep-all' }}>{t.promo_signup_desc}</span>
+            </div>
+          </div>
           {/* 로컬 처리 / 프라이버시 */}
           <div
             className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
@@ -117,55 +152,6 @@ export function HeroSection({ dict }: { dict?: any }) {
               <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{t.value_cost_title}</span>
               <span className="text-xs leading-snug" style={{ color: 'rgba(163,163,163,0.9)', wordBreak: 'keep-all' }}>{t.value_cost_desc}</span>
             </div>
-          </div>
-        </div>
-
-        {/* Headline */}
-        <h1
-          className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-center tracking-tight fade-in pt-6"
-          style={{ animationDelay: '0.1s', letterSpacing: '-0.02em' }}
-        >
-          <span style={{ color: 'var(--text-primary)' }}>{t.headline_1}</span>
-          <br className="md:hidden" />
-          <span
-            className="gradient-text"
-            style={{ background: 'linear-gradient(90deg, #aa8aff, #a0fff0)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-          >
-            {t.headline_2}
-          </span>
-        </h1>
-
-        <p
-          className="text-lg md:text-xl mb-8 max-w-2xl mx-auto text-center font-light fade-in"
-          style={{ color: '#a3a3a3', animationDelay: '0.2s', wordBreak: 'keep-all' }}
-        >
-          {t.description}
-        </p>
-
-        {/* ─── 신규 가입 혜택 ─── */}
-        <div className="w-full max-w-sm mb-6 fade-in" style={{ animationDelay: '0.22s' }}>
-          {/* 신규 가입 10크레딧 */}
-          <div
-            className="relative rounded-2xl p-4 flex flex-col gap-1 overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(168,85,247,0.14) 100%)',
-              border: '1px solid rgba(129,140,248,0.4)',
-            }}
-          >
-            {/* 배경 글로우 */}
-            <div
-              className="absolute -top-4 -right-4 w-24 h-24 rounded-full pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(129,140,248,0.25) 0%, transparent 70%)' }}
-            />
-            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#a78bfa' }}>
-              {t.promo_signup_label}
-            </span>
-            <span className="text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
-              {t.promo_signup_credits}
-            </span>
-            <span className="text-xs leading-snug" style={{ color: 'rgba(163,163,163,0.9)', wordBreak: 'keep-all' }}>
-              {t.promo_signup_desc}
-            </span>
           </div>
         </div>
 
