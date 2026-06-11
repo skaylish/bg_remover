@@ -114,44 +114,35 @@ export function HeroSection({ dict }: { dict?: any }) {
 
         {/* ─── 신규 가입 혜택 + 핵심 가치 (한 줄) ─── */}
         <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 fade-in" style={{ animationDelay: '0.22s' }}>
-          {/* 신규 가입 10크레딧 */}
+          {/* 신규 가입 10크레딧 — 인디고/바이올렛 */}
           <div
-            className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(168,85,247,0.14) 100%)', border: '1px solid rgba(129,140,248,0.4)' }}
+            className="relative rounded-2xl p-5 flex items-center gap-3 overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.40) 0%, rgba(168,85,247,0.34) 100%)', border: '1px solid rgba(129,140,248,0.7)' }}
           >
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(129,140,248,0.2)' }}>
-              <Gift size={22} style={{ color: '#a78bfa' }} />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(129,140,248,0.45)' }}>
+              <Gift size={26} style={{ color: '#fff' }} />
             </div>
-            <div className="flex flex-col gap-1 text-left">
-              <span className="text-base md:text-lg font-extrabold leading-tight" style={{ color: 'var(--text-primary)' }}>{t.promo_signup_credits}</span>
-              <span className="text-[13px] leading-snug" style={{ color: 'rgba(186,186,186,0.95)', wordBreak: 'keep-all' }}>{t.promo_signup_desc}</span>
-            </div>
+            <span className="text-lg md:text-xl font-extrabold leading-tight text-left" style={{ color: '#fff' }}>{t.promo_signup_credits}</span>
           </div>
-          {/* 로컬 처리 / 프라이버시 */}
+          {/* 로컬 처리 / 프라이버시 — 에메랄드 */}
           <div
-            className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, rgba(34,211,160,0.14) 0%, rgba(16,185,129,0.10) 100%)', border: '1px solid rgba(34,211,160,0.35)' }}
+            className="relative rounded-2xl p-5 flex items-center gap-3 overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.42) 0%, rgba(5,150,105,0.34) 100%)', border: '1px solid rgba(34,211,160,0.7)' }}
           >
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(34,211,160,0.18)' }}>
-              <ShieldCheck size={22} style={{ color: '#22d3a0' }} />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(34,211,160,0.4)' }}>
+              <ShieldCheck size={26} style={{ color: '#fff' }} />
             </div>
-            <div className="flex flex-col gap-1 text-left">
-              <span className="text-base md:text-lg font-extrabold leading-tight" style={{ color: 'var(--text-primary)' }}>{t.value_local_title}</span>
-              <span className="text-[13px] leading-snug" style={{ color: 'rgba(186,186,186,0.95)', wordBreak: 'keep-all' }}>{t.value_local_desc}</span>
-            </div>
+            <span className="text-lg md:text-xl font-extrabold leading-tight text-left" style={{ color: '#fff' }}>{t.value_local_title}</span>
           </div>
-          {/* AI 비용 절감 */}
+          {/* AI 비용 절감 — 앰버/골드 */}
           <div
-            className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, rgba(170,138,255,0.16) 0%, rgba(99,102,241,0.12) 100%)', border: '1px solid rgba(129,140,248,0.4)' }}
+            className="relative rounded-2xl p-5 flex items-center gap-3 overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.42) 0%, rgba(234,88,12,0.34) 100%)', border: '1px solid rgba(245,158,11,0.7)' }}
           >
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(129,140,248,0.18)' }}>
-              <Sparkles size={22} style={{ color: '#a78bfa' }} />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(245,158,11,0.42)' }}>
+              <Sparkles size={26} style={{ color: '#fff' }} />
             </div>
-            <div className="flex flex-col gap-1 text-left">
-              <span className="text-base md:text-lg font-extrabold leading-tight" style={{ color: 'var(--text-primary)' }}>{t.value_cost_title}</span>
-              <span className="text-[13px] leading-snug" style={{ color: 'rgba(186,186,186,0.95)', wordBreak: 'keep-all' }}>{t.value_cost_desc}</span>
-            </div>
+            <span className="text-lg md:text-xl font-extrabold leading-tight text-left" style={{ color: '#fff' }}>{t.value_cost_title}</span>
           </div>
         </div>
 
