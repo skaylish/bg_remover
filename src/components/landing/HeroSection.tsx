@@ -2,7 +2,7 @@
 
 import { UploadZone } from './UploadZone';
 import { BeforeAfter } from './BeforeAfter';
-import { ArrowDown, Coins, Crown } from 'lucide-react';
+import { ArrowDown, Coins, Crown, ShieldCheck, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -38,10 +38,10 @@ export function HeroSection({ dict }: { dict?: any }) {
     promo_signup_label: '🎁 신규 가입 혜택',
     promo_signup_credits: '10 크레딧 무료 지급',
     promo_signup_desc: '고해상도 다운로드 10장을 바로 사용하세요',
-    promo_sub_label: '🔥 구독 첫달 무료',
-    promo_sub_price: '첫 달 0원',
-    promo_sub_desc: '한시적 프로모션 · 지금 구독하면 첫 달 0원',
-    promo_sub_cta: '지금 구독하기 →',
+    value_local_title: '서버 저장 없는 100% 로컬 처리',
+    value_local_desc: '업로드한 이미지가 서버에 저장·전송되지 않고 내 브라우저에서만 처리됩니다.',
+    value_cost_title: 'AI로 획기적인 비용 절감',
+    value_cost_desc: '전문 편집·유료 툴 대비 비용을 대폭 줄이세요.',
   };
 
   return (
@@ -90,9 +90,39 @@ export function HeroSection({ dict }: { dict?: any }) {
           </Link>
         )}
 
+        {/* ─── 핵심 가치 강조 (최상단) ─── */}
+        <div className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2 fade-in" style={{ animationDelay: '0.06s' }}>
+          {/* 로컬 처리 / 프라이버시 */}
+          <div
+            className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, rgba(34,211,160,0.14) 0%, rgba(16,185,129,0.10) 100%)', border: '1px solid rgba(34,211,160,0.35)' }}
+          >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(34,211,160,0.18)' }}>
+              <ShieldCheck size={18} style={{ color: '#22d3a0' }} />
+            </div>
+            <div className="flex flex-col gap-0.5 text-left">
+              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{t.value_local_title}</span>
+              <span className="text-xs leading-snug" style={{ color: 'rgba(163,163,163,0.9)', wordBreak: 'keep-all' }}>{t.value_local_desc}</span>
+            </div>
+          </div>
+          {/* AI 비용 절감 */}
+          <div
+            className="relative rounded-2xl p-4 flex items-start gap-3 overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, rgba(170,138,255,0.16) 0%, rgba(99,102,241,0.12) 100%)', border: '1px solid rgba(129,140,248,0.4)' }}
+          >
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(129,140,248,0.18)' }}>
+              <Sparkles size={18} style={{ color: '#a78bfa' }} />
+            </div>
+            <div className="flex flex-col gap-0.5 text-left">
+              <span className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{t.value_cost_title}</span>
+              <span className="text-xs leading-snug" style={{ color: 'rgba(163,163,163,0.9)', wordBreak: 'keep-all' }}>{t.value_cost_desc}</span>
+            </div>
+          </div>
+        </div>
+
         {/* Headline */}
         <h1
-          className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-center tracking-tight fade-in pt-8"
+          className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight text-center tracking-tight fade-in pt-6"
           style={{ animationDelay: '0.1s', letterSpacing: '-0.02em' }}
         >
           <span style={{ color: 'var(--text-primary)' }}>{t.headline_1}</span>
@@ -112,8 +142,8 @@ export function HeroSection({ dict }: { dict?: any }) {
           {t.description}
         </p>
 
-        {/* ─── 프로모션 카드 2개 ─── */}
-        <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 fade-in" style={{ animationDelay: '0.22s' }}>
+        {/* ─── 신규 가입 혜택 ─── */}
+        <div className="w-full max-w-sm mb-6 fade-in" style={{ animationDelay: '0.22s' }}>
           {/* 신규 가입 10크레딧 */}
           <div
             className="relative rounded-2xl p-4 flex flex-col gap-1 overflow-hidden"
@@ -137,41 +167,6 @@ export function HeroSection({ dict }: { dict?: any }) {
               {t.promo_signup_desc}
             </span>
           </div>
-
-          {/* 구독 첫달 무료 */}
-          <Link
-            href={`/${lang}/pricing`}
-            className="relative rounded-2xl p-4 flex flex-col gap-1 overflow-hidden group transition-transform hover:scale-[1.02]"
-            style={{
-              background: 'linear-gradient(135deg, rgba(239,68,68,0.16) 0%, rgba(245,158,11,0.14) 100%)',
-              border: '1px solid rgba(239,68,68,0.45)',
-            }}
-          >
-            {/* 배경 글로우 */}
-            <div
-              className="absolute -top-4 -right-4 w-24 h-24 rounded-full pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(239,68,68,0.25) 0%, transparent 70%)' }}
-            />
-            {/* 한시적 뱃지 */}
-            <span
-              className="absolute top-2.5 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full"
-              style={{ background: 'rgba(239,68,68,0.25)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.4)' }}
-            >
-              한시적
-            </span>
-            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#fca5a5' }}>
-              {t.promo_sub_label}
-            </span>
-            <span className="text-2xl font-black" style={{ color: '#f87171' }}>
-              {t.promo_sub_price}
-            </span>
-            <span className="text-xs leading-snug" style={{ color: 'rgba(163,163,163,0.9)', wordBreak: 'keep-all' }}>
-              {t.promo_sub_desc}
-            </span>
-            <span className="text-xs font-semibold mt-1 group-hover:underline" style={{ color: '#f87171' }}>
-              {t.promo_sub_cta}
-            </span>
-          </Link>
         </div>
 
         {/* 작은 신뢰 배지 */}

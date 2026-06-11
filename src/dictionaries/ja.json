@@ -88,10 +88,10 @@
     "promo_signup_label": "🎁 新規会員特典",
     "promo_signup_credits": "10クレジット無料付与",
     "promo_signup_desc": "登録後すぐに高解像度10枚分をご利用いただけます",
-    "promo_sub_label": "🔥 初月無料",
-    "promo_sub_price": "初月 0円",
-    "promo_sub_desc": "期間限定キャンペーン · 今すぐ登録で初月0円",
-    "promo_sub_cta": "今すぐ登録 →"
+    "value_local_title": "サーバー保存なしの100%ローカル処理",
+    "value_local_desc": "アップロードした画像はサーバーに保存・送信されず、ブラウザ内だけで処理されます。",
+    "value_cost_title": "AIで画期的なコスト削減",
+    "value_cost_desc": "プロ編集や有料ツールに比べてコストを大幅に削減。"
   },
   "categoryGallery": {
     "title_1": "あらゆるカテゴリで ",

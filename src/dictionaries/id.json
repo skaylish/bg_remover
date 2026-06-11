@@ -88,10 +88,10 @@
     "promo_signup_label": "🎁 Bonus anggota baru",
     "promo_signup_credits": "10 kredit gratis",
     "promo_signup_desc": "Gunakan untuk 10 unduhan HD langsung setelah daftar",
-    "promo_sub_label": "🔥 Bulan pertama gratis",
-    "promo_sub_price": "Bulan pertama Rp0",
-    "promo_sub_desc": "Penawaran terbatas · Berlangganan sekarang, bulan pertama Rp0",
-    "promo_sub_cta": "Berlangganan sekarang →"
+    "value_local_title": "Pemrosesan 100% lokal, tanpa disimpan",
+    "value_local_desc": "Gambar Anda diproses sepenuhnya di browser — tidak diunggah atau disimpan di server kami.",
+    "value_cost_title": "Penghematan Biaya Drastis dengan AI",
+    "value_cost_desc": "Pangkas biaya secara drastis dibanding editor pro dan alat berbayar."
   },
   "categoryGallery": {
     "title_1": "Hasil Sempurna untuk ",

@@ -88,10 +88,10 @@
     "promo_signup_label": "🎁 Bono de registro",
     "promo_signup_credits": "10 créditos gratis",
     "promo_signup_desc": "Úsalos en 10 descargas HD al instante tras registrarte",
-    "promo_sub_label": "🔥 Primer mes gratis",
-    "promo_sub_price": "Primer mes 0€",
-    "promo_sub_desc": "Oferta limitada · Suscríbete ahora, primer mes 0€",
-    "promo_sub_cta": "Suscribirse ahora →"
+    "value_local_title": "Procesamiento 100% local, sin guardar nada",
+    "value_local_desc": "Tus imágenes se procesan solo en tu navegador, sin subirse ni guardarse en nuestros servidores.",
+    "value_cost_title": "Ahorro de costes radical con IA",
+    "value_cost_desc": "Reduce drásticamente los costes frente a editores pro y herramientas de pago."
   },
   "categoryGallery": {
     "title_1": "Resultados Perfectos en ",

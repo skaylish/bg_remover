@@ -89,7 +89,7 @@ export function AuthModal({ onClose }: AuthModalProps) {
         <div className="space-y-2">
           <div className="flex items-center gap-2.5 text-xs" style={{ color: 'var(--text-muted)' }}>
             <Coins size={13} style={{ color: '#818cf8', flexShrink: 0 }} />
-            <span>구독 시 <strong style={{ color: 'var(--text-primary)' }}>첫 달 이용료 무료</strong> — 한시적 프로모션</span>
+            <span>신규 가입 시 <strong style={{ color: 'var(--text-primary)' }}>10 크레딧 무료 지급</strong></span>
           </div>
           <div className="flex items-center gap-2.5 text-xs" style={{ color: 'var(--text-muted)' }}>
             <Monitor size={13} style={{ color: '#818cf8', flexShrink: 0 }} />

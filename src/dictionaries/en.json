@@ -88,10 +88,10 @@
     "promo_signup_label": "🎁 New Member Bonus",
     "promo_signup_credits": "10 Free Credits",
     "promo_signup_desc": "Use for 10 HD downloads instantly after sign up",
-    "promo_sub_label": "🔥 First Month Free",
-    "promo_sub_price": "1st Month $0",
-    "promo_sub_desc": "Limited-time offer · Subscribe now, pay nothing first month",
-    "promo_sub_cta": "Subscribe Now →"
+    "value_local_title": "100% Local Processing, Nothing Stored",
+    "value_local_desc": "Your images are processed entirely in your browser — never uploaded or stored on our servers.",
+    "value_cost_title": "Dramatic Cost Savings with AI",
+    "value_cost_desc": "Cut costs dramatically versus pro editors and paid tools."
   },
   "categoryGallery": {
     "title_1": "Perfect Results for ",
