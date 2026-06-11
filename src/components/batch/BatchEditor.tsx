@@ -282,20 +282,22 @@ export function BatchEditor({ dict }: { dict?: any }) {
       let blob: Blob;
       try {
         blob = await removeBackground(item.file, { ...baseOpts, device: 'gpu' as const });
-      } catch {
-        // GPU 실패 시 CPU fallback
+      } catch (gpuErr) {
+        console.error('[DEBUG-bg] GPU 실패 → CPU fallback:', gpuErr);
         updateItem(item.id, { progress: 0 });
         blob = await removeBackground(item.file, { ...baseOpts, device: 'cpu' as const });
       }
       const resultUrl = URL.createObjectURL(blob);
       updateItem(item.id, { status: 'done', resultBlob: blob, resultUrl, progress: 100 });
     } catch (err) {
+      console.error('[DEBUG-bg] 최종 실패:', err);
       const msg = err instanceof Error ? err.message : t.error_processing;
       updateItem(item.id, { status: 'error', error: msg });
     }
   };
 
   const runAll = async () => {
+    console.log('[DEBUG-bg] env — crossOriginIsolated:', self.crossOriginIsolated, '| webgpu:', !!(navigator as any).gpu, '| cores:', navigator.hardwareConcurrency);
     setIsRunning(true);
     abortRef.current = false;
     const queue = items.filter((i) => i.status === 'pending' || i.status === 'error');
