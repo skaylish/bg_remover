@@ -70,7 +70,7 @@ export function EditorLayout({ dict }: { dict?: any }) {
   const canUndo = useEditorStore((s) => s.canUndo);
   const canRedo = useEditorStore((s) => s.canRedo);
 
-  const useCredit = useCreditStore((s) => s.useCredit);
+  const useCreditDB = useCreditStore((s) => s.useCreditDB);
 
   const { process, progress, modelProgress, isDownloadingModel } = useBackgroundRemoval();
   const canvasRef = useRef<CanvasEditorHandle>(null);
@@ -141,7 +141,7 @@ export function EditorLayout({ dict }: { dict?: any }) {
 
   const handleDownloadPng = async (scale = 0.5, requiresCredit = false) => {
     if (requiresCredit) {
-      const ok = useCredit();
+      const ok = await useCreditDB();
       if (!ok) { setShowPurchaseModal(true); return; }
     }
     const blob = await canvasRef.current?.exportPng(scale);
@@ -150,7 +150,7 @@ export function EditorLayout({ dict }: { dict?: any }) {
 
   const handleDownloadJpeg = async (scale = 0.5, requiresCredit = false) => {
     if (requiresCredit) {
-      const ok = useCredit();
+      const ok = await useCreditDB();
       if (!ok) { setShowPurchaseModal(true); return; }
     }
     const blob = await canvasRef.current?.exportJpeg(scale);
