@@ -35,13 +35,14 @@ export function useBackgroundRemoval() {
       const { removeBackground } = await import('@imgly/background-removal');
 
       const publicPath = `${window.location.origin}/bgmodel/`;
-      // device:'gpu' 지정 시 라이브러리가 webgpu 어댑터 유무를 보고 자동으로 wasm 선택.
-      // 수동 GPU→CPU 폴백은 onnxruntime-web의 'multiple initWasm' 오류를 유발하므로 사용 안 함.
+      // CPU(wasm) 단일 경로 — WebGPU는 이 환경에서 불안정(디바이스 손실/빈 출력/크래시).
+      // crossOriginIsolated=true이므로 멀티스레드 wasm으로 충분히 빠름.
+      // 양자화 모델(quint8)이 CPU에 최적(정확·경량·빠름).
       const blob = await removeBackground(file, {
         debug: false,
-        model: 'isnet' as const,
+        model: 'isnet_quint8' as const,
         publicPath,
-        device: 'gpu' as const,
+        device: 'cpu' as const,
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
         progress: onProgress,

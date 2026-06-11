@@ -292,12 +292,12 @@ export function BatchEditor({ dict }: { dict?: any }) {
     try {
       const { removeBackground } = await import('@imgly/background-removal');
       const publicPath = `${window.location.origin}/bgmodel/`;
-      // device:'gpu' 지정 시 webgpu 어댑터 없으면 라이브러리가 자동으로 wasm 사용.
-      // 수동 GPU→CPU 폴백은 'multiple initWasm' 오류를 유발하므로 사용 안 함.
+      // CPU(wasm) 단일 경로 — WebGPU는 이 환경에서 불안정. crossOriginIsolated로
+      // 멀티스레드 wasm 사용. 양자화 모델(quint8)이 CPU에 최적.
       const blob = await removeBackground(item.file, {
-        model: 'isnet' as const,
+        model: 'isnet_quint8' as const,
         publicPath,
-        device: 'gpu' as const,
+        device: 'cpu' as const,
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
         // fetch: → 모델 다운로드(전역 배너), compute: → 개별 이미지 진행
