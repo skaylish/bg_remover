@@ -46,12 +46,11 @@ export async function proxy(request: NextRequest) {
   );
   await supabase.auth.getUser();
 
-  // 로케일 리디렉션 (모델 프록시 경로는 제외 — 307 우회 방지)
+  // 로케일 리디렉션 (api/정적 경로는 제외)
   if (
     pathname.includes('.') ||
     pathname.startsWith('/api') ||
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/bgmodel')
+    pathname.startsWith('/_next')
   ) {
     return response;
   }
