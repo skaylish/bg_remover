@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
 import { PurchaseModal } from '@/components/shared/PurchaseModal';
+import { removeBg } from '@/lib/bgRemoval';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ItemStatus = 'pending' | 'processing' | 'done' | 'error';
@@ -290,30 +291,18 @@ export function BatchEditor({ dict }: { dict?: any }) {
   const processOne = async (item: BatchItem) => {
     updateItem(item.id, { status: 'processing', progress: 0 });
     try {
-      const { removeBackground } = await import('@imgly/background-removal');
-      const publicPath = `${window.location.origin}/bgmodel/`;
-      // CPU(wasm) 단일 경로 — WebGPU 불안정 회피. 풀 정밀도 isnet(fp32)로 고품질.
-      // crossOriginIsolated=true로 멀티스레드 wasm 사용.
-      const blob = await removeBackground(item.file, {
-        model: 'isnet' as const,
-        publicPath,
-        device: 'cpu' as const,
-        proxyToWorker: true,
-        output: { format: 'image/png' as const, quality: 1 },
-        // fetch: → 모델 다운로드(전역 배너), compute: → 개별 이미지 진행
-        progress: (key: string, current: number, total: number) => {
-          if (key.startsWith('fetch:')) {
-            if (total > 0) setModelDownload({ active: true, progress: Math.round((current / total) * 100) });
-          } else {
-            setModelDownload((s) => (s.active ? { active: false, progress: 0 } : s));
-            if (total > 0) updateItem(item.id, { progress: Math.round((current / total) * 100) });
-          }
-        },
+      // download → 전역 모델 다운로드 배너, compute → 개별 이미지 진행
+      const blob = await removeBg(item.file, (stage, pct) => {
+        if (stage === 'download') {
+          setModelDownload({ active: true, progress: pct });
+        } else {
+          setModelDownload((s) => (s.active ? { active: false, progress: 0 } : s));
+          updateItem(item.id, { progress: pct });
+        }
       });
       const resultUrl = URL.createObjectURL(blob);
       updateItem(item.id, { status: 'done', resultBlob: blob, resultUrl, progress: 100 });
     } catch (err) {
-      console.error('[DEBUG-bg] 처리 실패:', item.file.name, err);
       const msg = err instanceof Error ? err.message : t.error_processing;
       updateItem(item.id, { status: 'error', error: msg });
     }
