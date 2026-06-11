@@ -35,23 +35,17 @@ export function useBackgroundRemoval() {
       const { removeBackground } = await import('@imgly/background-removal');
 
       const publicPath = `${window.location.origin}/bgmodel/`;
-      const baseOpts = {
+      // device:'gpu' 지정 시 라이브러리가 webgpu 어댑터 유무를 보고 자동으로 wasm 선택.
+      // 수동 GPU→CPU 폴백은 onnxruntime-web의 'multiple initWasm' 오류를 유발하므로 사용 안 함.
+      const blob = await removeBackground(file, {
         debug: false,
-        model: 'isnet_quint8' as const,
+        model: 'isnet_fp16' as const,
         publicPath,
+        device: 'gpu' as const,
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
         progress: onProgress,
-      };
-
-      let blob: Blob;
-      try {
-        blob = await removeBackground(file, { ...baseOpts, device: 'gpu' as const });
-      } catch {
-        // GPU 실패 시 CPU fallback
-        setProgress(0);
-        blob = await removeBackground(file, { ...baseOpts, device: 'cpu' as const });
-      }
+      });
 
       setProgress(100);
       return blob;

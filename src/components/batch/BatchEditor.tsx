@@ -264,9 +264,12 @@ export function BatchEditor({ dict }: { dict?: any }) {
     try {
       const { removeBackground } = await import('@imgly/background-removal');
       const publicPath = `${window.location.origin}/bgmodel/`;
-      const baseOpts = {
-        model: 'isnet_quint8' as const,
+      // device:'gpu' 지정 시 webgpu 어댑터 없으면 라이브러리가 자동으로 wasm 사용.
+      // 수동 GPU→CPU 폴백은 'multiple initWasm' 오류를 유발하므로 사용 안 함.
+      const blob = await removeBackground(item.file, {
+        model: 'isnet_fp16' as const,
         publicPath,
+        device: 'gpu' as const,
         proxyToWorker: true,
         output: { format: 'image/png' as const, quality: 1 },
         // fetch: → 모델 다운로드(전역 배너), compute: → 개별 이미지 진행
@@ -278,31 +281,27 @@ export function BatchEditor({ dict }: { dict?: any }) {
             if (total > 0) updateItem(item.id, { progress: Math.round((current / total) * 100) });
           }
         },
-      };
-      let blob: Blob;
-      try {
-        blob = await removeBackground(item.file, { ...baseOpts, device: 'gpu' as const });
-      } catch (gpuErr) {
-        console.error('[DEBUG-bg] GPU 실패 → CPU fallback:', gpuErr);
-        updateItem(item.id, { progress: 0 });
-        blob = await removeBackground(item.file, { ...baseOpts, device: 'cpu' as const });
-      }
+      });
       const resultUrl = URL.createObjectURL(blob);
       updateItem(item.id, { status: 'done', resultBlob: blob, resultUrl, progress: 100 });
     } catch (err) {
-      console.error('[DEBUG-bg] 최종 실패:', err);
       const msg = err instanceof Error ? err.message : t.error_processing;
       updateItem(item.id, { status: 'error', error: msg });
     }
   };
 
   const runAll = async () => {
-    console.log('[DEBUG-bg] env — crossOriginIsolated:', self.crossOriginIsolated, '| webgpu:', !!(navigator as any).gpu, '| cores:', navigator.hardwareConcurrency);
     setIsRunning(true);
     abortRef.current = false;
     const queue = items.filter((i) => i.status === 'pending' || i.status === 'error');
+
+    // 첫 이미지로 모델 다운로드 + 런타임 초기화를 단독 수행(동시 init 경쟁 방지),
+    // 이후 나머지를 병렬 처리
+    if (queue.length > 0 && !abortRef.current) {
+      await processOne(queue[0]);
+    }
     const CONCURRENCY = 2;
-    for (let i = 0; i < queue.length; i += CONCURRENCY) {
+    for (let i = 1; i < queue.length; i += CONCURRENCY) {
       if (abortRef.current) break;
       await Promise.all(queue.slice(i, i + CONCURRENCY).map(processOne));
     }
