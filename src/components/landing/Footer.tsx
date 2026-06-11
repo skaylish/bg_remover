@@ -89,7 +89,7 @@ export function Footer({ dict }: { dict?: any }) {
         </div>
       </div>
 
-      {/* 오픈소스 모델 라이선스 고지 (BiRefNet, MIT) */}
+      {/* 오픈소스 모델 라이선스 고지 (ormbg, Apache-2.0) */}
       <div
         className="max-w-6xl mx-auto mt-8 pt-6 text-center"
         style={{ borderTop: '1px solid var(--bg-border)' }}
@@ -97,15 +97,15 @@ export function Footer({ dict }: { dict?: any }) {
         <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-subtle)' }}>
           {t.license_prefix ?? '배경 제거 AI 모델'}:{' '}
           <a
-            href="https://github.com/ZhengPeng7/BiRefNet"
+            href="https://huggingface.co/schirrmacher/ormbg"
             target="_blank"
             rel="noopener noreferrer"
             className="underline transition-colors"
             style={{ color: 'var(--text-muted)' }}
           >
-            BiRefNet
+            ormbg
           </a>{' '}
-          (MIT License) © Peng Zheng
+          (Apache-2.0 License) © schirrmacher
         </p>
       </div>
     </footer>
