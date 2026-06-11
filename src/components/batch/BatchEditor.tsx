@@ -285,6 +285,7 @@ export function BatchEditor({ dict }: { dict?: any }) {
       const resultUrl = URL.createObjectURL(blob);
       updateItem(item.id, { status: 'done', resultBlob: blob, resultUrl, progress: 100 });
     } catch (err) {
+      console.error('[DEBUG-bg] 처리 실패:', item.file.name, err);
       const msg = err instanceof Error ? err.message : t.error_processing;
       updateItem(item.id, { status: 'error', error: msg });
     }
@@ -295,15 +296,11 @@ export function BatchEditor({ dict }: { dict?: any }) {
     abortRef.current = false;
     const queue = items.filter((i) => i.status === 'pending' || i.status === 'error');
 
-    // 첫 이미지로 모델 다운로드 + 런타임 초기화를 단독 수행(동시 init 경쟁 방지),
-    // 이후 나머지를 병렬 처리
-    if (queue.length > 0 && !abortRef.current) {
-      await processOne(queue[0]);
-    }
-    const CONCURRENCY = 2;
-    for (let i = 1; i < queue.length; i += CONCURRENCY) {
+    // 순차 처리 — onnxruntime-web/WebGPU는 동시 추론 시 세션 충돌이 발생하므로
+    // 한 번에 한 장씩 처리(런타임 재사용)
+    for (const item of queue) {
       if (abortRef.current) break;
-      await Promise.all(queue.slice(i, i + CONCURRENCY).map(processOne));
+      await processOne(item);
     }
     setModelDownload({ active: false, progress: 0 });
     setIsRunning(false);
