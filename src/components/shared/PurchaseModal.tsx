@@ -6,8 +6,6 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { TOSS_KRW_PRICES, formatKrw } from '@/lib/toss-pricing';
-import { requestTossBilling } from '@/lib/toss-client';
 
 const PLANS = [
   { key: 'starter',    icon: Zap,       credits:  100, color: '#6366f1', popular: false },
@@ -56,17 +54,14 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
     modal_see_all: '전체 요금 안내 보기 →',
   };
 
-  const isKo = lang === 'ko';
-  const priceMap: Record<string, string> = isKo
-    ? Object.fromEntries(Object.entries(TOSS_KRW_PRICES).map(([k, v]) => [k, formatKrw(v)]))
-    : {
-        starter:    t.price_starter,
-        lite:       t.price_lite,
-        business:   t.price_business,
-        growth:     t.price_growth,
-        enterprise: t.price_enterprise,
-      };
-  const perImageMap: Record<string, string> = isKo ? {} : {
+  const priceMap: Record<string, string> = {
+    starter:    t.price_starter,
+    lite:       t.price_lite,
+    business:   t.price_business,
+    growth:     t.price_growth,
+    enterprise: t.price_enterprise,
+  };
+  const perImageMap: Record<string, string> = {
     starter:    t.per_image_starter,
     lite:       t.per_image_lite,
     business:   t.per_image_business,
@@ -78,20 +73,6 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('로그인이 필요합니다.'); return; }
-
-    // 국내(한국어) → 토스페이먼츠 빌링, 그 외 → Gumroad
-    if (isKo) {
-      setPaying(plan.key);
-      try {
-        await requestTossBilling(plan.key, user.id, user.email ?? '', lang);
-      } catch (err) {
-        console.error('[toss] billing error', err);
-        alert('결제 창을 열지 못했습니다. 잠시 후 다시 시도해주세요.');
-      } finally {
-        setPaying(null);
-      }
-      return;
-    }
 
     setPaying(plan.key);
     try {
