@@ -4,7 +4,10 @@
 import { Check, Zap, Flame, Star, Rocket, Building2 } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { TOSS_KRW_PRICES, formatKrw } from '@/lib/toss-pricing';
+import { requestTossBilling } from '@/lib/toss-client';
 
 const PLANS = [
   { key: 'starter',    icon: Zap,       credits:  100, color: '#6366f1', popular: false },
@@ -22,6 +25,9 @@ export function PricingSection({ dict }: PricingSectionProps) {
   const credits   = useCreditStore((s) => s.credits);
   const unlimited = useCreditStore((s) => s.unlimited);
   const [paying, setPaying] = useState<string | null>(null);
+  const params = useParams();
+  const lang = (params?.lang as string) || 'ko';
+  const isKo = lang === 'ko';
 
   const t = dict?.pricing || {
     title_1: '심플하고 ',
@@ -67,14 +73,16 @@ export function PricingSection({ dict }: PricingSectionProps) {
     note_bottom: '저해상도 다운로드는 크레딧 없이 무제한 무료입니다. 고해상도 다운로드 시 이미지당 1크레딧이 차감됩니다.',
   };
 
-  const priceMap: Record<string, string> = {
-    starter:    t.price_starter,
-    lite:       t.price_lite,
-    business:   t.price_business,
-    growth:     t.price_growth,
-    enterprise: t.price_enterprise,
-  };
-  const perImageMap: Record<string, string> = {
+  const priceMap: Record<string, string> = isKo
+    ? Object.fromEntries(Object.entries(TOSS_KRW_PRICES).map(([k, v]) => [k, formatKrw(v)]))
+    : {
+        starter:    t.price_starter,
+        lite:       t.price_lite,
+        business:   t.price_business,
+        growth:     t.price_growth,
+        enterprise: t.price_enterprise,
+      };
+  const perImageMap: Record<string, string> = isKo ? {} : {
     starter:    t.per_image_starter,
     lite:       t.per_image_lite,
     business:   t.per_image_business,
@@ -86,6 +94,20 @@ export function PricingSection({ dict }: PricingSectionProps) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('로그인이 필요합니다.'); return; }
+
+    // 국내(한국어) → 토스페이먼츠 빌링, 그 외 → Gumroad
+    if (isKo) {
+      setPaying(plan.key);
+      try {
+        await requestTossBilling(plan.key, user.id, user.email ?? '', lang);
+      } catch (err) {
+        console.error('[toss] billing error', err);
+        alert('결제 창을 열지 못했습니다. 잠시 후 다시 시도해주세요.');
+      } finally {
+        setPaying(null);
+      }
+      return;
+    }
 
     setPaying(plan.key);
     try {
