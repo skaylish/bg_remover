@@ -1,6 +1,6 @@
 'use client';
 
-// 크레딧 부족 시 표시되는 결제 모달 — LemonSqueezy Checkout 연동
+// 크레딧 부족 시 표시되는 결제 모달 — Gumroad Checkout 연동
 import { X, Zap, Flame, Star, Rocket, Building2, Check } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -14,14 +14,6 @@ const PLANS = [
   { key: 'growth',     icon: Rocket,    credits: 2000, color: '#f59e0b', popular: false },
   { key: 'enterprise', icon: Building2, credits: 5000, color: '#22d3a0', popular: false },
 ];
-
-const VARIANT_IDS: Record<string, string> = {
-  starter:    process.env.NEXT_PUBLIC_LS_VARIANT_STARTER    ?? '',
-  lite:       process.env.NEXT_PUBLIC_LS_VARIANT_LITE       ?? '',
-  business:   process.env.NEXT_PUBLIC_LS_VARIANT_BUSINESS   ?? '',
-  growth:     process.env.NEXT_PUBLIC_LS_VARIANT_GROWTH     ?? '',
-  enterprise: process.env.NEXT_PUBLIC_LS_VARIANT_ENTERPRISE ?? '',
-};
 
 interface PurchaseModalProps {
   onClose: () => void;
@@ -82,25 +74,19 @@ export function PurchaseModal({ onClose, dict }: PurchaseModalProps) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('로그인이 필요합니다.'); return; }
 
-    const variantId = VARIANT_IDS[plan.key];
-    if (!variantId) { alert('결제 설정 오류입니다. 잠시 후 다시 시도해주세요.'); return; }
-
     setPaying(plan.key);
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ variantId }),
+        body: JSON.stringify({ plan: plan.key }),
       });
       const json = await res.json();
-      if (!json.url) { alert((json.detail || json.error) ?? '결제 창을 열지 못했습니다.'); return; }
-      const url = json.url;
-      const ls = (window as any).LemonSqueezy;
-      if (ls?.Url?.Open) { ls.Url.Open(url); onClose(); }
-      else window.open(url, '_blank');
+      if (!json.url) { alert((json.error) ?? '결제 창을 열지 못했습니다.'); return; }
+      window.open(json.url, '_blank');
       onClose();
     } catch (err) {
-      console.error('[LS] checkout error', err);
+      console.error('[GR] checkout error', err);
       alert('결제 창을 열지 못했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setPaying(null);

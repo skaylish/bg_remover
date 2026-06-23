@@ -1,6 +1,6 @@
 'use client';
 
-// 랜딩 페이지 요금제 섹션 — LemonSqueezy Checkout 연동
+// 랜딩 페이지 요금제 섹션 — Gumroad Checkout 연동
 import { Check, Zap, Flame, Star, Rocket, Building2 } from 'lucide-react';
 import { useCreditStore } from '@/store/creditStore';
 import { useState } from 'react';
@@ -13,14 +13,6 @@ const PLANS = [
   { key: 'growth',     icon: Rocket,    credits: 2000, color: '#f59e0b', popular: false },
   { key: 'enterprise', icon: Building2, credits: 5000, color: '#22d3a0', popular: false },
 ];
-
-const VARIANT_IDS: Record<string, string> = {
-  starter:    process.env.NEXT_PUBLIC_LS_VARIANT_STARTER    ?? '',
-  lite:       process.env.NEXT_PUBLIC_LS_VARIANT_LITE       ?? '',
-  business:   process.env.NEXT_PUBLIC_LS_VARIANT_BUSINESS   ?? '',
-  growth:     process.env.NEXT_PUBLIC_LS_VARIANT_GROWTH     ?? '',
-  enterprise: process.env.NEXT_PUBLIC_LS_VARIANT_ENTERPRISE ?? '',
-};
 
 interface PricingSectionProps {
   dict?: any;
@@ -95,25 +87,18 @@ export function PricingSection({ dict }: PricingSectionProps) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert('로그인이 필요합니다.'); return; }
 
-    const variantId = VARIANT_IDS[plan.key];
-    if (!variantId) { alert('결제 설정 오류입니다. 잠시 후 다시 시도해주세요.'); return; }
-
     setPaying(plan.key);
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ variantId }),
+        body: JSON.stringify({ plan: plan.key }),
       });
       const json = await res.json();
-      if (!json.url) { alert((json.detail || json.error) ?? '결제 창을 열지 못했습니다.'); return; }
-      const url = json.url;
-      // LemonSqueezy 오버레이 오픈 (lemon.js 로드 후 사용 가능)
-      const ls = (window as any).LemonSqueezy;
-      if (ls?.Url?.Open) ls.Url.Open(url);
-      else window.open(url, '_blank');
+      if (!json.url) { alert((json.error) ?? '결제 창을 열지 못했습니다.'); return; }
+      window.open(json.url, '_blank');
     } catch (err) {
-      console.error('[LS] checkout error', err);
+      console.error('[GR] checkout error', err);
       alert('결제 창을 열지 못했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setPaying(null);

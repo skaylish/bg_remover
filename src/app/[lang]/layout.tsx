@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import Script from 'next/script';
 import '../globals.css';
 import { ModelPreloader } from '@/components/shared/ModelPreloader';
 import { SITE_URL, SEO, getHreflangAlternates } from '@/lib/seo';
@@ -100,7 +99,6 @@ export default async function RootLayout({
       >
         <ModelPreloader />
         {children}
-        <Script src="https://app.lemonsqueezy.com/js/lemon.js" strategy="lazyOnload" />
       </body>
     </html>
   );
