@@ -4,6 +4,10 @@ import { createServiceClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
+export async function GET() {
+  return new Response('OK', { status: 200 });
+}
+
 const PLAN_CREDITS: Record<string, number> = {
   starter:    100,
   lite:       300,
