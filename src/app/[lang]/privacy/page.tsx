@@ -1,7 +1,23 @@
 // 언어별 개인정보처리방침 페이지
+import type { Metadata } from 'next';
 import { Navbar } from '@/components/shared/Navbar';
 import { Footer } from '@/components/landing/Footer';
 import { getDictionary } from '@/dictionaries';
+import { SITE_URL } from '@/lib/seo';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const c = CONTENT[lang] ?? CONTENT.en;
+  return {
+    title: c.title,
+    alternates: { canonical: `${SITE_URL}/${lang}/privacy` },
+    robots: { index: false, follow: true },
+  };
+}
 
 const CONTACT = 'dcbvcd@gmail.com';
 const EFFECTIVE = { ko: '2026년 3월 27일', en: 'March 27, 2026', ja: '2026年3月27日', es: '27 de marzo de 2026', id: '27 Maret 2026' };

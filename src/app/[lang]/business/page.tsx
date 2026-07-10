@@ -1,6 +1,34 @@
+import type { Metadata } from 'next';
 import { Navbar } from '@/components/shared/Navbar';
 import { Footer } from '@/components/landing/Footer';
 import { getDictionary } from '@/dictionaries';
+import { SITE_URL, getHreflangAlternates } from '@/lib/seo';
+
+const TITLES: Record<string, string> = {
+  ko: '사업자 정보',
+  en: 'Business Information',
+  ja: '事業者情報',
+  es: 'Información de la Empresa',
+  id: 'Informasi Bisnis',
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const title = TITLES[lang] ?? TITLES.en;
+  const canonical = `${SITE_URL}/${lang}/business`;
+
+  return {
+    title,
+    alternates: {
+      canonical,
+      languages: getHreflangAlternates('/business'),
+    },
+  };
+}
 
 export default async function BusinessPage({
   params,

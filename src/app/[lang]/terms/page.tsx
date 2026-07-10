@@ -1,9 +1,25 @@
 // 이용약관 다국어 페이지 (ko/en/ja/es/id)
+import type { Metadata } from 'next';
 import { Navbar } from '@/components/shared/Navbar';
 import { Footer } from '@/components/landing/Footer';
 import { getDictionary } from '@/dictionaries';
+import { SITE_URL } from '@/lib/seo';
 
 type Lang = 'ko' | 'en' | 'ja' | 'es' | 'id';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const c = CONTENT[lang as Lang] ?? CONTENT.en;
+  return {
+    title: c.title,
+    alternates: { canonical: `${SITE_URL}/${lang}/terms` },
+    robots: { index: false, follow: true },
+  };
+}
 
 interface TermsContent {
   title: string;

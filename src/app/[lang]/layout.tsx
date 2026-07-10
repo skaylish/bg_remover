@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
 import { ModelPreloader } from '@/components/shared/ModelPreloader';
-import { SITE_URL, SEO, getHreflangAlternates } from '@/lib/seo';
+import { SITE_URL, SEO } from '@/lib/seo';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
@@ -15,8 +15,9 @@ export async function generateMetadata({
   const { lang } = await params;
   const seo = SEO[lang as keyof typeof SEO] ?? SEO.en;
   const { title, description } = seo.home;
-  const canonical = `${SITE_URL}/${lang}`;
 
+  // canonical/hreflang은 각 페이지의 generateMetadata에서 개별 설정한다.
+  // (layout에서 설정하면 하위 페이지가 상속받아 모두 홈을 표준으로 선언하는 버그 발생)
   return {
     metadataBase: new URL(SITE_URL),
     title: {
@@ -24,14 +25,9 @@ export async function generateMetadata({
       template: '%s | BGRemover',
     },
     description,
-    alternates: {
-      canonical,
-      languages: getHreflangAlternates(),
-    },
     openGraph: {
       title,
       description,
-      url: canonical,
       siteName: 'BGRemover',
       type: 'website',
       locale: lang,
