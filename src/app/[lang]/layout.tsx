@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
+import { Analytics } from '@/components/shared/Analytics';
 import { ModelPreloader } from '@/components/shared/ModelPreloader';
 import { SITE_URL, SEO } from '@/lib/seo';
 
@@ -96,6 +97,7 @@ export default async function RootLayout({
         <ModelPreloader />
         {children}
       </body>
+      <Analytics />
     </html>
   );
 }

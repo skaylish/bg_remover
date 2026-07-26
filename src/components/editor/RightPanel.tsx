@@ -298,7 +298,7 @@ function BackgroundTab({ dict }: { dict?: any }) {
               style={{ height: '100px', border: '1px solid var(--bg-border)' }}
               onClick={() => fileInputRef.current?.click()}
             >
-              <img src={backgroundImageUrl} alt="bg" className="w-full h-full object-cover" />
+              <img src={backgroundImageUrl} alt="bg" className="w-full h-full object-cover" data-clarity-mask="true" />
               <div
                 className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-white opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ background: 'rgba(0,0,0,0.5)' }}
