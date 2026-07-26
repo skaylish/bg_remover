@@ -25,6 +25,13 @@ function getLocale(request: NextRequest): string {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // www → apex 308 영구 리디렉션 (중복 도메인 색인 방지). Supabase 조회 전에 처리해 왕복 낭비 차단.
+  const host = request.headers.get('host') ?? '';
+  if (host.startsWith('www.')) {
+    const apex = `https://${host.slice(4)}`;
+    return NextResponse.redirect(new URL(pathname + request.nextUrl.search, apex), 308);
+  }
+
   // Supabase 세션 갱신
   let response = NextResponse.next({ request });
 
