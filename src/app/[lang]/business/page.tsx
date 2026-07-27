@@ -27,6 +27,9 @@ export async function generateMetadata({
       canonical,
       languages: getHreflangAlternates('/business'),
     },
+    // 전자상거래법상 게시 의무는 있으나 색인 의무는 없다.
+    // 대표자 성명·주소·사업자번호가 검색에 노출되지 않도록 제외한다.
+    robots: { index: false, follow: true },
   };
 }
 

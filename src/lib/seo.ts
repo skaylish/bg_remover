@@ -1,6 +1,7 @@
 // 다국어 SEO 메타데이터 중앙 설정
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bgremover.ai').replace(/\/$/, '');
+// 기본값은 반드시 실제 서비스 도메인이어야 한다. 틀리면 env 누락 시 전 페이지 canonical이 오염된다.
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bgremover.pics').replace(/\/$/, '');
 
 export const SUPPORTED_LANGS = ['en', 'ko', 'ja', 'es', 'id'] as const;
 export type SupportedLang = typeof SUPPORTED_LANGS[number];
@@ -106,7 +107,9 @@ export const SEO: Record<SupportedLang, Record<PageKey, PageMeta>> = {
 };
 
 export function getHreflangAlternates(path = ''): Record<string, string> {
-  return Object.fromEntries(
-    SUPPORTED_LANGS.map(l => [l, `${SITE_URL}/${l}${path}`])
-  );
+  return {
+    ...Object.fromEntries(SUPPORTED_LANGS.map(l => [l, `${SITE_URL}/${l}${path}`])),
+    // 어느 언어에도 해당하지 않는 방문자에게 보여줄 기본 버전
+    'x-default': `${SITE_URL}/en${path}`,
+  };
 }
