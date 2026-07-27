@@ -322,7 +322,8 @@
     "terms": "Terms of Service",
     "business": "Business Info",
     "contact": "Contact Us",
-    "license_prefix": "Background removal AI model"
+    "license_prefix": "Background removal AI model",
+    "editor": "Editor"
   },
   "batch": {
     "title": "Batch Background Removal",
@@ -358,5 +359,36 @@
     "download_selected": "Download selected ({n})",
     "select_all": "Select all",
     "deselect_all": "Deselect all"
+  },
+  "faq": {
+    "title_1": "Frequently Asked ",
+    "title_2": "Questions",
+    "subtitle": "Everything about how BGRemover processes your images.",
+    "items": [
+      {
+        "q": "Are my images uploaded to a server?",
+        "a": "No. Background removal runs entirely inside your browser, so your image file never leaves your device. Only the AI model itself is downloaded on first use, and it is cached afterwards."
+      },
+      {
+        "q": "Is BGRemover really free?",
+        "a": "Low-resolution downloads are unlimited and free forever, with no account required. Full-resolution downloads need a paid plan, starting at $3.99 per month."
+      },
+      {
+        "q": "Which image formats are supported?",
+        "a": "You can upload JPG, PNG, and WebP images. Results are exported as PNG files with a transparent background."
+      },
+      {
+        "q": "Which AI model does BGRemover use?",
+        "a": "It runs the ormbg ONNX model, an IS-Net/DIS style segmentation network released under Apache-2.0. It executes on your GPU through WebGPU when available, and falls back to WebAssembly on the CPU otherwise."
+      },
+      {
+        "q": "Can I use the results commercially?",
+        "a": "Yes. The model is Apache-2.0 licensed and outputs carry no watermark, so you can use the images for product listings, marketing, and other commercial work."
+      },
+      {
+        "q": "Can I process multiple images at once?",
+        "a": "Yes. The bulk page removes backgrounds from many images in a single run, which is useful for product catalogues on Shopify, Amazon, or Etsy."
+      }
+    ]
   }
 }

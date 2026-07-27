@@ -322,7 +322,8 @@
     "terms": "Syarat Layanan",
     "business": "Informasi Bisnis",
     "contact": "Hubungi Kami",
-    "license_prefix": "Model AI penghapus latar"
+    "license_prefix": "Model AI penghapus latar",
+    "editor": "Editor"
   },
   "batch": {
     "title": "Penghapusan Latar Massal",
@@ -358,5 +359,36 @@
     "download_selected": "Unduh terpilih ({n})",
     "select_all": "Pilih semua",
     "deselect_all": "Batal pilih"
+  },
+  "faq": {
+    "title_1": "Pertanyaan ",
+    "title_2": "Umum",
+    "subtitle": "Semua tentang cara BGRemover memproses gambar Anda.",
+    "items": [
+      {
+        "q": "Apakah gambar saya diunggah ke server?",
+        "a": "Tidak. Penghapusan background berjalan sepenuhnya di dalam browser Anda, sehingga file gambar tidak pernah meninggalkan perangkat. Hanya model AI yang diunduh saat pertama kali dipakai, lalu disimpan di cache."
+      },
+      {
+        "q": "Apakah BGRemover benar-benar gratis?",
+        "a": "Unduhan resolusi rendah tidak terbatas dan gratis selamanya, tanpa perlu akun. Untuk mengunduh resolusi penuh diperlukan paket berbayar, mulai dari $3.99 per bulan."
+      },
+      {
+        "q": "Format gambar apa saja yang didukung?",
+        "a": "Anda dapat mengunggah gambar JPG, PNG, dan WebP. Hasilnya diekspor sebagai file PNG dengan background transparan."
+      },
+      {
+        "q": "Model AI apa yang digunakan?",
+        "a": "BGRemover menjalankan model ONNX ormbg, jaringan segmentasi bergaya IS-Net/DIS yang dirilis dengan lisensi Apache-2.0. Model berjalan di GPU melalui WebGPU bila tersedia, dan beralih ke WebAssembly pada CPU jika tidak."
+      },
+      {
+        "q": "Bolehkah hasilnya dipakai untuk keperluan komersial?",
+        "a": "Boleh. Modelnya berlisensi Apache-2.0 dan hasilnya tanpa watermark, jadi Anda bisa memakainya untuk halaman produk, materi pemasaran, dan pekerjaan komersial lainnya."
+      },
+      {
+        "q": "Bisakah memproses banyak gambar sekaligus?",
+        "a": "Bisa. Halaman proses massal menghapus background banyak gambar dalam sekali jalan, berguna untuk katalog produk di Shopify, Amazon, atau Etsy."
+      }
+    ]
   }
 }

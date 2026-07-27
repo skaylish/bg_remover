@@ -322,7 +322,8 @@
     "terms": "Términos de Servicio",
     "business": "Información Empresarial",
     "contact": "Contáctenos",
-    "license_prefix": "Modelo de IA de eliminación de fondo"
+    "license_prefix": "Modelo de IA de eliminación de fondo",
+    "editor": "Editor"
   },
   "batch": {
     "title": "Eliminación en lote",
@@ -358,5 +359,36 @@
     "download_selected": "Descargar seleccionados ({n})",
     "select_all": "Seleccionar todo",
     "deselect_all": "Deseleccionar"
+  },
+  "faq": {
+    "title_1": "Preguntas ",
+    "title_2": "Frecuentes",
+    "subtitle": "Todo sobre cómo BGRemover procesa tus imágenes.",
+    "items": [
+      {
+        "q": "¿Se suben mis imágenes a un servidor?",
+        "a": "No. La eliminación del fondo se ejecuta por completo dentro de tu navegador, así que el archivo de imagen nunca sale de tu dispositivo. Solo se descarga el modelo de IA la primera vez, y después queda en caché."
+      },
+      {
+        "q": "¿BGRemover es realmente gratis?",
+        "a": "Las descargas en baja resolución son ilimitadas y gratuitas para siempre, sin necesidad de cuenta. Para descargar en resolución completa hace falta un plan de pago, desde $3.99 al mes."
+      },
+      {
+        "q": "¿Qué formatos de imagen admite?",
+        "a": "Puedes subir imágenes JPG, PNG y WebP. Los resultados se exportan como archivos PNG con fondo transparente."
+      },
+      {
+        "q": "¿Qué modelo de IA utiliza?",
+        "a": "Utiliza el modelo ONNX ormbg, una red de segmentación del tipo IS-Net/DIS publicada bajo licencia Apache-2.0. Se ejecuta en tu GPU mediante WebGPU cuando está disponible, y si no, recurre a WebAssembly sobre la CPU."
+      },
+      {
+        "q": "¿Puedo usar los resultados comercialmente?",
+        "a": "Sí. El modelo tiene licencia Apache-2.0 y los resultados no llevan marca de agua, por lo que puedes usarlos en fichas de producto, marketing y otros trabajos comerciales."
+      },
+      {
+        "q": "¿Puedo procesar varias imágenes a la vez?",
+        "a": "Sí. La página de procesamiento por lotes elimina el fondo de muchas imágenes en una sola pasada, algo útil para catálogos de producto en Shopify, Amazon o Etsy."
+      }
+    ]
   }
 }

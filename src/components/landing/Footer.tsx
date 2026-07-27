@@ -7,6 +7,7 @@ import { Scissors } from 'lucide-react';
 const LOCALES = ['en', 'ko', 'ja', 'es', 'id'];
 
 const FOOTER_LINKS = [
+  { key: 'editor', href: '/editor' },
   { key: 'privacy', href: '/privacy' },
   { key: 'terms', href: '/terms' },
   { key: 'business', href: '/business' },
@@ -24,6 +25,7 @@ export function Footer({ dict }: { dict?: any }) {
     privacy: '개인정보처리방침',
     terms: '이용약관',
     business: '사업자 정보',
+    editor: '에디터',
     contact: '문의하기',
     license_prefix: '배경 제거 AI 모델',
   };

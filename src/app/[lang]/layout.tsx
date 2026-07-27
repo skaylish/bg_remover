@@ -4,6 +4,7 @@ import '../globals.css';
 import { Analytics } from '@/components/shared/Analytics';
 import { ModelPreloader } from '@/components/shared/ModelPreloader';
 import { SITE_URL, SEO } from '@/lib/seo';
+import { organizationSchema } from '@/lib/structured-data';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] });
@@ -87,7 +88,7 @@ export default async function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify([jsonLd, organizationSchema()]) }}
         />
       </head>
       <body
