@@ -43,15 +43,15 @@ const CONTENT: Record<Lang, RefundContent> = {
   ko: {
     title: '환불 정책',
     effective: '시행일: 2026년 3월 27일 | 다음세상 (bgremover.pics)',
-    intro: '당사는 고객 만족을 최우선으로 합니다. 본 환불 정책은 「전자상거래 등에서의 소비자보호에 관한 법률」을 준수하며, 결제 대행은 LemonSqueezy(lemonsqueezy.com)을 통해 이루어집니다.',
-    processor: 'BGRemover의 결제는 Merchant of Record(판매 주체)인 LemonSqueezy이 처리하며, 세금 및 환불 처리도 LemonSqueezy 정책에 따릅니다.',
+    intro: '당사는 고객 만족을 최우선으로 합니다. 본 환불 정책은 「전자상거래 등에서의 소비자보호에 관한 법률」을 준수하며, 결제 대행은 Gumroad(gumroad.com)을 통해 이루어집니다.',
+    processor: 'BGRemover의 결제는 Merchant of Record(판매 주체)인 Gumroad이 처리하며, 세금 및 환불 처리도 Gumroad 정책에 따릅니다.',
     sections: {
       full: {
         heading: '✅ 전액 환불',
         items: [
           '결제일로부터 14일 이내이며 크레딧을 전혀 사용하지 않은 경우',
           '서비스 오류 또는 회사 귀책 사유로 정상 이용이 불가능한 경우',
-          'LemonSqueezy 결제 시스템 오류로 중복 결제된 경우',
+          'Gumroad 결제 시스템 오류로 중복 결제된 경우',
         ],
       },
       partial: {
@@ -78,7 +78,7 @@ const CONTENT: Record<Lang, RefundContent> = {
           '취소 시 즉시 해지되지 않으며, 현재 결제 기간 말일까지 서비스가 유지됩니다.',
           '다음 달 크레딧은 갱신일에 지급되며, 취소 후에는 지급되지 않습니다.',
           '미사용 크레딧은 갱신 시 초기화되며 이월되지 않습니다.',
-          '구독 관리(취소 포함)는 LemonSqueezy Customer Portal에서 직접 처리할 수 있습니다.',
+          '구독 관리(취소 포함)는 Gumroad Customer Portal에서 직접 처리할 수 있습니다.',
         ],
       },
       topup: {
@@ -102,28 +102,28 @@ const CONTENT: Record<Lang, RefundContent> = {
         heading: '환불 신청 방법',
         items: [
           '이메일: dcbvcd@gmail.com',
-          '필수 기재사항: 결제 이메일, 결제일, LemonSqueezy 주문 번호(선택), 환불 사유',
+          '필수 기재사항: 결제 이메일, 결제일, Gumroad 주문 번호(선택), 환불 사유',
           '처리 기간: 영업일 기준 3일 이내 검토 후 회신',
-          '환불 처리 기간: LemonSqueezy 승인 후 카드사에 따라 5~10 영업일 소요',
+          '환불 처리 기간: Gumroad 승인 후 카드사에 따라 5~10 영업일 소요',
         ],
       },
     },
-    note: 'LemonSqueezy은 Merchant of Record로서 모든 거래의 법적 판매 주체입니다. 부가세·소비세 등 세금 처리는 LemonSqueezy이 자동으로 관리합니다. 환불 관련 추가 문의는 LemonSqueezy 고객센터(lemonsqueezy.com/help)를 통해서도 가능합니다.',
-    footer: '사업자: 다음세상 | 대표자: 박영구 | 이메일: dcbvcd@gmail.com | 결제 대행: LemonSqueezy (lemonsqueezy.com)',
+    note: 'Gumroad은 Merchant of Record로서 모든 거래의 법적 판매 주체입니다. 부가세·소비세 등 세금 처리는 Gumroad이 자동으로 관리합니다. 환불 관련 추가 문의는 Gumroad 고객센터(gumroad.com/help)를 통해서도 가능합니다.',
+    footer: '사업자: 다음세상 | 대표자: 박영구 | 이메일: dcbvcd@gmail.com | 결제 대행: Gumroad (gumroad.com)',
   },
 
   en: {
     title: 'Refund Policy',
     effective: 'Effective: March 27, 2026 | Daumseseang (bgremover.pics)',
-    intro: 'Customer satisfaction is our top priority. This Refund Policy complies with applicable consumer protection law. All payments are processed by LemonSqueezy (lemonsqueezy.com).',
-    processor: 'BGRemover payments are handled by LemonSqueezy as the Merchant of Record. Taxes and refund processing are governed by LemonSqueezy\'s policies.',
+    intro: 'Customer satisfaction is our top priority. This Refund Policy complies with applicable consumer protection law. All payments are processed by Gumroad (gumroad.com).',
+    processor: 'BGRemover payments are handled by Gumroad as the Merchant of Record. Taxes and refund processing are governed by Gumroad\'s policies.',
     sections: {
       full: {
         heading: '✅ Full Refund',
         items: [
           'Within 14 days of payment and no credits have been used.',
           'Service is unavailable due to a Company-attributable error or outage.',
-          'A duplicate charge occurred due to a LemonSqueezy payment system error.',
+          'A duplicate charge occurred due to a Gumroad payment system error.',
         ],
       },
       partial: {
@@ -150,7 +150,7 @@ const CONTENT: Record<Lang, RefundContent> = {
           'Cancellation takes effect at the end of the current billing period; access continues until then.',
           'Credits for the next month are issued on renewal and will not be issued after cancellation.',
           'Unused credits reset at renewal and do not roll over.',
-          'You can manage (including cancel) your subscription directly via the LemonSqueezy Customer Portal.',
+          'You can manage (including cancel) your subscription directly via the Gumroad Customer Portal.',
         ],
       },
       topup: {
@@ -174,28 +174,28 @@ const CONTENT: Record<Lang, RefundContent> = {
         heading: 'How to Request a Refund',
         items: [
           'Email: dcbvcd@gmail.com',
-          'Required information: payment email, payment date, LemonSqueezy order number (if available), reason for refund.',
+          'Required information: payment email, payment date, Gumroad order number (if available), reason for refund.',
           'Review time: we will respond within 3 business days.',
-          'Processing time: 5–10 business days after LemonSqueezy approves, depending on your card issuer.',
+          'Processing time: 5–10 business days after Gumroad approves, depending on your card issuer.',
         ],
       },
     },
-    note: 'LemonSqueezy is the Merchant of Record and the legal seller for all transactions. LemonSqueezy automatically manages tax (VAT/GST) processing. For additional refund questions, you may also contact LemonSqueezy Support at lemonsqueezy.com/help.',
-    footer: 'Company: Daumseseang | CEO: Yeonggu Park | Email: dcbvcd@gmail.com | Payment processor: LemonSqueezy (lemonsqueezy.com)',
+    note: 'Gumroad is the Merchant of Record and the legal seller for all transactions. Gumroad automatically manages tax (VAT/GST) processing. For additional refund questions, you may also contact Gumroad Support at gumroad.com/help.',
+    footer: 'Company: Daumseseang | CEO: Yeonggu Park | Email: dcbvcd@gmail.com | Payment processor: Gumroad (gumroad.com)',
   },
 
   ja: {
     title: '返金ポリシー',
     effective: '施行日: 2026年3月27日 | ダウムセサン (bgremover.pics)',
-    intro: '当社はお客様の満足を最優先にしています。本返金ポリシーは適用される消費者保護法を遵守しており、すべての決済はLemonSqueezy（lemonsqueezy.com）が処理します。',
-    processor: 'BGRemoverの決済はMerchant of RecordであるLemonSqueezyが処理します。税金・返金処理はLemonSqueezyのポリシーに従います。',
+    intro: '当社はお客様の満足を最優先にしています。本返金ポリシーは適用される消費者保護法を遵守しており、すべての決済はGumroad（gumroad.com）が処理します。',
+    processor: 'BGRemoverの決済はMerchant of RecordであるGumroadが処理します。税金・返金処理はGumroadのポリシーに従います。',
     sections: {
       full: {
         heading: '✅ 全額返金',
         items: [
           '決済日から14日以内で、クレジットを一切使用していない場合',
           '会社の帰責事由によりサービスが利用不能な場合',
-          'LemonSqueezy決済システムの不具合による二重請求が発生した場合',
+          'Gumroad決済システムの不具合による二重請求が発生した場合',
         ],
       },
       partial: {
@@ -222,7 +222,7 @@ const CONTENT: Record<Lang, RefundContent> = {
           '解約しても当月末まではサービスが継続されます。',
           '翌月のクレジットは更新日に付与され、解約後は付与されません。',
           '未使用クレジットは更新時にリセットされ、繰り越しはありません。',
-          'サブスクリプション管理（解約を含む）はLemonSqueezy Customer Portalから直接行えます。',
+          'サブスクリプション管理（解約を含む）はGumroad Customer Portalから直接行えます。',
         ],
       },
       topup: {
@@ -246,28 +246,28 @@ const CONTENT: Record<Lang, RefundContent> = {
         heading: '返金申請方法',
         items: [
           'メール: dcbvcd@gmail.com',
-          '必須記載事項: 決済メールアドレス、決済日、LemonSqueezy注文番号（任意）、返金理由',
+          '必須記載事項: 決済メールアドレス、決済日、Gumroad注文番号（任意）、返金理由',
           '審査期間: 3営業日以内にご返答します',
-          '処理期間: LemonSqueezy承認後、カード会社によって5〜10営業日かかります',
+          '処理期間: Gumroad承認後、カード会社によって5〜10営業日かかります',
         ],
       },
     },
-    note: 'LemonSqueezyはMerchant of Recordとしてすべての取引における法的販売主体です。消費税・VAT等の税務処理はLemonSqueezyが自動管理します。返金に関するご質問はLemonSqueezyサポート（lemonsqueezy.com/help）にもお問い合わせいただけます。',
-    footer: '事業者: ダウムセサン | 代表: パク・ヨングク | メール: dcbvcd@gmail.com | 決済代行: LemonSqueezy (lemonsqueezy.com)',
+    note: 'GumroadはMerchant of Recordとしてすべての取引における法的販売主体です。消費税・VAT等の税務処理はGumroadが自動管理します。返金に関するご質問はGumroadサポート（gumroad.com/help）にもお問い合わせいただけます。',
+    footer: '事業者: ダウムセサン | 代表: パク・ヨングク | メール: dcbvcd@gmail.com | 決済代行: Gumroad (gumroad.com)',
   },
 
   es: {
     title: 'Política de Reembolsos',
     effective: 'En vigor desde: 27 de marzo de 2026 | Daumseseang (bgremover.pics)',
-    intro: 'La satisfacción del cliente es nuestra prioridad. Esta Política de Reembolsos cumple con la legislación de protección al consumidor aplicable. Todos los pagos son procesados por LemonSqueezy (lemonsqueezy.com).',
-    processor: 'Los pagos de BGRemover son gestionados por LemonSqueezy como Merchant of Record. El procesamiento de impuestos y reembolsos se rige por las políticas de LemonSqueezy.',
+    intro: 'La satisfacción del cliente es nuestra prioridad. Esta Política de Reembolsos cumple con la legislación de protección al consumidor aplicable. Todos los pagos son procesados por Gumroad (gumroad.com).',
+    processor: 'Los pagos de BGRemover son gestionados por Gumroad como Merchant of Record. El procesamiento de impuestos y reembolsos se rige por las políticas de Gumroad.',
     sections: {
       full: {
         heading: '✅ Reembolso Total',
         items: [
           'Dentro de los 14 días posteriores al pago y sin créditos utilizados.',
           'El Servicio no está disponible por causas imputables a la Empresa.',
-          'Se realizó un cobro duplicado por error del sistema de pago de LemonSqueezy.',
+          'Se realizó un cobro duplicado por error del sistema de pago de Gumroad.',
         ],
       },
       partial: {
@@ -294,7 +294,7 @@ const CONTENT: Record<Lang, RefundContent> = {
           'La cancelación tiene efecto al final del período de facturación actual; el acceso continúa hasta entonces.',
           'Los créditos del mes siguiente se emiten en la renovación y no se emitirán tras la cancelación.',
           'Los créditos no utilizados se reinician en la renovación y no se acumulan.',
-          'Puede gestionar (incluida la cancelación) su suscripción directamente en el Portal de Clientes de LemonSqueezy.',
+          'Puede gestionar (incluida la cancelación) su suscripción directamente en el Portal de Clientes de Gumroad.',
         ],
       },
       topup: {
@@ -318,28 +318,28 @@ const CONTENT: Record<Lang, RefundContent> = {
         heading: 'Cómo Solicitar un Reembolso',
         items: [
           'Email: dcbvcd@gmail.com',
-          'Información requerida: correo de pago, fecha de pago, número de pedido de LemonSqueezy (si disponible), motivo del reembolso.',
+          'Información requerida: correo de pago, fecha de pago, número de pedido de Gumroad (si disponible), motivo del reembolso.',
           'Plazo de revisión: responderemos en un plazo de 3 días hábiles.',
-          'Plazo de procesamiento: 5–10 días hábiles tras la aprobación de LemonSqueezy, según el emisor de su tarjeta.',
+          'Plazo de procesamiento: 5–10 días hábiles tras la aprobación de Gumroad, según el emisor de su tarjeta.',
         ],
       },
     },
-    note: 'LemonSqueezy es el Merchant of Record y el vendedor legal de todas las transacciones. LemonSqueezy gestiona automáticamente el procesamiento de impuestos (IVA/GST). Para consultas adicionales sobre reembolsos, también puede contactar con el soporte de LemonSqueezy en lemonsqueezy.com/help.',
-    footer: 'Empresa: Daumseseang | CEO: Yeonggu Park | Email: dcbvcd@gmail.com | Procesador de pagos: LemonSqueezy (lemonsqueezy.com)',
+    note: 'Gumroad es el Merchant of Record y el vendedor legal de todas las transacciones. Gumroad gestiona automáticamente el procesamiento de impuestos (IVA/GST). Para consultas adicionales sobre reembolsos, también puede contactar con el soporte de Gumroad en gumroad.com/help.',
+    footer: 'Empresa: Daumseseang | CEO: Yeonggu Park | Email: dcbvcd@gmail.com | Procesador de pagos: Gumroad (gumroad.com)',
   },
 
   id: {
     title: 'Kebijakan Pengembalian Dana',
     effective: 'Berlaku: 27 Maret 2026 | Daumseseang (bgremover.pics)',
-    intro: 'Kepuasan pelanggan adalah prioritas utama kami. Kebijakan Pengembalian Dana ini mematuhi hukum perlindungan konsumen yang berlaku. Semua pembayaran diproses oleh LemonSqueezy (lemonsqueezy.com).',
-    processor: 'Pembayaran BGRemover ditangani oleh LemonSqueezy sebagai Merchant of Record. Pemrosesan pajak dan pengembalian dana diatur oleh kebijakan LemonSqueezy.',
+    intro: 'Kepuasan pelanggan adalah prioritas utama kami. Kebijakan Pengembalian Dana ini mematuhi hukum perlindungan konsumen yang berlaku. Semua pembayaran diproses oleh Gumroad (gumroad.com).',
+    processor: 'Pembayaran BGRemover ditangani oleh Gumroad sebagai Merchant of Record. Pemrosesan pajak dan pengembalian dana diatur oleh kebijakan Gumroad.',
     sections: {
       full: {
         heading: '✅ Pengembalian Dana Penuh',
         items: [
           'Dalam 14 hari setelah pembayaran dan tidak ada kredit yang digunakan.',
           'Layanan tidak tersedia karena kesalahan yang dapat diatribusikan kepada Perusahaan.',
-          'Terjadi tagihan ganda akibat kesalahan sistem pembayaran LemonSqueezy.',
+          'Terjadi tagihan ganda akibat kesalahan sistem pembayaran Gumroad.',
         ],
       },
       partial: {
@@ -366,7 +366,7 @@ const CONTENT: Record<Lang, RefundContent> = {
           'Pembatalan berlaku pada akhir periode penagihan saat ini; akses tetap berlanjut hingga saat itu.',
           'Kredit untuk bulan berikutnya diterbitkan saat pembaruan dan tidak akan diterbitkan setelah pembatalan.',
           'Kredit yang tidak terpakai direset saat pembaruan dan tidak dapat diakumulasi.',
-          'Anda dapat mengelola (termasuk membatalkan) langganan langsung melalui LemonSqueezy Customer Portal.',
+          'Anda dapat mengelola (termasuk membatalkan) langganan langsung melalui Gumroad Customer Portal.',
         ],
       },
       topup: {
@@ -390,14 +390,14 @@ const CONTENT: Record<Lang, RefundContent> = {
         heading: 'Cara Mengajukan Pengembalian Dana',
         items: [
           'Email: dcbvcd@gmail.com',
-          'Informasi yang diperlukan: email pembayaran, tanggal pembayaran, nomor pesanan LemonSqueezy (jika tersedia), alasan pengembalian dana.',
+          'Informasi yang diperlukan: email pembayaran, tanggal pembayaran, nomor pesanan Gumroad (jika tersedia), alasan pengembalian dana.',
           'Waktu peninjauan: kami akan merespons dalam 3 hari kerja.',
-          'Waktu pemrosesan: 5–10 hari kerja setelah persetujuan LemonSqueezy, tergantung penerbit kartu Anda.',
+          'Waktu pemrosesan: 5–10 hari kerja setelah persetujuan Gumroad, tergantung penerbit kartu Anda.',
         ],
       },
     },
-    note: 'LemonSqueezy adalah Merchant of Record dan penjual resmi untuk semua transaksi. LemonSqueezy secara otomatis mengelola pemrosesan pajak (PPN/GST). Untuk pertanyaan tambahan tentang pengembalian dana, Anda juga dapat menghubungi Dukungan LemonSqueezy di lemonsqueezy.com/help.',
-    footer: 'Perusahaan: Daumseseang | CEO: Yeonggu Park | Email: dcbvcd@gmail.com | Pemroses pembayaran: LemonSqueezy (lemonsqueezy.com)',
+    note: 'Gumroad adalah Merchant of Record dan penjual resmi untuk semua transaksi. Gumroad secara otomatis mengelola pemrosesan pajak (PPN/GST). Untuk pertanyaan tambahan tentang pengembalian dana, Anda juga dapat menghubungi Dukungan Gumroad di gumroad.com/help.',
+    footer: 'Perusahaan: Daumseseang | CEO: Yeonggu Park | Email: dcbvcd@gmail.com | Pemroses pembayaran: Gumroad (gumroad.com)',
   },
 };
 

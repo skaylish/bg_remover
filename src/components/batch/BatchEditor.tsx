@@ -461,7 +461,7 @@ export function BatchEditor({ dict }: { dict?: any }) {
             padding: '32px',
           }}
         >
-          <input {...getInputProps()} />
+          <input {...getInputProps()} aria-label={t.drop_idle} />
           <div className="flex flex-col items-center gap-3 text-center">
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center"

@@ -19,7 +19,8 @@
   --text-primary: #ffffff;
   --text-secondary: #e9deff;
   --text-muted: #adaaaa;
-  --text-subtle: #767575;
+  /* WCAG AA(4.5:1) 충족값. #767575는 4.04~4.20으로 미달이었음 (글래스 카드 배경에서도 4.94:1 확보) */
+  --text-subtle: #8a8a8a;
 
   --success: #a0fff0;
   --error: #ff6e84;

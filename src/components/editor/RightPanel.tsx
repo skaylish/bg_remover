@@ -335,6 +335,7 @@ function BackgroundTab({ dict }: { dict?: any }) {
             accept="image/png,image/jpeg,image/webp"
             style={{ display: 'none' }}
             onChange={handleImageUpload}
+            aria-label={t.bg_image_replace || '이미지 교체'}
           />
         </div>
       )}

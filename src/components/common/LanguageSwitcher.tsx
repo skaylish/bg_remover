@@ -23,6 +23,7 @@ export function LanguageSwitcher({ currentLang }: { currentLang: string }) {
       <select
         value={currentLang || 'en'}
         onChange={handleChange}
+        aria-label="Language"
         className="appearance-none bg-transparent text-sm font-medium focus:outline-none cursor-pointer pl-2 pr-6 py-1 rounded"
         style={{
           color: 'var(--text-primary)',

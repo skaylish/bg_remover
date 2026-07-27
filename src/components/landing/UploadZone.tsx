@@ -117,7 +117,7 @@ export function UploadZone({ dict }: { dict?: any }) {
           minHeight: '380px',
         }}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} aria-label={t.button} />
 
         {/* Faint cinematic background image */}
         <div
@@ -160,7 +160,7 @@ export function UploadZone({ dict }: { dict?: any }) {
               <p className="text-sm mb-2 font-light" style={{ color: '#a3a3a3' }}>
                 {t.subtitle}
               </p>
-              <p className="text-xs mb-8 font-light" style={{ color: '#6b6b6b' }}>
+              <p className="text-xs mb-8 font-light" style={{ color: 'var(--text-subtle)' }}>
                 {t.paste_hint}
               </p>
 
@@ -179,7 +179,7 @@ export function UploadZone({ dict }: { dict?: any }) {
       {/* Sample images */}
       {!isLoading && !loadingSample && (
         <div className="mt-5 flex flex-col items-center gap-3">
-          <p className="text-xs" style={{ color: '#6b6b6b' }}>{t.samples}</p>
+          <p className="text-xs" style={{ color: 'var(--text-subtle)' }}>{t.samples}</p>
           <div className="flex gap-2 flex-wrap justify-center">
             {SAMPLES.map(({ key, url }) => (
               <button
