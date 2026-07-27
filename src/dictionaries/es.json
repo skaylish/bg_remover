@@ -272,11 +272,11 @@
       },
       {
         "title": "Procesamiento Neuronal",
-        "description": "Nuestra arquitectura patentada analiza la profundidad estructural y la coherencia de los bordes en tiempo real."
+        "description": "El modelo de código abierto ormbg (Apache-2.0) se ejecuta en tu propio dispositivo: en la GPU mediante WebGPU cuando está disponible, y en WebAssembly en los demás casos."
       },
       {
-        "title": "Obra Maestra",
-        "description": "Descargue el recurso en su estado original, con canales alfa perfectos, o siga editando."
+        "title": "Descargar o seguir editando",
+        "description": "Guarda un PNG con fondo transparente, o ajusta antes el fondo, los degradados y las sombras en el editor."
       }
     ]
   },
@@ -298,16 +298,16 @@
         "description": "Exporte como PNG transparentes o aplique degradados cromáticos y fondos escénicos."
       },
       {
-        "title": "Exportación Prístina",
-        "description": "Cero pérdida de compresión. Descargue sus obras en resolución nativa completa sin artefactos."
+        "title": "Exportar a resolución original",
+        "description": "Exporta en PNG con compresión sin pérdidas, manteniendo la resolución original de tu imagen."
       },
       {
         "title": "Privacidad Absoluta",
         "description": "Sus imágenes nunca tocan un servidor. El procesamiento ocurre de forma segura en su máquina."
       },
       {
-        "title": "Ejecución Fuera de Línea",
-        "description": "Una vez cargada, nuestra IA está disponible en todo momento y lugar, totalmente offline."
+        "title": "Modelo en caché",
+        "description": "El modelo se descarga una sola vez y luego se carga desde la caché del navegador, así las siguientes ejecuciones empiezan de inmediato."
       },
       {
         "title": "Precisión AI Adaptativa",

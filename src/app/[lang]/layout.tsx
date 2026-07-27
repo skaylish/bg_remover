@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
 import { Analytics } from '@/components/shared/Analytics';
 import { ModelPreloader } from '@/components/shared/ModelPreloader';
-import { SITE_URL, SEO } from '@/lib/seo';
+import { SITE_URL, SEO, SUPPORTED_LANGS, type SupportedLang } from '@/lib/seo';
 import { organizationSchema } from '@/lib/structured-data';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
@@ -79,6 +80,10 @@ export default async function RootLayout({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
+
+  // [lang]은 어떤 세그먼트든 잡으므로 /ads.txt 같은 경로가 lang="ads.txt"인 홈페이지로 200 응답되던 문제.
+  // Google이 소프트 404를 중복 페이지로 취급하므로 지원 언어가 아니면 명시적으로 404를 낸다.
+  if (!SUPPORTED_LANGS.includes(lang as SupportedLang)) notFound();
 
   return (
     <html

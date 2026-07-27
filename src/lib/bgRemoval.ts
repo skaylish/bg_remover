@@ -40,9 +40,12 @@ async function load(onProgress?: ProgressFn, forceDevice?: 'webgpu' | 'wasm') {
         }
       };
 
+      // q8 양자화(44MB). fp32는 176MB로 첫 방문 이탈과 대역폭 비용이 커서 전환했다.
+      // 실측 비교: 인물·동물은 알파 평균차 0.03%로 사실상 동일, 자전거 바퀴살 같은
+      // 가는 반복 구조에서만 0.22%까지 벌어짐(그마저 32/255 초과 픽셀은 0.06%).
       return pipeline('background-removal', MODEL_ID, {
         device,
-        dtype: 'fp32',
+        dtype: 'q8',
         progress_callback,
       });
     })();

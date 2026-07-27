@@ -272,11 +272,11 @@
       },
       {
         "title": "Pemrosesan Neural",
-        "description": "Arsitektur deep learning kami menganalisis kedalaman struktural dan koherensi tepi secara real-time."
+        "description": "Model sumber terbuka ormbg (Apache-2.0) berjalan langsung di perangkat Anda — di GPU lewat WebGPU bila tersedia, dan di WebAssembly untuk selebihnya."
       },
       {
-        "title": "Unduh Hasil",
-        "description": "Unduh aset murni tanpa artefak dengan channel alfa yang sempurna, atau lanjutkan pengeditan."
+        "title": "Unduh atau Lanjut Edit",
+        "description": "Simpan sebagai PNG berlatar transparan, atau rapikan dulu latar, gradien, dan bayangan di editor."
       }
     ]
   },
@@ -298,16 +298,16 @@
         "description": "Ekspor sebagai PNG transparan, atau tambahkan gradien kromatik dan latar pemandangan instan."
       },
       {
-        "title": "Ekspor Sempurna",
-        "description": "Nol kompresi. Unduh karya agung Anda dalam resolusi asli penuh tanpa masalah distorsi."
+        "title": "Ekspor Resolusi Asli",
+        "description": "Ekspor sebagai PNG dengan kompresi lossless, pada resolusi asli gambar Anda."
       },
       {
         "title": "Privasi Mutlak",
         "description": "Gambar Anda tidak pernah dikirim ke server. Diproses secara aman di perangkat lokal Anda."
       },
       {
-        "title": "Mode Offline",
-        "description": "Setelah dimuat, AI kami dapat digunakan kapan saja, di mana saja, sepenuhnya offline di perangkat."
+        "title": "Model Tersimpan di Cache",
+        "description": "Model diunduh sekali saja lalu dimuat dari cache browser, sehingga proses berikutnya langsung dimulai."
       },
       {
         "title": "Presisi AI Adaptif",
