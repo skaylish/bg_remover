@@ -21,7 +21,8 @@ export function Footer({ dict }: { dict?: any }) {
 
   const t = dict?.footer || {
     copyright: '© 2026 BGRemover. 모든 이미지는 로컬에서 처리됩니다.',
-    company: '다음세상 | 대표자: 박영구 | 사업자등록번호: 516-09-02883',
+    // 대표자명·사업자등록번호 등 상세 고지는 /business 페이지(noindex)에서만 노출한다
+    company: '다음세상',
     privacy: '개인정보처리방침',
     terms: '이용약관',
     business: '사업자 정보',
@@ -52,7 +53,7 @@ export function Footer({ dict }: { dict?: any }) {
             </span>
           </div>
           <p className="text-xs" style={{ color: 'var(--text-subtle)' }}>
-            {t.company ?? '다음세상 | 대표자: 박영구 | 사업자등록번호: 516-09-02883'}
+            {t.company ?? '다음세상'}
           </p>
         </div>
 
